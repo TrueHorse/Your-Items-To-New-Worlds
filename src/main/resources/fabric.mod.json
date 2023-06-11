@@ -1,31 +1,27 @@
 {
 	"schemaVersion": 1,
-	"id": "modid",
+	"id": "your_items_to_new_worlds",
 	"version": "${version}",
-	"name": "Example mod",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"name": "Your Items to New Worlds",
+	"description": "This mod allows you to transfer your items from one world to another",
 	"authors": [
 		"Me!"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"sources": "https://github.com/TrueHorse/Your-Items-To-New-Worlds"
 	},
-	"license": "CC0-1.0",
-	"icon": "assets/modid/icon.png",
+	"license": "GPL-3.0",
+	"icon": "assets/your_items_to_new_worlds/icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"com.example.ExampleMod"
-		],
-		"client": [
-			"com.example.ExampleModClient"
+			"net.trueHorse.yourItemsToNewWorlds.YourItemsToNewWorlds"
 		]
 	},
 	"mixins": [
-		"modid.mixins.json",
+		"your_items_to_new_worlds.mixins.json",
 		{
-			"config": "modid.client.mixins.json",
+			"config": "your_items_to_new_worlds.client.mixins.json",
 			"environment": "client"
 		}
 	],
