@@ -5,10 +5,11 @@
 	"name": "Your Items to New Worlds",
 	"description": "This mod allows you to transfer your items from one world to another",
 	"authors": [
-		"Me!"
+		"TrueHorse"
 	],
 	"contact": {
-		"sources": "https://github.com/TrueHorse/Your-Items-To-New-Worlds"
+		"sources": "https://github.com/TrueHorse/Your-Items-To-New-Worlds",
+		"issues": "https://github.com/TrueHorse/Your-Items-To-New-Worlds/issues"
 	},
 	"license": "GPL-3.0",
 	"icon": "assets/your_items_to_new_worlds/icon.png",
@@ -32,6 +33,5 @@
 		"fabric-api": "*"
 	},
 	"suggests": {
-		"another-mod": "*"
 	}
 }
