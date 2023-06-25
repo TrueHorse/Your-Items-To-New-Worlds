@@ -2,12 +2,10 @@ package net.trueHorse.yourItemsToNewWorlds.gui;
 
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.gui.widget.CyclingButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.gui.widget.*;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.trueHorse.yourItemsToNewWorlds.YourItemsToNewWorlds;
 
 import java.util.ArrayList;
@@ -17,6 +15,7 @@ import java.util.function.Consumer;
 
 public class ImportItemsScreen extends Screen {
 
+    private final Identifier textureSheet = new Identifier("your_items_to_new_worlds","textures/gui/import_items_screen.png");
     private final Consumer<Optional<ArrayList>> applier;
     private final List<String> playerNames = new ArrayList<>();
     private final String[] searchLocationDeterminationModeIDs = {"transfer_items.your_items_to_new_worlds.spawn_point",
@@ -27,6 +26,7 @@ public class ImportItemsScreen extends Screen {
     private CyclingButtonWidget<String> playerNameWidget;
     private CyclingButtonWidget<String> searchLocationModeWidget;
     private final TextFieldWidget[] coordFields = new TextFieldWidget[3];
+    private final ArrayList<TexturedButtonWidget> itemSelectButtons= new ArrayList<>();
     private final Screen parent;
 
     public ImportItemsScreen(Screen parent, Consumer<Optional<ArrayList>> applier){
@@ -65,10 +65,18 @@ public class ImportItemsScreen extends Screen {
         coordFields[2] = new TextFieldWidget(this.textRenderer,coordFields[1].getX()+coordFields[1].getWidth()+margin,coordRowY,50,20,Text.of("tempZText"));
         widgets.addAll(List.of(coordFields));
 
-        widgets.add(ButtonWidget.builder(Text.of("tempSearchText"),button-> YourItemsToNewWorlds.LOGGER.warn("search")).dimensions(this.width/2-75,searchLocationModeWidget.getY()+searchLocationModeWidget.getHeight()+margin,150,20).build());
+        ButtonWidget searchButton = ButtonWidget.builder(Text.of("tempSearchText"),button-> YourItemsToNewWorlds.LOGGER.warn("search")).dimensions(this.width/2-75,searchLocationModeWidget.getY()+searchLocationModeWidget.getHeight()+margin,150,20).build();
+        widgets.add(searchButton);
 
-        widgets.add(addDrawableChild(ButtonWidget.builder(Text.translatable("controls.resetAll"), button -> close()).dimensions(this.width / 2 - 155, this.height - 29, 150, 20).build()));
-        widgets.add(ButtonWidget.builder(ScreenTexts.DONE, button -> applyAndClose()).dimensions(this.width / 2 - 155 + 160, this.height - 29, 150, 20).build());
+        int backButtonsY = this.height-29;
+        int pixelsBetweenSearchAndBack = backButtonsY-(searchButton.getY()+searchButton.getHeight());
+        int pageArrowY = searchButton.getY()+searchButton.getHeight()+(pixelsBetweenSearchAndBack)/2-9;
+        widgets.add(new ToggleableTexturedButtonWidget(minDistanceFromEdge,pageArrowY,12,17,14,2,18,textureSheet,button -> YourItemsToNewWorlds.LOGGER.warn("pressed left")));
+        widgets.add(new ToggleableTexturedButtonWidget(this.width-minDistanceFromEdge,pageArrowY,12,17,0,2,18,textureSheet,button -> YourItemsToNewWorlds.LOGGER.warn("pressed right")));
+
+
+        widgets.add(addDrawableChild(ButtonWidget.builder(Text.translatable("controls.resetAll"), button -> close()).dimensions(this.width / 2 - 155, backButtonsY, 150, 20).build()));
+        widgets.add(ButtonWidget.builder(ScreenTexts.DONE, button -> applyAndClose()).dimensions(this.width / 2 - 155 + 160, backButtonsY, 150, 20).build());
 
         widgets.forEach(this::addDrawableChild);
     }
