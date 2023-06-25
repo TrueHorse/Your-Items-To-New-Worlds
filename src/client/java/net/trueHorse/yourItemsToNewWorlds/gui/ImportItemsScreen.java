@@ -45,6 +45,7 @@ public class ImportItemsScreen extends Screen {
         ArrayList<ClickableWidget> widgets = new ArrayList<>();
 
         worldPathWidget = new TextFieldWidget(this.textRenderer,minDistanceFromEdge,margin,this.width-2*minDistanceFromEdge,20,Text.of("tempPathText"));
+        worldPathWidget.setPlaceholder(Text.of("tempPathText"));
         worldPathWidget.setMaxLength(200);
         widgets.add(worldPathWidget);
 
@@ -55,8 +56,9 @@ public class ImportItemsScreen extends Screen {
         playerNameWidget = CyclingButtonWidget.builder(Text::of).values(playerNames).build(this.width/2-50,worldPathWidget.getY()+worldPathWidget.getHeight()+margin,100,20,Text.of("tempPlayerNameText"));
         widgets.add(playerNameWidget);
 
+        int coordRowStartX = (this.width-(3*50+150))/2;
         int coordRowY = playerNameWidget.getY()+playerNameWidget.getHeight()+margin;
-        searchLocationModeWidget = CyclingButtonWidget.<String>builder(Text::translatable).values(searchLocationDeterminationModeIDs).build(minDistanceFromEdge,coordRowY,150,20,Text.of("tempLocationModeText"));
+        searchLocationModeWidget = CyclingButtonWidget.<String>builder(Text::translatable).values(searchLocationDeterminationModeIDs).build(coordRowStartX,coordRowY,150,20,Text.of("tempLocationModeText"));
         widgets.add(searchLocationModeWidget);
         coordFields[0] = new TextFieldWidget(this.textRenderer,searchLocationModeWidget.getX()+searchLocationModeWidget.getWidth()+margin,coordRowY,50,20,Text.of("tempXText"));
         coordFields[1] = new TextFieldWidget(this.textRenderer,coordFields[0].getX()+coordFields[0].getWidth()+margin,coordRowY,50,20,Text.of("tempYText"));
