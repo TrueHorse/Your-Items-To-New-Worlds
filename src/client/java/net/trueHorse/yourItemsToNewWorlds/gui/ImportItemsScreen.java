@@ -30,7 +30,7 @@ public class ImportItemsScreen extends Screen {
     private final Screen parent;
 
     public ImportItemsScreen(Screen parent, Consumer<Optional<ArrayList>> applier){
-        super(Text.translatable(("editGamerule.title")));
+        super(Text.of("tempTransferItemsText"));
         this.applier = applier;
         this.parent = parent;
     }
