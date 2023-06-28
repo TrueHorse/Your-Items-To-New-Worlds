@@ -37,10 +37,11 @@ public class ImportItemsScreen extends Screen {
 
     @Override
     protected void init(){
+        itemSelectButtons.clear();
         super.init();
 
-        int margin = 10;
-        int minDistanceFromEdge = 25;
+        final int margin = 10;
+        final int minDistanceFromEdge = 25;
 
         ArrayList<ClickableWidget> widgets = new ArrayList<>();
 
@@ -56,8 +57,8 @@ public class ImportItemsScreen extends Screen {
         playerNameWidget = CyclingButtonWidget.builder(Text::of).values(playerNames).build(this.width/2-50,worldPathWidget.getY()+worldPathWidget.getHeight()+margin,100,20,Text.of("tempPlayerNameText"));
         widgets.add(playerNameWidget);
 
-        int coordRowStartX = (this.width-(3*50+150))/2;
-        int coordRowY = playerNameWidget.getY()+playerNameWidget.getHeight()+margin;
+        final int coordRowStartX = (this.width-(3*(50+margin)+150))/2;
+        final int coordRowY = playerNameWidget.getY()+playerNameWidget.getHeight()+margin;
         searchLocationModeWidget = CyclingButtonWidget.<String>builder(Text::translatable).values(searchLocationDeterminationModeIDs).build(coordRowStartX,coordRowY,150,20,Text.of("tempLocationModeText"));
         widgets.add(searchLocationModeWidget);
         coordFields[0] = new TextFieldWidget(this.textRenderer,searchLocationModeWidget.getX()+searchLocationModeWidget.getWidth()+margin,coordRowY,50,20,Text.of("tempXText"));
@@ -68,12 +69,22 @@ public class ImportItemsScreen extends Screen {
         ButtonWidget searchButton = ButtonWidget.builder(Text.of("tempSearchText"),button-> YourItemsToNewWorlds.LOGGER.warn("search")).dimensions(this.width/2-75,searchLocationModeWidget.getY()+searchLocationModeWidget.getHeight()+margin,150,20).build();
         widgets.add(searchButton);
 
-        int backButtonsY = this.height-29;
-        int pixelsBetweenSearchAndBack = backButtonsY-(searchButton.getY()+searchButton.getHeight());
-        int pageArrowY = searchButton.getY()+searchButton.getHeight()+(pixelsBetweenSearchAndBack)/2-9;
+        final int backButtonsY = this.height-29;
+        final int pixelsBetweenSearchAndBack = backButtonsY-(searchButton.getY()+searchButton.getHeight());
+        final int pageArrowY = searchButton.getY()+searchButton.getHeight()+(pixelsBetweenSearchAndBack)/2-9;
         widgets.add(new ToggleableTexturedButtonWidget(minDistanceFromEdge,pageArrowY,12,17,14,2,18,textureSheet,button -> YourItemsToNewWorlds.LOGGER.warn("pressed left")));
-        widgets.add(new ToggleableTexturedButtonWidget(this.width-minDistanceFromEdge,pageArrowY,12,17,0,2,18,textureSheet,button -> YourItemsToNewWorlds.LOGGER.warn("pressed right")));
+        widgets.add(new ToggleableTexturedButtonWidget(this.width-minDistanceFromEdge-12,pageArrowY,12,17,0,2,18,textureSheet,button -> YourItemsToNewWorlds.LOGGER.warn("pressed right")));
 
+        final int itemRows = (int) Math.floor((pixelsBetweenSearchAndBack - 2*margin)/25.0);
+        final int itemColumns = (int) Math.floor((this.width-(minDistanceFromEdge+12)*2)/25.0);
+        final int additionalGridYMargin = ((pixelsBetweenSearchAndBack-2*margin)%25)/2;
+        final int additionalGridXMargin = ((this.width-(minDistanceFromEdge+12)*2)%25)/2;
+        for(int i=0;i<itemRows;i++){
+            for(int j=0;j<itemColumns;j++){
+                itemSelectButtons.add(new TexturedButtonWidget(minDistanceFromEdge+12+additionalGridXMargin+j*25,searchButton.getY()+searchButton.getHeight()+margin+additionalGridYMargin+i*25,25,25,27,0,25,textureSheet,button -> YourItemsToNewWorlds.LOGGER.warn("pressed item "+itemSelectButtons.indexOf(button))));
+            }
+        }
+        widgets.addAll(itemSelectButtons);
 
         widgets.add(addDrawableChild(ButtonWidget.builder(Text.translatable("controls.resetAll"), button -> close()).dimensions(this.width / 2 - 155, backButtonsY, 150, 20).build()));
         widgets.add(ButtonWidget.builder(ScreenTexts.DONE, button -> applyAndClose()).dimensions(this.width / 2 - 155 + 160, backButtonsY, 150, 20).build());
