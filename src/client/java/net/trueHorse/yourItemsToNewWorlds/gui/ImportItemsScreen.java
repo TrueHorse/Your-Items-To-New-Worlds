@@ -75,8 +75,8 @@ public class ImportItemsScreen extends Screen {
         final int backButtonsY = this.height-29;
         final int pixelsBetweenSearchAndBack = backButtonsY-(searchButton.getY()+searchButton.getHeight());
         final int pageArrowY = searchButton.getY()+searchButton.getHeight()+(pixelsBetweenSearchAndBack)/2-9;
-        widgets.add(new ToggleableTexturedButtonWidget(minDistanceFromEdge,pageArrowY,12,17,14,2,18,textureSheet,button -> YourItemsToNewWorlds.LOGGER.warn("pressed left")));
-        widgets.add(new ToggleableTexturedButtonWidget(this.width-minDistanceFromEdge-12,pageArrowY,12,17,0,2,18,textureSheet,button -> YourItemsToNewWorlds.LOGGER.warn("pressed right")));
+        widgets.add(new TexturedButtonWidget(minDistanceFromEdge,pageArrowY,12,17,14,2,18,textureSheet,button -> YourItemsToNewWorlds.LOGGER.warn("pressed left")));
+        widgets.add(new TexturedButtonWidget(this.width-minDistanceFromEdge-12,pageArrowY,12,17,0,2,18,textureSheet,button -> YourItemsToNewWorlds.LOGGER.warn("pressed right")));
 
         final int itemRows = (int) Math.floor((pixelsBetweenSearchAndBack - 2*margin)/25.0);
         final int itemColumns = (int) Math.floor((this.width-(minDistanceFromEdge+12)*2)/25.0);
