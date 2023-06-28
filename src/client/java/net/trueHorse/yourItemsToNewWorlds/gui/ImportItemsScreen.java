@@ -3,6 +3,7 @@ package net.trueHorse.yourItemsToNewWorlds.gui;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.*;
+import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -28,6 +29,8 @@ public class ImportItemsScreen extends Screen {
     private final TextFieldWidget[] coordFields = new TextFieldWidget[3];
     private final ArrayList<TexturedButtonWidget> itemSelectButtons= new ArrayList<>();
     private final Screen parent;
+    private final ArrayList<ItemStack> importableItems = new ArrayList<>();
+    private boolean[] itemSelected;
 
     public ImportItemsScreen(Screen parent, Consumer<Optional<ArrayList>> applier){
         super(Text.of("tempTransferItemsText"));
