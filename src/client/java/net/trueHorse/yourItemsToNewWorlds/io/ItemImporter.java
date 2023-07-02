@@ -1,5 +1,6 @@
 package net.trueHorse.yourItemsToNewWorlds.io;
 
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtIo;
@@ -12,10 +13,11 @@ import net.trueHorse.yourItemsToNewWorlds.storage.RegionReader;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class ItemImporter {
 
-    public static void printItemsFromOtherWorld() {
+    public static ArrayList<ItemStack> readItemsFromOtherWorld() {
         String path = "C:\\Users\\Paul\\curseforge\\minecraft\\Instances\\All the Mods 8 - ATM8\\saves\\Test World";
         String uuid = "2c143ece-4173-4b31-97ca-bd6c2458fc3a";
 
@@ -31,7 +33,7 @@ public class ItemImporter {
         }
 
         if (nbtCompound == null) {
-            return;
+            return new ArrayList<>();
         }
 
         BlockPos spawnPosition = new BlockPos(nbtCompound.getInt("SpawnX"), nbtCompound.getInt("SpawnY"), nbtCompound.getInt("SpawnZ"));
@@ -64,6 +66,8 @@ public class ItemImporter {
         surroundingChunks.forEach(chunkNbt -> ((NbtCompound) chunkNbt).getList("block_entities", 10).forEach(be -> YourItemsToNewWorlds.LOGGER.warn(be.toString())));
         YourItemsToNewWorlds.LOGGER.warn("Block Entity Items:\n");
         itemsInBlockEntitiesNbts.forEach(nbt -> YourItemsToNewWorlds.LOGGER.warn(((NbtCompound) nbt).getString("id")));
+
+        return new ArrayList<>(itemsInBlockEntitiesNbts.stream().map(nbt -> ItemStack.fromNbt((NbtCompound) nbt)).filter(stack -> !stack.isEmpty()).toList());
     }
 
 }

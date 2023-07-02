@@ -8,6 +8,8 @@ import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.trueHorse.yourItemsToNewWorlds.YourItemsToNewWorlds;
+import net.trueHorse.yourItemsToNewWorlds.io.ItemImporter;
+import net.trueHorse.yourItemsToNewWorlds.screenHandlers.ImportItemScreenHandler;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -31,8 +33,9 @@ public class ImportItemsScreen extends Screen {
     private ButtonWidget searchButton;
     private TexturedButtonWidget leftArrowButton;
     private TexturedButtonWidget rightArrowButton;
-    private final ArrayList<TexturedButtonWidget> itemSelectButtons= new ArrayList<>();
+    private final ArrayList<TexturedItemButtonWidget> itemSelectButtons= new ArrayList<>();
     private final Screen parent;
+    private final ImportItemScreenHandler handler = new ImportItemScreenHandler();
     private String lastWorldPathString = "";
 
     public ImportItemsScreen(Screen parent, Consumer<Optional<ArrayList<ItemStack>>> applier){
@@ -79,7 +82,7 @@ public class ImportItemsScreen extends Screen {
             coordFields[2] = new TextFieldWidget(this.textRenderer,coordFields[1].getX()+coordFields[1].getWidth()+ margin,coordRowY,50,20,Text.of("tempZText"));
             widgets.addAll(List.of(coordFields));
 
-            searchButton = ButtonWidget.builder(Text.of("tempSearchText"),button-> makeGridAreaVisable()).dimensions(this.width/2-75,searchLocationModeWidget.getY()+searchLocationModeWidget.getHeight()+ margin,150,20).build();
+            searchButton = ButtonWidget.builder(Text.of("tempSearchText"),button-> generateAndDisplayGridArea()).dimensions(this.width/2-75,searchLocationModeWidget.getY()+searchLocationModeWidget.getHeight()+ margin,150,20).build();
             widgets.add(searchButton);
 
             final int pixelsBetweenSearchAndBack = this.height-29-(searchButton.getY()+searchButton.getHeight());
@@ -97,7 +100,7 @@ public class ImportItemsScreen extends Screen {
             final int additionalGridXMargin = ((this.width-(minDistanceFromEdge +12)*2)%25)/2;
             for(int i=0;i<itemRows;i++){
                 for(int j=0;j<itemColumns;j++){
-                    TexturedItemButtonWidget selectButton = new TexturedItemButtonWidget(minDistanceFromEdge +12+additionalGridXMargin+j*25,searchButton.getY()+searchButton.getHeight()+ margin +additionalGridYMargin+i*25,25,25,27,0,25,textureSheet, button -> YourItemsToNewWorlds.LOGGER.warn("pressed item "+itemSelectButtons.indexOf(button)),ItemStack.EMPTY);
+                    TexturedItemButtonWidget selectButton = new TexturedItemButtonWidget(minDistanceFromEdge +12+additionalGridXMargin+j*25,searchButton.getY()+searchButton.getHeight()+ margin +additionalGridYMargin+i*25,25,25,27,0,25,textureSheet, button -> YourItemsToNewWorlds.LOGGER.warn("pressed item "+((TexturedItemButtonWidget)button).itemStack),ItemStack.EMPTY);
                     selectButton.visible = false;
                     itemSelectButtons.add(selectButton);
                 }
@@ -111,10 +114,19 @@ public class ImportItemsScreen extends Screen {
         widgets.forEach(this::addDrawableChild);
     }
 
-    public void makeGridAreaVisable(){
-        itemSelectButtons.forEach(button -> button.visible = true);
+    public void generateAndDisplayGridArea(){
+        handler.initImportableItemStacksWith(ItemImporter.readItemsFromOtherWorld());
+        refreshGrid();
         leftArrowButton.visible = true;
         rightArrowButton.visible = true;
+    }
+
+    public void refreshGrid(){
+        for(int i=0;i<itemSelectButtons.size();i++){
+            TexturedItemButtonWidget button = itemSelectButtons.get(i);
+            button.setItemStack(handler.getImportableItems().get(i));
+            button.visible = true;
+        }
     }
 
     @Override

@@ -7,8 +7,8 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 public class TexturedItemButtonWidget extends TexturedButtonWidget {
-    
-    private ItemStack itemStack;
+    //TODO private
+    public ItemStack itemStack;
 
     public TexturedItemButtonWidget(int x, int y, int width, int height, int u, int v, Identifier texture, PressAction pressAction, ItemStack itemStack) {
         super(x, y, width, height, u, v, texture, pressAction);
@@ -33,7 +33,7 @@ public class TexturedItemButtonWidget extends TexturedButtonWidget {
     @Override
     public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
         super.renderButton(context,mouseX,mouseY,delta);
-        context.drawItem(itemStack,this.getX()+4,this.getX()+4);
+        context.drawItem(itemStack,this.getX()+4,this.getY()+4);
     }
     
     public void setItemStack(ItemStack itemStack){
