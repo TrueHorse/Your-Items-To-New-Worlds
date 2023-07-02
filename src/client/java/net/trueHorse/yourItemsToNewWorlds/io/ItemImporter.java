@@ -1,4 +1,4 @@
-package net.trueHorse.yourItemsToNewWorlds.util;
+package net.trueHorse.yourItemsToNewWorlds.io;
 
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
