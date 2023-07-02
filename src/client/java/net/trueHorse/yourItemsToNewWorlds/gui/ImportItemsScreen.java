@@ -97,7 +97,7 @@ public class ImportItemsScreen extends Screen {
             final int additionalGridXMargin = ((this.width-(minDistanceFromEdge +12)*2)%25)/2;
             for(int i=0;i<itemRows;i++){
                 for(int j=0;j<itemColumns;j++){
-                    TexturedButtonWidget selectButton = new TexturedButtonWidget(minDistanceFromEdge +12+additionalGridXMargin+j*25,searchButton.getY()+searchButton.getHeight()+ margin +additionalGridYMargin+i*25,25,25,27,0,25,textureSheet, button -> YourItemsToNewWorlds.LOGGER.warn("pressed item "+itemSelectButtons.indexOf(button)));
+                    TexturedItemButtonWidget selectButton = new TexturedItemButtonWidget(minDistanceFromEdge +12+additionalGridXMargin+j*25,searchButton.getY()+searchButton.getHeight()+ margin +additionalGridYMargin+i*25,25,25,27,0,25,textureSheet, button -> YourItemsToNewWorlds.LOGGER.warn("pressed item "+itemSelectButtons.indexOf(button)),ItemStack.EMPTY);
                     selectButton.visible = false;
                     itemSelectButtons.add(selectButton);
                 }
