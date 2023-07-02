@@ -10,6 +10,7 @@ import net.minecraft.util.Identifier;
 public class TexturedItemButtonWidget extends TexturedButtonWidget {
     //TODO private
     public ItemStack itemStack;
+    private boolean toggled;
 
     public TexturedItemButtonWidget(int x, int y, int width, int height, int u, int v, Identifier texture, PressAction pressAction, ItemStack itemStack) {
         super(x, y, width, height, u, v, texture, pressAction);
@@ -33,9 +34,17 @@ public class TexturedItemButtonWidget extends TexturedButtonWidget {
 
     @Override
     public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
-        super.renderButton(context,mouseX,mouseY,delta);
+        if(toggled){
+            this.drawTexture(context, this.texture, this.getX(), this.getY(), this.u, this.v, this.hoveredVOffset, this.width, this.height, this.textureWidth, this.textureHeight);
+        }else{
+            this.drawTexture(context, this.texture, this.getX(), this.getY(), this.u+this.width, this.v, this.hoveredVOffset, this.width, this.height, this.textureWidth, this.textureHeight);
+        }
         context.drawItem(itemStack,this.getX()+5,this.getY()+4);
         context.drawItemInSlot(MinecraftClient.getInstance().textRenderer,itemStack,this.getX()+5,this.getY()+4);
+    }
+
+    public void toggle(){
+        toggled = !toggled;
     }
     
     public void setItemStack(ItemStack itemStack){

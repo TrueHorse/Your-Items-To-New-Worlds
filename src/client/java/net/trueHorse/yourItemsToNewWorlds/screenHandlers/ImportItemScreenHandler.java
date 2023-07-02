@@ -20,6 +20,11 @@ public class ImportItemScreenHandler {
         return importableItemStacks;
     }
 
+
+    public void toggleSelection(int index){
+        itemSelected[index] = !itemSelected[index];
+    }
+
     public boolean[] getItemSelected() {
         return itemSelected;
     }
