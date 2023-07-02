@@ -33,8 +33,6 @@ public class ImportItemsScreen extends Screen {
     private TexturedButtonWidget rightArrowButton;
     private final ArrayList<TexturedButtonWidget> itemSelectButtons= new ArrayList<>();
     private final Screen parent;
-    private final ArrayList<ItemStack> importableItems = new ArrayList<>();
-    private boolean[] itemSelected;
     private String lastWorldPathString = "";
 
     public ImportItemsScreen(Screen parent, Consumer<Optional<ArrayList<ItemStack>>> applier){
