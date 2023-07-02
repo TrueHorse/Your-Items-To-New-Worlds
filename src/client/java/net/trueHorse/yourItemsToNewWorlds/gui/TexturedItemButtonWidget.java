@@ -1,5 +1,6 @@
 package net.trueHorse.yourItemsToNewWorlds.gui;
 
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.TexturedButtonWidget;
 import net.minecraft.item.ItemStack;
@@ -33,7 +34,8 @@ public class TexturedItemButtonWidget extends TexturedButtonWidget {
     @Override
     public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
         super.renderButton(context,mouseX,mouseY,delta);
-        context.drawItem(itemStack,this.getX()+4,this.getY()+4);
+        context.drawItem(itemStack,this.getX()+5,this.getY()+4);
+        context.drawItemInSlot(MinecraftClient.getInstance().textRenderer,itemStack,this.getX()+5,this.getY()+4);
     }
     
     public void setItemStack(ItemStack itemStack){
