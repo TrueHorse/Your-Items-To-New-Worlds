@@ -3,24 +3,24 @@ package net.trueHorse.yourItemsToNewWorlds.screenHandlers;
 import net.minecraft.item.ItemStack;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.Arrays;
 
 public class ImportItemScreenHandler {
 
     private ArrayList<ItemStack> importableItemStacks;
-    private List<Boolean> itemSelected;
+    private boolean[] itemSelected;
 
     public void initImportableItemStacksWith(ArrayList<ItemStack> itemStacks){
         importableItemStacks = itemStacks;
-        itemSelected = Collections.nCopies(itemStacks.size(),false);
+        itemSelected = new boolean[itemStacks.size()];
+        Arrays.fill(itemSelected,false);
     }
 
     public ArrayList<ItemStack> getImportableItems() {
         return importableItemStacks;
     }
 
-    public List<Boolean> getItemSelected() {
+    public boolean[] getItemSelected() {
         return itemSelected;
     }
 }
