@@ -10,6 +10,7 @@ import net.minecraft.util.Identifier;
 public class TexturedItemButtonWidget extends TexturedButtonWidget {
     //TODO private
     public ItemStack itemStack;
+
     private boolean toggled;
 
     public TexturedItemButtonWidget(int x, int y, int width, int height, int u, int v, Identifier texture, PressAction pressAction, ItemStack itemStack) {
@@ -49,5 +50,9 @@ public class TexturedItemButtonWidget extends TexturedButtonWidget {
     
     public void setItemStack(ItemStack itemStack){
         this.itemStack = itemStack;
+    }
+
+    public void setToggled(boolean toggled) {
+        this.toggled = toggled;
     }
 }

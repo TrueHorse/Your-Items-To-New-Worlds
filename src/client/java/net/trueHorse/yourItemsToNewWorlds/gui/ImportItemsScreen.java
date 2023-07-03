@@ -37,6 +37,7 @@ public class ImportItemsScreen extends Screen {
     private final Screen parent;
     private final ImportItemScreenHandler handler = new ImportItemScreenHandler();
     private String lastWorldPathString = "";
+    private int gridPage = 0;
 
     public ImportItemsScreen(Screen parent, Consumer<Optional<ArrayList<ItemStack>>> applier){
         super(Text.of("tempTransferItemsText"));
@@ -87,10 +88,14 @@ public class ImportItemsScreen extends Screen {
 
             final int pixelsBetweenSearchAndBack = this.height-29-(searchButton.getY()+searchButton.getHeight());
             final int pageArrowY = searchButton.getY()+searchButton.getHeight()+(pixelsBetweenSearchAndBack)/2-9;
-            leftArrowButton = new TexturedButtonWidget(minDistanceFromEdge,pageArrowY,12,17,14,2,18,textureSheet, button -> YourItemsToNewWorlds.LOGGER.warn("pressed left"));
+            leftArrowButton = new TexturedButtonWidget(minDistanceFromEdge,pageArrowY,12,17,14,2,18,textureSheet,
+                    button -> {gridPage--;
+                    refreshGridArea();});
             leftArrowButton.visible = false;
             widgets.add(leftArrowButton);
-            rightArrowButton = new TexturedButtonWidget(this.width- minDistanceFromEdge -12,pageArrowY,12,17,0,2,18,textureSheet, button -> YourItemsToNewWorlds.LOGGER.warn("pressed right"));
+            rightArrowButton = new TexturedButtonWidget(this.width- minDistanceFromEdge -12,pageArrowY,12,17,0,2,18,textureSheet,
+                    button -> {gridPage++;
+                        refreshGridArea();});
             rightArrowButton.visible = false;
             widgets.add(rightArrowButton);
 
@@ -102,7 +107,7 @@ public class ImportItemsScreen extends Screen {
                 for(int j=0;j<itemColumns;j++){
                     TexturedItemButtonWidget selectButton = new TexturedItemButtonWidget(minDistanceFromEdge +12+additionalGridXMargin+j*25,searchButton.getY()+searchButton.getHeight()+ margin +additionalGridYMargin+i*25,25,25,27,0,25,textureSheet,
                             button -> {((TexturedItemButtonWidget)button).toggle();
-                            handler.toggleSelection(itemSelectButtons.indexOf(button)+0*0);
+                            handler.toggleSelection(itemSelectButtons.indexOf(button)+gridPage*itemSelectButtons.size());
                             YourItemsToNewWorlds.LOGGER.warn("pressed item "+((TexturedItemButtonWidget)button).itemStack);},ItemStack.EMPTY);
                     selectButton.visible = false;
                     itemSelectButtons.add(selectButton);
@@ -119,15 +124,30 @@ public class ImportItemsScreen extends Screen {
 
     public void generateAndDisplayGridArea(){
         handler.initImportableItemStacksWith(ItemImporter.readItemsFromOtherWorld());
-        refreshGrid();
+        refreshGridArea();
         leftArrowButton.visible = true;
         rightArrowButton.visible = true;
     }
 
-    public void refreshGrid(){
-        for(int i=0;i<itemSelectButtons.size();i++){
+    public void refreshGridArea(){
+        leftArrowButton.visible = !(gridPage==0);
+
+        int pageItemCount;
+        if(handler.getImportableItems().size() - gridPage * itemSelectButtons.size()<=itemSelectButtons.size()){
+            pageItemCount = handler.getImportableItems().size() - gridPage * itemSelectButtons.size();
+            rightArrowButton.visible = false;
+            for(int i=pageItemCount-1;i<itemSelectButtons.size();i++){
+                itemSelectButtons.get(i).visible = false;
+            }
+        }else{
+            pageItemCount = itemSelectButtons.size();
+            rightArrowButton.visible = true;
+        }
+
+        for(int i=0;i<pageItemCount;i++){
             TexturedItemButtonWidget button = itemSelectButtons.get(i);
-            button.setItemStack(handler.getImportableItems().get(i));
+            button.setItemStack(handler.getImportableItems().get(i+gridPage*itemSelectButtons.size()));
+            button.setToggled(handler.getItemSelected()[i+gridPage*itemSelectButtons.size()]);
             button.visible = true;
         }
     }
