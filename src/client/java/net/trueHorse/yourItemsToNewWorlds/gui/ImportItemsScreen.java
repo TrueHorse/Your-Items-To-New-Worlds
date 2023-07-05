@@ -31,6 +31,8 @@ public class ImportItemsScreen extends Screen {
     private CyclingButtonWidget<String> searchLocationModeWidget;
     private final TextFieldWidget[] coordFields = new TextFieldWidget[3];
     private ButtonWidget searchButton;
+    private CyclingButtonWidget<Boolean> selectAllButton;
+
     private TexturedButtonWidget leftArrowButton;
     private TexturedButtonWidget rightArrowButton;
     private final ArrayList<TexturedItemButtonWidget> itemSelectButtons= new ArrayList<>();
@@ -93,6 +95,7 @@ public class ImportItemsScreen extends Screen {
                     refreshGridArea();});
             leftArrowButton.visible = false;
             widgets.add(leftArrowButton);
+
             rightArrowButton = new TexturedButtonWidget(this.width- minDistanceFromEdge -12,pageArrowY,12,17,0,2,18,textureSheet,
                     button -> {gridPage++;
                         refreshGridArea();});
@@ -113,6 +116,21 @@ public class ImportItemsScreen extends Screen {
                     itemSelectButtons.add(selectButton);
                 }
             }
+
+            selectAllButton = CyclingButtonWidget.onOffBuilder(false).build(this.width-minDistanceFromEdge-30-rightArrowButton.getWidth()-additionalGridXMargin,searchButton.getY()+searchButton.getHeight()+margin+additionalGridYMargin-12,30,12,Text.of("Select All"),
+                    (button,selectAll)->{
+                        if(selectAll){
+                            button.setMessage(Text.translatable("gui.none"));
+                        }else {
+                            button.setMessage(Text.translatable("gui.all"));
+                        }
+                        handler.setAllSelections(selectAll);
+                        refreshGridArea();
+                    });
+            selectAllButton.setMessage(Text.translatable("gui.all"));
+            selectAllButton.visible = false;
+
+            widgets.add(selectAllButton);
             widgets.addAll(itemSelectButtons);
         }
 
@@ -125,14 +143,14 @@ public class ImportItemsScreen extends Screen {
     public void generateAndDisplayGridArea(){
         handler.initImportableItemStacksWith(ItemImporter.readItemsFromOtherWorld());
         refreshGridArea();
-        leftArrowButton.visible = true;
-        rightArrowButton.visible = true;
+        selectAllButton.visible = true;
     }
 
     public void refreshGridArea(){
         leftArrowButton.visible = !(gridPage==0);
 
         int pageItemCount;
+        YourItemsToNewWorlds.LOGGER.warn(String.valueOf(handler.getImportableItems().size()));
         if(handler.getImportableItems().size() - gridPage * itemSelectButtons.size()<=itemSelectButtons.size()){
             pageItemCount = handler.getImportableItems().size() - gridPage * itemSelectButtons.size();
             rightArrowButton.visible = false;

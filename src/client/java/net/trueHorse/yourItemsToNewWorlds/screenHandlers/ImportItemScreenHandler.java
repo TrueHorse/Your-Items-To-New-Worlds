@@ -16,6 +16,10 @@ public class ImportItemScreenHandler {
         Arrays.fill(itemSelected,false);
     }
 
+    public void setAllSelections(boolean val){
+        Arrays.fill(itemSelected,val);
+    }
+
     public ArrayList<ItemStack> getImportableItems() {
         return importableItemStacks;
     }
