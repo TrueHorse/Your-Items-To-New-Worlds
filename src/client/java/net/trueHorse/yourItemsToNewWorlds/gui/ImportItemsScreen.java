@@ -14,6 +14,7 @@ import net.trueHorse.yourItemsToNewWorlds.screenHandlers.ImportItemScreenHandler
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -78,11 +79,16 @@ public class ImportItemsScreen extends Screen {
 
             final int coordRowStartX = (this.width-(3*(50+ margin)+150))/2;
             final int coordRowY = playerNameWidget.getY()+playerNameWidget.getHeight()+ margin;
-            searchLocationModeWidget = CyclingButtonWidget.<String>builder(Text::translatable).values(searchLocationDeterminationModeIDs).build(coordRowStartX,coordRowY,150,20,Text.of("tempLocationModeText"));
+            searchLocationModeWidget = CyclingButtonWidget.<String>builder(Text::translatable).values(searchLocationDeterminationModeIDs).build(coordRowStartX,coordRowY,150,20,Text.of("tempLocationModeText"),
+                    (button,val)->{
+                button.setMessage(Text.translatable(val));
+                setCoordFieldsEditability(Objects.equals(val, searchLocationDeterminationModeIDs[3]));
+                    });
             widgets.add(searchLocationModeWidget);
             coordFields[0] = new TextFieldWidget(this.textRenderer,searchLocationModeWidget.getX()+searchLocationModeWidget.getWidth()+ margin,coordRowY,50,20,Text.of("tempXText"));
             coordFields[1] = new TextFieldWidget(this.textRenderer,coordFields[0].getX()+coordFields[0].getWidth()+ margin,coordRowY,50,20,Text.of("tempYText"));
             coordFields[2] = new TextFieldWidget(this.textRenderer,coordFields[1].getX()+coordFields[1].getWidth()+ margin,coordRowY,50,20,Text.of("tempZText"));
+            setCoordFieldsEditability(false);
             widgets.addAll(List.of(coordFields));
 
             searchButton = ButtonWidget.builder(Text.of("tempSearchText"),button-> generateAndDisplayGridArea()).dimensions(this.width/2-75,searchLocationModeWidget.getY()+searchLocationModeWidget.getHeight()+ margin,150,20).build();
@@ -138,6 +144,13 @@ public class ImportItemsScreen extends Screen {
         widgets.add(ButtonWidget.builder(ScreenTexts.DONE, button -> applyAndClose()).dimensions(this.width / 2 - 155 + 160, this.height-29, 150, 20).build());
 
         widgets.forEach(this::addDrawableChild);
+    }
+
+    public void setCoordFieldsEditability(boolean coordsEditable){
+        for(TextFieldWidget coordField:coordFields){
+            coordField.setEditable(coordsEditable);
+            coordField.active = coordsEditable;
+        }
     }
 
     public void generateAndDisplayGridArea(){
