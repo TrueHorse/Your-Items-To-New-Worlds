@@ -88,6 +88,10 @@ public class ImportItemsScreen extends Screen {
             coordFields[0] = new TextFieldWidget(this.textRenderer,searchLocationModeWidget.getX()+searchLocationModeWidget.getWidth()+ margin,coordRowY,50,20,Text.of("tempXText"));
             coordFields[1] = new TextFieldWidget(this.textRenderer,coordFields[0].getX()+coordFields[0].getWidth()+ margin,coordRowY,50,20,Text.of("tempYText"));
             coordFields[2] = new TextFieldWidget(this.textRenderer,coordFields[1].getX()+coordFields[1].getWidth()+ margin,coordRowY,50,20,Text.of("tempZText"));
+            for(TextFieldWidget coordField:coordFields){
+                //checks, if text only consists of digits
+                coordField.setTextPredicate(string -> string.matches("\\d*"));
+            }
             setCoordFieldsEditability(false);
             widgets.addAll(List.of(coordFields));
 
