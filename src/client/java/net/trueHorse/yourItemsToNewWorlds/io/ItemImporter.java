@@ -19,18 +19,17 @@ import java.util.function.Function;
 
 public class ItemImporter {
 
-    public static ArrayList<ItemStack> readItemsFromOtherWorld(int searchLocationDetermMode){
-        return readItemsFromOtherWorld(searchLocationDetermMode,null);
+    public static ArrayList<ItemStack> readItemsFromOtherWorld(String worldPath,int searchLocationDetermMode){
+        return readItemsFromOtherWorld(worldPath,searchLocationDetermMode,null);
     }
 
-    public static ArrayList<ItemStack> readItemsFromOtherWorld(int searchLocationDetermMode, BlockPos chosenPos) {
-        String path = "C:\\Users\\Paul\\curseforge\\minecraft\\Instances\\All the Mods 8 - ATM8\\saves\\Test World";
+    public static ArrayList<ItemStack> readItemsFromOtherWorld(String worldPath, int searchLocationDetermMode, BlockPos chosenPos) {
         String uuid = "2c143ece-4173-4b31-97ca-bd6c2458fc3a";
         ArrayList<ItemStack> items = new ArrayList<>();
 
         NbtCompound playerNbt = null;
 
-        File file = new File(path + "\\playerdata", uuid + ".dat");
+        File file = new File(worldPath + "\\playerdata", uuid + ".dat");
         if (file.exists() && file.isFile()) {
             try {
                 playerNbt = NbtIo.readCompressed(file);
@@ -46,7 +45,7 @@ public class ItemImporter {
 
         items.addAll(playerNbt.getList("Inventory", 10).stream().map(nbt -> ItemStack.fromNbt((NbtCompound)nbt)).filter(stack -> !stack.isEmpty()).toList());
 
-        RegionReader regionReader = new RegionReader(new File(path + "\\region").toPath(), false);
+        RegionReader regionReader = new RegionReader(new File(worldPath + "\\region").toPath(), false);
         ChunkPos centerChunkPos;
         try {
             centerChunkPos = switch (searchLocationDetermMode) {
