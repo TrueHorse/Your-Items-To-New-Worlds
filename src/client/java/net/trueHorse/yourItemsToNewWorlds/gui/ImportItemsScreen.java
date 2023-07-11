@@ -156,9 +156,18 @@ public class ImportItemsScreen extends Screen {
     }
 
     public void generateAndDisplayGridArea(){
-        //TODO use coord fields
+        int modeNumber = Arrays.asList(searchLocationDeterminationModeIDs).indexOf(searchLocationModeWidget.getValue());
+        if(modeNumber==3){
+            for(TextFieldWidget coordField:coordFields){
+                if(coordField.getText().isEmpty()){
+                    coordField.setText("0");
+                }
+            }
+            handler.initImportableItemStacksWith(ItemImporter.readItemsFromOtherWorld(modeNumber, new BlockPos(Integer.parseInt(coordFields[0].getText()),Integer.parseInt(coordFields[1].getText()),Integer.parseInt(coordFields[2].getText()))));
+        }else{
+            handler.initImportableItemStacksWith(ItemImporter.readItemsFromOtherWorld(modeNumber));
+        }
         //handler.initImportableItemStacksWith(ItemImporter.readItemsFromOtherWorld(Arrays.binarySearch(searchLocationDeterminationModeIDs,searchLocationModeWidget.getValue()),new BlockPos(Integer.parseInt(coordFields[0].getText()),Integer.parseInt(coordFields[1].getText()),Integer.parseInt(coordFields[2].getText()))));
-        handler.initImportableItemStacksWith(ItemImporter.readItemsFromOtherWorld(Arrays.asList(searchLocationDeterminationModeIDs).indexOf(searchLocationModeWidget.getValue()),new BlockPos(0,0,0)));
         refreshGridArea();
         selectAllButton.visible = true;
     }
@@ -171,7 +180,7 @@ public class ImportItemsScreen extends Screen {
         if(handler.getImportableItems().size() - gridPage * itemSelectButtons.size()<=itemSelectButtons.size()){
             pageItemCount = handler.getImportableItems().size() - gridPage * itemSelectButtons.size();
             rightArrowButton.visible = false;
-            for(int i=pageItemCount-1;i<itemSelectButtons.size();i++){
+            for(int i=pageItemCount;i<itemSelectButtons.size();i++){
                 itemSelectButtons.get(i).visible = false;
             }
         }else{
