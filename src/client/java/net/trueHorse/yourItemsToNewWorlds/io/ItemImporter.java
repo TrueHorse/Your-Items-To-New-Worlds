@@ -44,7 +44,7 @@ public class ItemImporter {
             return new ArrayList<>();
         }
 
-        items.addAll(playerNbt.getList("Inventory", 10).stream().map(nbt -> ItemStack.fromNbt((NbtCompound)nbt)).toList());
+        items.addAll(playerNbt.getList("Inventory", 10).stream().map(nbt -> ItemStack.fromNbt((NbtCompound)nbt)).filter(stack -> !stack.isEmpty()).toList());
 
         RegionReader regionReader = new RegionReader(new File(path + "\\region").toPath(), false);
         ChunkPos centerChunkPos;
