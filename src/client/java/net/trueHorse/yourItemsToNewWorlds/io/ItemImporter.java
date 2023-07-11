@@ -74,6 +74,7 @@ public class ItemImporter {
 
         NbtList itemsInBlockEntitiesNbts = new NbtList();
         surroundingChunks.forEach(chunkNbt -> ((NbtCompound) chunkNbt).getList("block_entities", 10).forEach(be -> itemsInBlockEntitiesNbts.addAll(((NbtCompound) be).getList("Items", 10))));
+        surroundingChunks.forEach(chunkNbt -> ((NbtCompound) chunkNbt).getCompound("Level").getList("TileEntities", 10).forEach(be -> itemsInBlockEntitiesNbts.addAll(((NbtCompound) be).getList("Items", 10))));
 
         items.addAll(itemsInBlockEntitiesNbts.stream().map(nbt -> ItemStack.fromNbt((NbtCompound) nbt)).filter(stack -> !stack.isEmpty()).toList());
         return items;
