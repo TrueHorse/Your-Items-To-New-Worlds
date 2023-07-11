@@ -94,10 +94,10 @@ public class ItemImporter {
 
         //getting number for each chunk, summing up 3x3 squares and saving chunk with highest val to return later
         ChunkPos containerChunk = new ChunkPos(0,0);
-        int biggestCount = 0;
+        long biggestVal = 0;
         for(int i = smallestChunkY+1;i<biggestChunkY;i++){
             for(int j = smallestChunkX+1;j<biggestChunkX;j++){
-                int sum = 0;
+                long sum = 0;
                 for(int k = -1;k<=1;k++){
                     for(int l = -1;l<=1;l++){
                         int chunkIndex1 = j+l-smallestChunkX;
@@ -107,12 +107,19 @@ public class ItemImporter {
                         if(itemEntitiesInChunks[chunkIndex1][chunkIndex2]==null){
                             itemEntitiesInChunks[chunkIndex1][chunkIndex2] = chunkToValFunc.apply(new ChunkPos(j+l,i+k));
                         }
-                        sum += itemEntitiesInChunks[chunkIndex1][chunkIndex2];
+                        try{
+                            sum = Math.addExact(sum,itemEntitiesInChunks[chunkIndex1][chunkIndex2]);
+                        }catch (ArithmeticException e){
+                            sum = Long.MAX_VALUE;
+                        }
                     }
                 }
-                if(sum>biggestCount){
-                    biggestCount = sum;
+                if(sum>biggestVal){
+                    biggestVal = sum;
                     containerChunk = new ChunkPos(j,i);
+                    if(biggestVal == Long.MAX_VALUE){
+                        return containerChunk;
+                    }
                 }
             }
         }
@@ -134,7 +141,18 @@ public class ItemImporter {
     }
 
     public static ChunkPos getInhabitationChunkPos(RegionReader regionReader){
-        throw new NotImplementedException();
+        return getChunkPosWithBiggestSurroundingVal(regionReader,chunkPos -> {
+            try {
+                return Math.toIntExact(regionReader.getNbtAt(chunkPos).getLong("InhabitedTime"));
+            } catch (IOException e) {
+                YourItemsToNewWorlds.LOGGER.error("Couldn't read region file "+(Math.floor(chunkPos.x/32.0))+"."+(Math.floor(chunkPos.z/32.0)));
+                return 0;
+            } catch(NullPointerException e){
+                return 0;
+            }catch (ArithmeticException e){
+                return Integer.MAX_VALUE;
+            }
+        });
     }
 
 }
