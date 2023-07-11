@@ -1,5 +1,6 @@
 package net.trueHorse.yourItemsToNewWorlds.gui;
 
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.*;
@@ -35,6 +36,7 @@ public class ImportItemsScreen extends Screen {
     private TexturedButtonWidget leftArrowButton;
     private TexturedButtonWidget rightArrowButton;
     private final ArrayList<TexturedItemButtonWidget> itemSelectButtons= new ArrayList<>();
+    private TextWidget noItemsTextWidget;
     private final Screen parent;
     private final ImportItemScreenHandler handler = new ImportItemScreenHandler();
     private String lastWorldPathString = "";
@@ -140,6 +142,10 @@ public class ImportItemsScreen extends Screen {
 
             widgets.add(selectAllButton);
             widgets.addAll(itemSelectButtons);
+
+            noItemsTextWidget = new TextWidget(this.width/2-100,pageArrowY,200,20,Text.of("No items found."), MinecraftClient.getInstance().textRenderer);
+            noItemsTextWidget.visible = false;
+            widgets.add(noItemsTextWidget);
         }
 
         widgets.add(addDrawableChild(ButtonWidget.builder(Text.translatable("controls.resetAll"), button -> close()).dimensions(this.width / 2 - 155, this.height-29, 150, 20).build()));
@@ -167,16 +173,13 @@ public class ImportItemsScreen extends Screen {
         }else{
             handler.initImportableItemStacksWith(ItemImporter.readItemsFromOtherWorld(modeNumber));
         }
-        //handler.initImportableItemStacksWith(ItemImporter.readItemsFromOtherWorld(Arrays.binarySearch(searchLocationDeterminationModeIDs,searchLocationModeWidget.getValue()),new BlockPos(Integer.parseInt(coordFields[0].getText()),Integer.parseInt(coordFields[1].getText()),Integer.parseInt(coordFields[2].getText()))));
         refreshGridArea();
-        selectAllButton.visible = true;
     }
 
     public void refreshGridArea(){
         leftArrowButton.visible = !(gridPage==0);
 
         int pageItemCount;
-        YourItemsToNewWorlds.LOGGER.warn(String.valueOf(handler.getImportableItems().size()));
         if(handler.getImportableItems().size() - gridPage * itemSelectButtons.size()<=itemSelectButtons.size()){
             pageItemCount = handler.getImportableItems().size() - gridPage * itemSelectButtons.size();
             rightArrowButton.visible = false;
@@ -194,6 +197,10 @@ public class ImportItemsScreen extends Screen {
             button.setToggled(handler.getItemSelected()[i+gridPage*itemSelectButtons.size()]);
             button.visible = true;
         }
+
+        boolean noItems = pageItemCount == 0;
+        selectAllButton.visible = !noItems;
+        noItemsTextWidget.visible = noItems;
     }
 
     @Override
