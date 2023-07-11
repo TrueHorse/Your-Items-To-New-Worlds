@@ -2,7 +2,6 @@ package net.trueHorse.yourItemsToNewWorlds.io;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.util.math.BlockPos;
@@ -27,6 +26,7 @@ public class ItemImporter {
     public static ArrayList<ItemStack> readItemsFromOtherWorld(int searchLocationDetermMode, BlockPos chosenPos) {
         String path = "C:\\Users\\Paul\\curseforge\\minecraft\\Instances\\All the Mods 8 - ATM8\\saves\\Test World";
         String uuid = "2c143ece-4173-4b31-97ca-bd6c2458fc3a";
+        ArrayList<ItemStack> items = new ArrayList<>();
 
         NbtCompound playerNbt = null;
 
@@ -44,12 +44,7 @@ public class ItemImporter {
             return new ArrayList<>();
         }
 
-        NbtList invItemNbts = playerNbt.getList("Inventory", 10);
-
-        YourItemsToNewWorlds.LOGGER.warn("Inventory Items:\n");
-        for (NbtElement itemNbt : invItemNbts) {
-            YourItemsToNewWorlds.LOGGER.warn(((NbtCompound) itemNbt).getString("id"));
-        }
+        items.addAll(playerNbt.getList("Inventory", 10).stream().map(nbt -> ItemStack.fromNbt((NbtCompound)nbt)).toList());
 
         RegionReader regionReader = new RegionReader(new File(path + "\\region").toPath(), false);
         ChunkPos centerChunkPos;
@@ -81,7 +76,8 @@ public class ItemImporter {
         NbtList itemsInBlockEntitiesNbts = new NbtList();
         surroundingChunks.forEach(chunkNbt -> ((NbtCompound) chunkNbt).getList("block_entities", 10).forEach(be -> itemsInBlockEntitiesNbts.addAll(((NbtCompound) be).getList("Items", 10))));
 
-        return new ArrayList<>(itemsInBlockEntitiesNbts.stream().map(nbt -> ItemStack.fromNbt((NbtCompound) nbt)).filter(stack -> !stack.isEmpty()).toList());
+        items.addAll(itemsInBlockEntitiesNbts.stream().map(nbt -> ItemStack.fromNbt((NbtCompound) nbt)).filter(stack -> !stack.isEmpty()).toList());
+        return items;
     }
 
     public static ChunkPos getChunkPosWithBiggestSurroundingVal(RegionReader regionReader, Function<ChunkPos,Integer> chunkToValFunc){
