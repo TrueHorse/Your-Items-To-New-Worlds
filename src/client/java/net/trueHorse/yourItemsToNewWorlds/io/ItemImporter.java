@@ -146,8 +146,8 @@ public class ItemImporter {
         return getChunkPosWithBiggestSurroundingVal(regionReader,chunkPos -> {
             try {
                 NbtCompound chunkNbt = regionReader.getNbtAt(chunkPos);
-                return Math.addExact(Math.toIntExact(chunkNbt.getLong("InhabitedTime")),
-                        Math.toIntExact(chunkNbt.getCompound("Level").getLong("InhabitedTime")));
+                return Math.toIntExact(chunkNbt.getLong("InhabitedTime"))
+                        + Math.toIntExact(chunkNbt.getCompound("Level").getLong("InhabitedTime"));
             } catch (IOException e) {
                 YourItemsToNewWorlds.LOGGER.error("Couldn't read region file "+(Math.floor(chunkPos.x/32.0))+"."+(Math.floor(chunkPos.z/32.0)));
                 return 0;
