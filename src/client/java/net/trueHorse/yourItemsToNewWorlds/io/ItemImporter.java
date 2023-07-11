@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.NoSuchElementException;
+import java.util.function.Function;
 
 public class ItemImporter {
 
@@ -79,8 +80,8 @@ public class ItemImporter {
         return new ArrayList<>(itemsInBlockEntitiesNbts.stream().map(nbt -> ItemStack.fromNbt((NbtCompound) nbt)).filter(stack -> !stack.isEmpty()).toList());
     }
 
-    public static ChunkPos getContainerChunkPos(RegionReader regionReader) throws NoSuchElementException{
-        //creating two-dimensional array of number of entities with items per Chunk
+    public static ChunkPos getChunkPosWithBiggestSurroundingVal(RegionReader regionReader, Function<ChunkPos,Integer> chunkToValFunc){
+        //creating two-dimensional array of values of Chunks
         String[] regionNames = regionReader.getAllRegionFileNames();
         int smallestChunkX = Arrays.stream(regionNames).map(name -> Integer.parseInt(name.split("[.]")[1])).min(Comparator.naturalOrder()).get()*32;
         int biggestChunkX = Arrays.stream(regionNames).map(name -> Integer.parseInt(name.split("[.]")[1])).max(Comparator.naturalOrder()).get()*32+31;
@@ -104,14 +105,7 @@ public class ItemImporter {
                         //YourItemsToNewWorlds.LOGGER.info("i j k l"+i+" "+j+" "+k+" "+l);
                         //YourItemsToNewWorlds.LOGGER.info("Indices: "+chunkIndex1+" "+chunkIndex2);
                         if(itemEntitiesInChunks[chunkIndex1][chunkIndex2]==null){
-                            try {
-                                itemEntitiesInChunks[chunkIndex1][chunkIndex2] = (int)regionReader.getNbtAt(new ChunkPos(j+l,i+k)).getList("block_entities", 10).stream().filter(nbt -> !((NbtCompound)nbt).getList("Items",10).isEmpty()).count();
-                            } catch (IOException e) {
-                                YourItemsToNewWorlds.LOGGER.error("Couldn't read region file "+(Math.floor((j+l)/32.0))+"."+(Math.floor((i+k)/32.0)));
-                                itemEntitiesInChunks[chunkIndex1][chunkIndex2] = 0;
-                            } catch(NullPointerException e){
-                                itemEntitiesInChunks[chunkIndex1][chunkIndex2] = 0;
-                            }
+                            itemEntitiesInChunks[chunkIndex1][chunkIndex2] = chunkToValFunc.apply(new ChunkPos(j+l,i+k));
                         }
                         sum += itemEntitiesInChunks[chunkIndex1][chunkIndex2];
                     }
@@ -122,8 +116,21 @@ public class ItemImporter {
                 }
             }
         }
-        //return chunk with the biggest value
+        //return chunk with the biggest surrounding value
         return containerChunk;
+    }
+
+    public static ChunkPos getContainerChunkPos(RegionReader regionReader) throws NoSuchElementException{
+        return getChunkPosWithBiggestSurroundingVal(regionReader,chunkPos -> {
+            try {
+                return (int)regionReader.getNbtAt(chunkPos).getList("block_entities", 10).stream().filter(nbt -> !((NbtCompound)nbt).getList("Items",10).isEmpty()).count();
+            } catch (IOException e) {
+                YourItemsToNewWorlds.LOGGER.error("Couldn't read region file "+(Math.floor(chunkPos.x/32.0))+"."+(Math.floor(chunkPos.z/32.0)));
+                return 0;
+            } catch(NullPointerException e){
+                return 0;
+            }
+        });
     }
 
     public static ChunkPos getInhabitationChunkPos(RegionReader regionReader){
