@@ -130,7 +130,9 @@ public class ItemImporter {
     public static ChunkPos getContainerChunkPos(RegionReader regionReader) throws NoSuchElementException{
         return getChunkPosWithBiggestSurroundingVal(regionReader,chunkPos -> {
             try {
-                return (int)regionReader.getNbtAt(chunkPos).getList("block_entities", 10).stream().filter(nbt -> !((NbtCompound)nbt).getList("Items",10).isEmpty()).count();
+                NbtCompound chunkNbt = regionReader.getNbtAt(chunkPos);
+                return (int)chunkNbt.getList("block_entities", 10).stream().filter(nbt -> !((NbtCompound)nbt).getList("Items",10).isEmpty()).count()
+                        + (int)chunkNbt.getCompound("Level").getList("TileEntities", 10).stream().filter(nbt -> !((NbtCompound)nbt).getList("Items",10).isEmpty()).count();
             } catch (IOException e) {
                 YourItemsToNewWorlds.LOGGER.error("Couldn't read region file "+(Math.floor(chunkPos.x/32.0))+"."+(Math.floor(chunkPos.z/32.0)));
                 return 0;
@@ -143,7 +145,9 @@ public class ItemImporter {
     public static ChunkPos getInhabitationChunkPos(RegionReader regionReader){
         return getChunkPosWithBiggestSurroundingVal(regionReader,chunkPos -> {
             try {
-                return Math.toIntExact(regionReader.getNbtAt(chunkPos).getLong("InhabitedTime"));
+                NbtCompound chunkNbt = regionReader.getNbtAt(chunkPos);
+                return Math.addExact(Math.toIntExact(chunkNbt.getLong("InhabitedTime")),
+                        Math.toIntExact(chunkNbt.getCompound("Level").getLong("InhabitedTime")));
             } catch (IOException e) {
                 YourItemsToNewWorlds.LOGGER.error("Couldn't read region file "+(Math.floor(chunkPos.x/32.0))+"."+(Math.floor(chunkPos.z/32.0)));
                 return 0;
