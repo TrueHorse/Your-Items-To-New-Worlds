@@ -21,7 +21,6 @@ public class ImportItemsScreen extends Screen {
 
     private final Identifier textureSheet = new Identifier("your_items_to_new_worlds","textures/gui/import_items_screen.png");
     private final Consumer<Optional<ArrayList<ItemStack>>> applier;
-    private final List<String> playerNames = new ArrayList<>();
     private final String[] searchLocationDeterminationModeIDs = {"transfer_items.your_items_to_new_worlds.spawn_point",
             "transfer_items.your_items_to_new_worlds.most_item_containers",
             "transfer_items.your_items_to_new_worlds.longest_inhabitation",
@@ -70,11 +69,9 @@ public class ImportItemsScreen extends Screen {
         YourItemsToNewWorlds.LOGGER.warn(String.valueOf(potentialWorldPath.exists()));
         if(potentialWorldPath.exists()){
             //TODO check if actually a Minecraft world folder
-            //test names
-            playerNames.add("Horse");
-            playerNames.add("Jo");
+            handler.initPlayerNames(potentialWorldPath);
 
-            playerNameWidget = CyclingButtonWidget.builder(Text::of).values(playerNames).build(this.width/2-50,worldPathWidget.getY()+worldPathWidget.getHeight()+ margin,100,20,Text.of("tempPlayerNameText"),
+            playerNameWidget = CyclingButtonWidget.builder(Text::of).values(handler.getPlayerNames()).build(this.width/2-50,worldPathWidget.getY()+worldPathWidget.getHeight()+ margin,100,20,Text.of("tempPlayerNameText"),
                     (button,val)-> button.setMessage(Text.of(val)));
             playerNameWidget.setMessage(Text.of(playerNameWidget.getValue()));
             widgets.add(playerNameWidget);
