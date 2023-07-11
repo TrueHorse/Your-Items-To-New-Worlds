@@ -74,7 +74,9 @@ public class ImportItemsScreen extends Screen {
             playerNames.add("Horse");
             playerNames.add("Jo");
 
-            playerNameWidget = CyclingButtonWidget.builder(Text::of).values(playerNames).build(this.width/2-50,worldPathWidget.getY()+worldPathWidget.getHeight()+ margin,100,20,Text.of("tempPlayerNameText"));
+            playerNameWidget = CyclingButtonWidget.builder(Text::of).values(playerNames).build(this.width/2-50,worldPathWidget.getY()+worldPathWidget.getHeight()+ margin,100,20,Text.of("tempPlayerNameText"),
+                    (button,val)-> button.setMessage(Text.of(val)));
+            playerNameWidget.setMessage(Text.of(playerNameWidget.getValue()));
             widgets.add(playerNameWidget);
 
             final int coordRowStartX = (this.width-(3*(50+ margin)+150))/2;
@@ -84,6 +86,7 @@ public class ImportItemsScreen extends Screen {
                 button.setMessage(Text.translatable(val));
                 setCoordFieldsEditability(Objects.equals(val, searchLocationDeterminationModeIDs[3]));
                     });
+            searchLocationModeWidget.setMessage(Text.translatable(searchLocationModeWidget.getValue()));
             widgets.add(searchLocationModeWidget);
             coordFields[0] = new TextFieldWidget(this.textRenderer,searchLocationModeWidget.getX()+searchLocationModeWidget.getWidth()+ margin,coordRowY,50,20,Text.of("tempXText"));
             coordFields[1] = new TextFieldWidget(this.textRenderer,coordFields[0].getX()+coordFields[0].getWidth()+ margin,coordRowY,50,20,Text.of("tempYText"));
