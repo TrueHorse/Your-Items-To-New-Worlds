@@ -1,4 +1,4 @@
-package net.trueHorse.yourItemsToNewWorlds.storage;
+package net.trueHorse.yourItemsToNewWorlds.io;
 
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
@@ -20,8 +20,7 @@ public class RegionReader {
     }
 
     private RegionFile getRegionFile(ChunkPos pos) throws IOException{
-        int regionX = pos.getRegionX();
-        Path path = this.directory.resolve("r." + regionX + "." + pos.getRegionZ() + ".mca");
+        Path path = this.directory.resolve("r." + pos.getRegionX() + "." + pos.getRegionZ() + ".mca");
         return new RegionFile(path, this.directory, this.desync);
     }
 
@@ -49,5 +48,9 @@ public class RegionReader {
         dataInputStream.close();
 
         return nbt;
+    }
+
+    public String[] getAllRegionFileNames(){
+        return directory.toFile().list();
     }
 }

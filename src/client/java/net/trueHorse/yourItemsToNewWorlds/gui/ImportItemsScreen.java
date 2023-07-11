@@ -7,15 +7,13 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
 import net.trueHorse.yourItemsToNewWorlds.YourItemsToNewWorlds;
 import net.trueHorse.yourItemsToNewWorlds.io.ItemImporter;
 import net.trueHorse.yourItemsToNewWorlds.screenHandlers.ImportItemScreenHandler;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class ImportItemsScreen extends Screen {
@@ -158,7 +156,9 @@ public class ImportItemsScreen extends Screen {
     }
 
     public void generateAndDisplayGridArea(){
-        handler.initImportableItemStacksWith(ItemImporter.readItemsFromOtherWorld());
+        //TODO use coord fields
+        //handler.initImportableItemStacksWith(ItemImporter.readItemsFromOtherWorld(Arrays.binarySearch(searchLocationDeterminationModeIDs,searchLocationModeWidget.getValue()),new BlockPos(Integer.parseInt(coordFields[0].getText()),Integer.parseInt(coordFields[1].getText()),Integer.parseInt(coordFields[2].getText()))));
+        handler.initImportableItemStacksWith(ItemImporter.readItemsFromOtherWorld(Arrays.asList(searchLocationDeterminationModeIDs).indexOf(searchLocationModeWidget.getValue()),new BlockPos(0,0,0)));
         refreshGridArea();
         selectAllButton.visible = true;
     }
