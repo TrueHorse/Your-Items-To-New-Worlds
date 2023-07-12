@@ -33,7 +33,7 @@ public class ItemImporter {
             try {
                 playerNbt = NbtIo.readCompressed(file);
             } catch (IOException e) {
-                YourItemsToNewWorlds.LOGGER.error("Couldn't read player data file.");
+                YourItemsToNewWorlds.LOGGER.error("Couldn't read player data file.\n"+e.getMessage());
                 return new ArrayList<>();
             }
         }
@@ -66,7 +66,7 @@ public class ItemImporter {
                 try {
                     surroundingChunks.add(regionReader.getNbtAt(new ChunkPos(centerChunkPos.x + i, centerChunkPos.z + j)));
                 } catch (IOException e) {
-                    YourItemsToNewWorlds.LOGGER.error("Couldn't get chunk at relative " + i + " " + j);
+                    YourItemsToNewWorlds.LOGGER.error("Couldn't get chunk at " + (i+centerChunkPos.x) + " " + (j+ centerChunkPos.z));
                 }
             }
         }
