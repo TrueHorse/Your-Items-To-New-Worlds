@@ -43,7 +43,7 @@ public class ImportItemsScreen extends Screen {
     private int gridPage = 0;
 
     public ImportItemsScreen(Screen parent, Consumer<Optional<ArrayList<ItemStack>>> applier){
-        super(Text.of("tempTransferItemsText"));
+        super(Text.translatable("transfer_items.your_items_to_new_worlds.select_transfer_items"));
         this.applier = applier;
         this.parent = parent;
     }
@@ -72,11 +72,11 @@ public class ImportItemsScreen extends Screen {
             //TODO user friendly world selection
             boolean successfulNameRequests = handler.initPlayerNames(potentialWorldPath);
 
-            playerNameWidget = CyclingButtonWidget.builder(Text::of).values(handler.getPlayerNames()).build(this.width/2-50,worldPathWidget.getY()+worldPathWidget.getHeight()+ margin,100,20,Text.of("tempPlayerNameText"),
+            playerNameWidget = CyclingButtonWidget.builder(Text::of).values(handler.getPlayerNames()).build(this.width/2-50,worldPathWidget.getY()+worldPathWidget.getHeight()+ margin,100,20,Text.translatable("transfer_items.your_items_to_new_worlds.player_name"),
                     (button,val)-> button.setMessage(Text.of(val)));
             playerNameWidget.setMessage(Text.of(playerNameWidget.getValue()));
             if(!successfulNameRequests){
-                playerNameWidget.setTooltip(Tooltip.of(Text.of("Not all name requests succeeded.\nSee the log for further details.")));
+                playerNameWidget.setTooltip(Tooltip.of(Text.translatable("transfer_items.your_items_to_new_worlds.request_error_tooltip")));
             }
             widgets.add(playerNameWidget);
 
@@ -89,9 +89,9 @@ public class ImportItemsScreen extends Screen {
                     });
             searchLocationModeWidget.setMessage(Text.translatable(searchLocationModeWidget.getValue()));
             widgets.add(searchLocationModeWidget);
-            coordFields[0] = new TextFieldWidget(this.textRenderer,searchLocationModeWidget.getX()+searchLocationModeWidget.getWidth()+ margin,coordRowY,50,20,Text.of("tempXText"));
-            coordFields[1] = new TextFieldWidget(this.textRenderer,coordFields[0].getX()+coordFields[0].getWidth()+ margin,coordRowY,50,20,Text.of("tempYText"));
-            coordFields[2] = new TextFieldWidget(this.textRenderer,coordFields[1].getX()+coordFields[1].getWidth()+ margin,coordRowY,50,20,Text.of("tempZText"));
+            coordFields[0] = new TextFieldWidget(this.textRenderer,searchLocationModeWidget.getX()+searchLocationModeWidget.getWidth()+ margin,coordRowY,50,20,Text.of("X"));
+            coordFields[1] = new TextFieldWidget(this.textRenderer,coordFields[0].getX()+coordFields[0].getWidth()+ margin,coordRowY,50,20,Text.of("Y"));
+            coordFields[2] = new TextFieldWidget(this.textRenderer,coordFields[1].getX()+coordFields[1].getWidth()+ margin,coordRowY,50,20,Text.of("Z"));
             for(TextFieldWidget coordField:coordFields){
                 //checks, if text only consists of digits
                 coordField.setTextPredicate(string -> string.matches("\\d*"));
@@ -99,7 +99,7 @@ public class ImportItemsScreen extends Screen {
             setCoordFieldsEditability(false);
             widgets.addAll(List.of(coordFields));
 
-            searchButton = ButtonWidget.builder(Text.of("tempSearchText"),button-> generateAndDisplayGridArea()).dimensions(this.width/2-75,searchLocationModeWidget.getY()+searchLocationModeWidget.getHeight()+ margin,150,20).build();
+            searchButton = ButtonWidget.builder(Text.translatable("itemGroup.search"),button-> generateAndDisplayGridArea()).dimensions(this.width/2-75,searchLocationModeWidget.getY()+searchLocationModeWidget.getHeight()+ margin,150,20).build();
             widgets.add(searchButton);
 
             final int pixelsBetweenSearchAndBack = this.height-29-(searchButton.getY()+searchButton.getHeight());
@@ -131,7 +131,7 @@ public class ImportItemsScreen extends Screen {
                 }
             }
 
-            selectAllButton = CyclingButtonWidget.onOffBuilder(false).build(this.width-minDistanceFromEdge-30-rightArrowButton.getWidth()-additionalGridXMargin,searchButton.getY()+searchButton.getHeight()+margin+additionalGridYMargin-12,30,12,Text.of("Select All"),
+            selectAllButton = CyclingButtonWidget.onOffBuilder(false).build(this.width-minDistanceFromEdge-30-rightArrowButton.getWidth()-additionalGridXMargin,searchButton.getY()+searchButton.getHeight()+margin+additionalGridYMargin-12,30,12,Text.translatable("transfer_items.your_items_to_new_worlds.select_all"),
                     (button,selectAll)->{
                         if(selectAll){
                             button.setMessage(Text.translatable("gui.none"));
@@ -147,7 +147,7 @@ public class ImportItemsScreen extends Screen {
             widgets.add(selectAllButton);
             widgets.addAll(itemSelectButtons);
 
-            noItemsTextWidget = new TextWidget(this.width/2-100,pageArrowY,200,20,Text.of("No items found."), MinecraftClient.getInstance().textRenderer);
+            noItemsTextWidget = new TextWidget(this.width/2-100,pageArrowY,200,20,Text.translatable("transfer_items.your_items_to_new_worlds.no_items_found"), MinecraftClient.getInstance().textRenderer);
             noItemsTextWidget.visible = false;
             widgets.add(noItemsTextWidget);
         }
