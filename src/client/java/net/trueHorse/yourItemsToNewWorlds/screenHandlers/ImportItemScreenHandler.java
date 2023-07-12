@@ -63,6 +63,19 @@ public class ImportItemScreenHandler {
         return new ArrayList<>(playerIdNames.values());
     }
 
+    public String getPlayerName(String uuid){
+        return playerIdNames.get(uuid);
+    }
+
+    public String getUuid(String playerName){
+        for (Map.Entry<String, String> entry : playerIdNames.entrySet()) {
+            if (entry.getValue().equals(playerName)) {
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
+
     public ArrayList<ItemStack> getImportableItems() {
         return importableItemStacks;
     }

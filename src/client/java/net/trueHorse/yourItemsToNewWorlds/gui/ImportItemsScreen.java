@@ -169,9 +169,9 @@ public class ImportItemsScreen extends Screen {
                     coordField.setText("0");
                 }
             }
-            handler.initImportableItemStacksWith(ItemImporter.readItemsFromOtherWorld(worldPathWidget.getText(),modeNumber, new BlockPos(Integer.parseInt(coordFields[0].getText()),Integer.parseInt(coordFields[1].getText()),Integer.parseInt(coordFields[2].getText()))));
+            handler.initImportableItemStacksWith(ItemImporter.readItemsFromOtherWorld(worldPathWidget.getText(),handler.getUuid(playerNameWidget.getValue()),modeNumber, new BlockPos(Integer.parseInt(coordFields[0].getText()),Integer.parseInt(coordFields[1].getText()),Integer.parseInt(coordFields[2].getText()))));
         }else{
-            handler.initImportableItemStacksWith(ItemImporter.readItemsFromOtherWorld(worldPathWidget.getText(),modeNumber));
+            handler.initImportableItemStacksWith(ItemImporter.readItemsFromOtherWorld(worldPathWidget.getText(),handler.getUuid(playerNameWidget.getValue()),modeNumber));
         }
         refreshGridArea();
     }

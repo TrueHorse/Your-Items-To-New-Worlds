@@ -19,17 +19,16 @@ import java.util.function.Function;
 
 public class ItemImporter {
 
-    public static ArrayList<ItemStack> readItemsFromOtherWorld(String worldPath,int searchLocationDetermMode){
-        return readItemsFromOtherWorld(worldPath,searchLocationDetermMode,null);
+    public static ArrayList<ItemStack> readItemsFromOtherWorld(String worldPath,String playerUuid,int searchLocationDetermMode){
+        return readItemsFromOtherWorld(worldPath,playerUuid,searchLocationDetermMode,null);
     }
 
-    public static ArrayList<ItemStack> readItemsFromOtherWorld(String worldPath, int searchLocationDetermMode, BlockPos chosenPos) {
-        String uuid = "2c143ece-4173-4b31-97ca-bd6c2458fc3a";
+    public static ArrayList<ItemStack> readItemsFromOtherWorld(String worldPath,String playerUuid, int searchLocationDetermMode, BlockPos chosenPos) {
         ArrayList<ItemStack> items = new ArrayList<>();
 
         NbtCompound playerNbt = null;
 
-        File file = new File(worldPath + "\\playerdata", uuid + ".dat");
+        File file = new File(worldPath + "\\playerdata", playerUuid + ".dat");
         if (file.exists() && file.isFile()) {
             try {
                 playerNbt = NbtIo.readCompressed(file);
