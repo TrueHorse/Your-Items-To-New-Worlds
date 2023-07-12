@@ -5,7 +5,9 @@
   "transfer_items.your_items_to_new_worlds.coordinates": "Coordinates",
   "transfer_items.your_items_to_new_worlds.select_transfer_items": "Select Import Items",
   "transfer_items.your_items_to_new_worlds.player_name": "Player Name",
-  "transfer_items.your_items_to_new_worlds.request_error_tooltip": "Not all name requests succeeded.\nSee the log for further details.",
+  "transfer_items.your_items_to_new_worlds.request_error_tooltip": "Include Inventory and Ender Chest of that player.\nNot all name requests succeeded.\nSee the log for further details.",
   "transfer_items.your_items_to_new_worlds.select_all": "Select All",
-  "transfer_items.your_items_to_new_worlds.no_items_found": "No items found."
+  "transfer_items.your_items_to_new_worlds.no_items_found": "No items found.",
+  "transfer_items.your_items_to_new_worlds.mode_button_explanation": "Search the area that has:",
+  "transfer_items.your_items_to_new_worlds.player_button_explanation": "Include Inventory and Ender Chest of that player."
 }

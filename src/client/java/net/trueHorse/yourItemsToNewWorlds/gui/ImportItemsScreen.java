@@ -69,7 +69,7 @@ public class ImportItemsScreen extends Screen {
         File potentialWorldPath = new File(worldPathWidget.getText());
         YourItemsToNewWorlds.LOGGER.warn(String.valueOf(potentialWorldPath.exists()));
         if(potentialWorldPath.exists()){
-            //TODO user friendly world selection
+            //TODO user-friendly world selection
             boolean successfulNameRequests = handler.initPlayerNames(potentialWorldPath);
 
             playerNameWidget = CyclingButtonWidget.builder(Text::of).values(handler.getPlayerNames()).build(this.width/2-50,worldPathWidget.getY()+worldPathWidget.getHeight()+ margin,100,20,Text.translatable("transfer_items.your_items_to_new_worlds.player_name"),
@@ -77,6 +77,8 @@ public class ImportItemsScreen extends Screen {
             playerNameWidget.setMessage(Text.of(playerNameWidget.getValue()));
             if(!successfulNameRequests){
                 playerNameWidget.setTooltip(Tooltip.of(Text.translatable("transfer_items.your_items_to_new_worlds.request_error_tooltip")));
+            }else{
+                playerNameWidget.setTooltip(Tooltip.of(Text.translatable("transfer_items.your_items_to_new_worlds.player_button_explanation")));
             }
             widgets.add(playerNameWidget);
 
@@ -88,7 +90,9 @@ public class ImportItemsScreen extends Screen {
                 setCoordFieldsEditability(Objects.equals(val, searchLocationDeterminationModeIDs[3]));
                     });
             searchLocationModeWidget.setMessage(Text.translatable(searchLocationModeWidget.getValue()));
+            searchLocationModeWidget.setTooltip(Tooltip.of(Text.translatable("transfer_items.your_items_to_new_worlds.mode_button_explanation")));
             widgets.add(searchLocationModeWidget);
+
             coordFields[0] = new TextFieldWidget(this.textRenderer,searchLocationModeWidget.getX()+searchLocationModeWidget.getWidth()+ margin,coordRowY,50,20,Text.of("X"));
             coordFields[1] = new TextFieldWidget(this.textRenderer,coordFields[0].getX()+coordFields[0].getWidth()+ margin,coordRowY,50,20,Text.of("Y"));
             coordFields[2] = new TextFieldWidget(this.textRenderer,coordFields[1].getX()+coordFields[1].getWidth()+ margin,coordRowY,50,20,Text.of("Z"));
