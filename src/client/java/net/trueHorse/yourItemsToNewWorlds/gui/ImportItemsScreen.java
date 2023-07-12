@@ -3,6 +3,7 @@ package net.trueHorse.yourItemsToNewWorlds.gui;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.*;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenTexts;
@@ -68,12 +69,15 @@ public class ImportItemsScreen extends Screen {
         File potentialWorldPath = new File(worldPathWidget.getText());
         YourItemsToNewWorlds.LOGGER.warn(String.valueOf(potentialWorldPath.exists()));
         if(potentialWorldPath.exists()){
-            //TODO check if actually a Minecraft world folder
-            handler.initPlayerNames(potentialWorldPath);
+            //TODO user friendly world selection
+            boolean successfulNameRequests = handler.initPlayerNames(potentialWorldPath);
 
             playerNameWidget = CyclingButtonWidget.builder(Text::of).values(handler.getPlayerNames()).build(this.width/2-50,worldPathWidget.getY()+worldPathWidget.getHeight()+ margin,100,20,Text.of("tempPlayerNameText"),
                     (button,val)-> button.setMessage(Text.of(val)));
             playerNameWidget.setMessage(Text.of(playerNameWidget.getValue()));
+            if(!successfulNameRequests){
+                playerNameWidget.setTooltip(Tooltip.of(Text.of("Not all name requests succeeded.\nSee the log for further details.")));
+            }
             widgets.add(playerNameWidget);
 
             final int coordRowStartX = (this.width-(3*(50+ margin)+150))/2;

@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ImportItemScreenHandler {
 
@@ -29,7 +30,9 @@ public class ImportItemScreenHandler {
         Arrays.fill(itemSelected,false);
     }
 
-    public void initPlayerNames(File worldFolder){
+    //@return if all name requests where successful
+    public boolean initPlayerNames(File worldFolder){
+        AtomicBoolean success = new AtomicBoolean(true);
         File playerDataFolder = new File(worldFolder.getPath()+"\\playerdata");
         ArrayList<String> uuids;
         try {
@@ -48,11 +51,14 @@ public class ImportItemScreenHandler {
                         .build();
                 HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
                 playerIdNames.put(uuid,JsonHelper.deserialize(response.body()).get("name").getAsString());
-            }catch (IOException | InterruptedException e){//timeout is subclass of IO
+            }catch (IOException | InterruptedException | NullPointerException e){//timeout is subclass of IO
                 YourItemsToNewWorlds.LOGGER.error("Player name request failed.");
+                YourItemsToNewWorlds.LOGGER.error(e.getMessage());
                 playerIdNames.put(uuid,uuid);
+                success.set(false);
             }
         });
+        return success.get();
     }
 
     public void setAllSelections(boolean val){
