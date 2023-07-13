@@ -80,7 +80,7 @@ public class ItemImporter {
         return items;
     }
 
-    public static ChunkPos getChunkPosWithBiggestSurroundingVal(RegionReader regionReader, Function<ChunkPos,Integer> chunkToValFunc){
+    private static ChunkPos getChunkPosWithBiggestSurroundingVal(RegionReader regionReader, Function<ChunkPos,Integer> chunkToValFunc){
         //creating two-dimensional array of values of Chunks
         String[] regionNames = regionReader.getAllRegionFileNames();
         int smallestChunkX = Arrays.stream(regionNames).map(name -> Integer.parseInt(name.split("[.]")[1])).min(Comparator.naturalOrder()).get()*32;
@@ -127,7 +127,7 @@ public class ItemImporter {
         return containerChunk;
     }
 
-    public static ChunkPos getContainerChunkPos(RegionReader regionReader) throws NoSuchElementException{
+    private static ChunkPos getContainerChunkPos(RegionReader regionReader) throws NoSuchElementException{
         return getChunkPosWithBiggestSurroundingVal(regionReader,chunkPos -> {
             try {
                 NbtCompound chunkNbt = regionReader.getNbtAt(chunkPos);
@@ -142,7 +142,7 @@ public class ItemImporter {
         });
     }
 
-    public static ChunkPos getInhabitationChunkPos(RegionReader regionReader){
+    private static ChunkPos getInhabitationChunkPos(RegionReader regionReader){
         return getChunkPosWithBiggestSurroundingVal(regionReader,chunkPos -> {
             try {
                 NbtCompound chunkNbt = regionReader.getNbtAt(chunkPos);
