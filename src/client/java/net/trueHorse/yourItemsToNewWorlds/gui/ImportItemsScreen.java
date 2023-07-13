@@ -62,7 +62,7 @@ public class ImportItemsScreen extends Screen {
         worldPathWidget.setPlaceholder(Text.of("tempPathText"));
         worldPathWidget.setMaxLength(200);
         worldPathWidget.setText(lastWorldPathString);
-        worldPathWidget.setChangedListener(text -> updateUI(text));
+        worldPathWidget.setChangedListener(text -> onWorldPathChanged(text));
         widgets.add(worldPathWidget);
         setInitialFocus(worldPathWidget);
 
@@ -171,15 +171,15 @@ public class ImportItemsScreen extends Screen {
 
     public void generateAndDisplayGridArea(){
         int modeNumber = Arrays.asList(searchLocationDeterminationModeIDs).indexOf(searchLocationModeWidget.getValue());
-        if(modeNumber==3){
-            for(TextFieldWidget coordField:coordFields){
-                if(coordField.getText().isEmpty()){
+        if(modeNumber==3) {
+            for (TextFieldWidget coordField : coordFields) {
+                if (coordField.getText().isEmpty()) {
                     coordField.setText("0");
                 }
             }
-            handler.initImportableItemStacksWith(ItemImporter.readItemsFromOtherWorld(worldPathWidget.getText(),handler.getUuid(playerNameWidget.getValue()),modeNumber, new BlockPos(Integer.parseInt(coordFields[0].getText()),Integer.parseInt(coordFields[1].getText()),Integer.parseInt(coordFields[2].getText()))));
+            handler.initImportableItemStacks(worldPathWidget.getText(), playerNameWidget.getValue(), modeNumber, new BlockPos(Integer.parseInt(coordFields[0].getText()),Integer.parseInt(coordFields[1].getText()),Integer.parseInt(coordFields[2].getText())));
         }else{
-            handler.initImportableItemStacksWith(ItemImporter.readItemsFromOtherWorld(worldPathWidget.getText(),handler.getUuid(playerNameWidget.getValue()),modeNumber));
+            handler.initImportableItemStacks(worldPathWidget.getText(), playerNameWidget.getValue(),modeNumber);
         }
         refreshGridArea();
     }
@@ -232,8 +232,13 @@ public class ImportItemsScreen extends Screen {
         close();
     }
 
-    private void updateUI(String newTextFieldContent){
-        lastWorldPathString = newTextFieldContent;
+    private void onWorldPathChanged(String newPath){
+        handler.clearCache();
+        updateUI(newPath);
+    }
+
+    private void updateUI(String newPathFieldContent){
+        lastWorldPathString = newPathFieldContent;
         this.clearAndInit();
     }
 }

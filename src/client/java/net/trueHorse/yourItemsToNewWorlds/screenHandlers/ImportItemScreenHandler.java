@@ -2,7 +2,9 @@ package net.trueHorse.yourItemsToNewWorlds.screenHandlers;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.JsonHelper;
+import net.minecraft.util.math.BlockPos;
 import net.trueHorse.yourItemsToNewWorlds.YourItemsToNewWorlds;
+import net.trueHorse.yourItemsToNewWorlds.io.ItemImporter;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,10 +26,25 @@ public class ImportItemScreenHandler {
     private boolean[] itemSelected;
     private final Map<String,String> playerIdNames = new HashMap<>();
 
-    public void initImportableItemStacksWith(ArrayList<ItemStack> itemStacks){
-        importableItemStacks = itemStacks;
-        itemSelected = new boolean[itemStacks.size()];
-        Arrays.fill(itemSelected,false);
+    private final Map<Integer,ArrayList<ItemStack>> itemCache = new HashMap<>();
+
+    public void initImportableItemStacks(String worldPath, String playerName, int searchMode){
+        initImportableItemStacks(worldPath,playerName,searchMode,null);
+    }
+
+    public void initImportableItemStacks(String worldPath, String playerName, int searchMode, BlockPos chosenCoords){
+        if(itemCache.containsKey(searchMode)){
+            importableItemStacks=itemCache.get(searchMode);
+        }else {
+            importableItemStacks = ItemImporter.readItemsFromOtherWorld(worldPath,getUuid(playerName),searchMode,chosenCoords);
+            itemCache.put(searchMode,importableItemStacks);
+            itemSelected = new boolean[importableItemStacks.size()];
+            Arrays.fill(itemSelected, false);
+        }
+    }
+
+    public void clearCache(){
+        itemCache.clear();
     }
 
     //@return if all name requests where successful
