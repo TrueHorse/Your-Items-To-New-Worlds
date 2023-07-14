@@ -5,7 +5,6 @@ import net.minecraft.client.gui.screen.world.CreateWorldScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.GridWidget;
 import net.minecraft.text.Text;
-import net.trueHorse.yourItemsToNewWorlds.YourItemsToNewWorlds;
 import net.trueHorse.yourItemsToNewWorlds.gui.ImportItemsScreen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -22,7 +21,7 @@ public class CreateWorldScreenMoreTabMixin {
 
     @Inject(method = "<init>", at = @At("TAIL"), locals = LocalCapture.CAPTURE_FAILSOFT)
     private void addItemTransferButton(CreateWorldScreen createWorldScreen, CallbackInfo ci, GridWidget.Adder adder) {
-        adder.add(ButtonWidget.builder(Text.of("Transfertest"), button -> MinecraftClient.getInstance().setScreen(new ImportItemsScreen(field_42178, list -> YourItemsToNewWorlds.LOGGER.warn("apply")))).width(210).build());
+        adder.add(ButtonWidget.builder(Text.of("Transfertest"), button -> MinecraftClient.getInstance().setScreen(new ImportItemsScreen(field_42178, importItems -> ((WorldCreatorAccess)field_42178.getWorldCreator()).setImportItems(importItems)))).width(210).build());
     }
 
 }

@@ -11,17 +11,19 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.trueHorse.yourItemsToNewWorlds.YourItemsToNewWorlds;
-import net.trueHorse.yourItemsToNewWorlds.io.ItemImporter;
 import net.trueHorse.yourItemsToNewWorlds.screenHandlers.ImportItemScreenHandler;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 public class ImportItemsScreen extends Screen {
 
     private final Identifier textureSheet = new Identifier("your_items_to_new_worlds","textures/gui/import_items_screen.png");
-    private final Consumer<Optional<ArrayList<ItemStack>>> applier;
+    private final Consumer<ArrayList<ItemStack>> applier;
     private final String[] searchLocationDeterminationModeIDs = {"transfer_items.your_items_to_new_worlds.spawn_point",
             "transfer_items.your_items_to_new_worlds.most_item_containers",
             "transfer_items.your_items_to_new_worlds.longest_inhabitation",
@@ -42,7 +44,7 @@ public class ImportItemsScreen extends Screen {
     private String lastWorldPathString = "";
     private int gridPage = 0;
 
-    public ImportItemsScreen(Screen parent, Consumer<Optional<ArrayList<ItemStack>>> applier){
+    public ImportItemsScreen(Screen parent, Consumer<ArrayList<ItemStack>> applier){
         super(Text.translatable("transfer_items.your_items_to_new_worlds.select_transfer_items"));
         this.applier = applier;
         this.parent = parent;
@@ -228,7 +230,7 @@ public class ImportItemsScreen extends Screen {
     }
 
     public void applyAndClose(){
-        applier.accept(Optional.empty());
+        applier.accept(handler.getSelectedItems());
         close();
     }
 

@@ -17,7 +17,7 @@ import java.util.Optional;
 import java.util.OptionalLong;
 
 @Mixin(WorldCreator.class)
-public class WorldCreatorMixin extends WorldCreator{
+public class WorldCreatorMixin extends WorldCreator implements WorldCreatorAccess{
 
     ArrayList<ItemStack> importItems = new ArrayList<>();
 

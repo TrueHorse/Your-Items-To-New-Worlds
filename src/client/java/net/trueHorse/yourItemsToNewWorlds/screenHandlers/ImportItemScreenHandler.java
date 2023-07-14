@@ -78,6 +78,16 @@ public class ImportItemScreenHandler {
         return success.get();
     }
 
+    public ArrayList<ItemStack> getSelectedItems(){
+        ArrayList<ItemStack> selectedItems = new ArrayList<>();
+        for(int i=0;i<importableItemStacks.size();i++){
+            if(itemSelected[i]){
+                selectedItems.add(importableItemStacks.get(i));
+            }
+        }
+        return selectedItems;
+    }
+
     public void setAllSelections(boolean val){
         Arrays.fill(itemSelected,val);
     }
