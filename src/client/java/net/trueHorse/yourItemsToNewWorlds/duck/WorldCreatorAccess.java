@@ -1,4 +1,4 @@
-package net.trueHorse.yourItemsToNewWorlds.mixin.client;
+package net.trueHorse.yourItemsToNewWorlds.duck;
 
 import net.minecraft.item.ItemStack;
 

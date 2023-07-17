@@ -3,7 +3,8 @@
 	"package": "net.trueHorse.yourItemsToNewWorlds.mixin.client",
 	"compatibilityLevel": "JAVA_17",
 	"client": [
-		"CreateWorldScreenMoreTabMixin"
+		"CreateWorldScreenMoreTabMixin",
+		"WorldCreatorMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
