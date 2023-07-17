@@ -8,7 +8,7 @@ import net.minecraft.world.gen.feature.FeatureConfig;
 import net.minecraft.world.level.LevelProperties;
 import net.minecraft.world.level.ServerWorldProperties;
 import net.trueHorse.yourItemsToNewWorlds.duck.GeneratorOptionsAccess;
-import net.trueHorse.yourItemsToNewWorlds.feature.ImportChestFeature;
+import net.trueHorse.yourItemsToNewWorlds.feature.ImportChestsFeature;
 import net.trueHorse.yourItemsToNewWorlds.feature.YourItemsToNewWorldsFeatures;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -25,7 +25,7 @@ public class MinecraftServerMixin {
         if(debugWorld) return;
         ArrayList<ItemStack> importItems = ((GeneratorOptionsAccess)((LevelProperties)worldProperties).getGeneratorOptions()).getImportItems();
         if(!importItems.isEmpty()){
-            ImportChestFeature.importItems = importItems;
+            ImportChestsFeature.importItems = importItems;
             YourItemsToNewWorldsFeatures.importChestsFeature.generateIfValid(FeatureConfig.DEFAULT,world, world.getChunkManager().getChunkGenerator(), world.random, new BlockPos(worldProperties.getSpawnX(), worldProperties.getSpawnY(), worldProperties.getSpawnZ()));
         }
     }

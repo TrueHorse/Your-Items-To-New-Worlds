@@ -18,10 +18,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
-public class ImportChestFeature extends Feature<DefaultFeatureConfig> {
+public class ImportChestsFeature extends Feature<DefaultFeatureConfig> {
 
     public static ArrayList<ItemStack> importItems = new ArrayList<>();
-    public ImportChestFeature(Codec<DefaultFeatureConfig> configCodec) {
+    public ImportChestsFeature(Codec<DefaultFeatureConfig> configCodec) {
         super(configCodec);
     }
 
