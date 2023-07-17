@@ -60,7 +60,7 @@ public class ImportChestsFeature extends Feature<DefaultFeatureConfig> {
         int addedPositions = 0;
         for (int i = 0; i < chestStackHeight; i++) {
             for (int j = 0; j < 2; j++) {
-                blockPositions.add(new BlockPos(blockPos.getX()+j, blockPos.getY() + i, blockPos.getZ()));
+                blockPositions.add(new BlockPos(blockPos.getX()-j, blockPos.getY() + i, blockPos.getZ()));
                 addedPositions++;
                 if(addedPositions==chestCount){
                     break;
