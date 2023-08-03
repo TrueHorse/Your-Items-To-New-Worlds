@@ -60,6 +60,8 @@ public class ImportItemsScreen extends Screen {
 
         ArrayList<ClickableWidget> widgets = new ArrayList<>();
 
+        widgets.add(ButtonWidget.builder(Text.of("worlds"), button -> client.setScreen(new ImportWorldSelectionScreen(Text.of("select import world"),this,path -> worldPathWidget.setText(path.toString())))).build());
+
         worldPathWidget = new TextFieldWidget(this.textRenderer,minDistanceFromEdge,margin,this.width-2*minDistanceFromEdge,20,Text.of("tempPathText"));
         worldPathWidget.setPlaceholder(Text.of("tempPathText"));
         worldPathWidget.setMaxLength(200);
