@@ -4,8 +4,6 @@ import com.ibm.icu.text.SimpleDateFormat;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.FatalErrorScreen;
-import net.minecraft.client.gui.screen.world.CreateWorldScreen;
 import net.minecraft.client.gui.screen.world.WorldIcon;
 import net.minecraft.client.gui.widget.AlwaysSelectedEntryListWidget;
 import net.minecraft.client.input.KeyCodes;
@@ -13,11 +11,8 @@ import net.minecraft.client.texture.NativeImage;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Util;
-import net.minecraft.util.crash.CrashReport;
 import net.minecraft.util.path.SymlinkEntry;
 import net.minecraft.util.path.SymlinkValidationException;
-import net.minecraft.world.level.storage.LevelStorage;
-import net.minecraft.world.level.storage.LevelStorageException;
 import net.minecraft.world.level.storage.LevelSummary;
 import net.trueHorse.yourItemsToNewWorlds.YourItemsToNewWorlds;
 import net.trueHorse.yourItemsToNewWorlds.screenHandlers.ImportWorldSelectionScreenHandler;
@@ -30,44 +25,31 @@ import java.nio.file.LinkOption;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.*;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
+import java.util.Optional;
 
 public class ImportWorldListWidget extends AlwaysSelectedEntryListWidget<ImportWorldListWidget.Entry> {
 
-    private CompletableFuture<List<LevelSummary>> levelsFuture;
-    @Nullable
-    private List<LevelSummary> levels;
     private String search;
     private final ImportWorldSelectionScreen parent;
     private final ImportWorldSelectionScreenHandler handler;
 
-    public ImportWorldListWidget(ImportWorldSelectionScreen parent, ImportWorldSelectionScreenHandler handler, MinecraftClient minecraftClient, int width, int height, int top, int bottom, int itemHeight, String search, ImportWorldListWidget oldWidget) {
+    public ImportWorldListWidget(ImportWorldSelectionScreen parent, ImportWorldSelectionScreenHandler handler, MinecraftClient minecraftClient, int width, int height, int top, int bottom, int itemHeight, String search) {
         super(minecraftClient, width, height, top, bottom, itemHeight);
         this.setRenderBackground(false);
         this.setRenderHorizontalShadows(false);
         this.parent = parent;
         this.handler = handler;
-        this.levelsFuture = oldWidget != null ? oldWidget.levelsFuture : this.loadLevels();
         this.search = search;
-        this.show(this.tryGet());
+        this.showSummaries(search);
     }
 
     @Override
     protected void clearEntries() {
         this.children().forEach(ImportWorldListWidget.Entry::close);
         super.clearEntries();
-    }
-
-    @Nullable
-    private List<LevelSummary> tryGet() {
-        try {
-            return this.levelsFuture.getNow(null);
-        } catch (CancellationException | CompletionException runtimeException) {
-            return null;
-        }
     }
 
     @Override
@@ -82,50 +64,21 @@ public class ImportWorldListWidget extends AlwaysSelectedEntryListWidget<ImportW
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        List<LevelSummary> list = this.tryGet();
-        if (list != this.levels) {
-            this.show(list);
-        }
+        this.showSummaries(this.search);
         super.render(context, mouseX, mouseY, delta);
     }
 
-    private void show(@Nullable List<LevelSummary> levels) {
-        if (levels != null) {
-            this.showSummaries(this.search, levels);
-        }
-        this.levels = levels;
-    }
-
     public void search(String search) {
-        if (this.levels != null && !search.equals(this.search)) {
-            this.showSummaries(search, this.levels);
+        if (handler.getWorlds() != null && !search.equals(this.search)) {
+            this.showSummaries(search);
         }
         this.search = search;
     }
 
-    private CompletableFuture<List<LevelSummary>> loadLevels() {
-        LevelStorage.LevelList levelList;
-        try {
-            levelList = this.client.getLevelStorage().getLevelList();
-        } catch (LevelStorageException levelStorageException) {
-            YourItemsToNewWorlds.LOGGER.error("Couldn't load level list", levelStorageException);
-            this.showUnableToLoadScreen(levelStorageException.getMessageText());
-            return CompletableFuture.completedFuture(List.of());
-        }
-        if (levelList.isEmpty()) {
-            CreateWorldScreen.create(this.client, null);
-            return CompletableFuture.completedFuture(List.of());
-        }
-        return this.client.getLevelStorage().loadSummaries(levelList).exceptionally(throwable -> {
-            this.client.setCrashReportSupplierAndAddDetails(CrashReport.create(throwable, "Couldn't load level list"));
-            return List.of();
-        });
-    }
-
-    private void showSummaries(String search, List<LevelSummary> summaries) {
+    private void showSummaries(String search) {
         this.clearEntries();
         search = search.toLowerCase(Locale.ROOT);
-        for (LevelSummary levelSummary : summaries) {
+        for (LevelSummary levelSummary : handler.getWorlds()) {
             if (!this.shouldShow(search, levelSummary)) continue;
             this.addEntry(new ImportWorldListWidget.WorldEntry(this, levelSummary));
         }
@@ -138,10 +91,6 @@ public class ImportWorldListWidget extends AlwaysSelectedEntryListWidget<ImportW
 
     private void narrateScreenIfNarrationEnabled() {
         this.parent.narrateScreenIfNarrationEnabled(true);
-    }
-
-    private void showUnableToLoadScreen(Text message) {
-        this.client.setScreen(new FatalErrorScreen(Text.translatable("selectWorld.unable_to_load"), message));
     }
 
     @Override
@@ -244,10 +193,15 @@ public class ImportWorldListWidget extends AlwaysSelectedEntryListWidget<ImportW
 
         @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            if (this.level.isUnavailable()) {
+            ImportWorldListWidget.this.setSelected(this);
+            if (mouseX - ImportWorldListWidget.this.getRowLeft() <= 32.0) {
+                parent.applyAndClose(this.level);
                 return true;
             }
-            ImportWorldListWidget.this.setSelected(this);
+            if (Util.getMeasuringTimeMs() - this.time < 250L) {
+                parent.applyAndClose(this.level);
+                return true;
+            }
             this.time = Util.getMeasuringTimeMs();
             return true;
         }
