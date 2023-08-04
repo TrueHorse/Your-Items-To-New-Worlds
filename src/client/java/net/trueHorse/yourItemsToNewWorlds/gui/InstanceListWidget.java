@@ -22,7 +22,9 @@ public class InstanceListWidget extends ElementListWidget<InstanceListWidget.Ent
         this.setRenderBackground(false);
         this.setRenderHorizontalShadows(false);
         this.parent = parent;
-        this.addEntry(new InstanceEntry(client.runDirectory.toPath(),handler));
+        for(Path path:handler.getInstances()){
+            this.addEntry(new InstanceEntry(path,handler));
+        }
     }
 
     public void pclearEntries(){

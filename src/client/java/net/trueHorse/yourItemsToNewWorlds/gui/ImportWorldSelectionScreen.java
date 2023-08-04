@@ -4,7 +4,9 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.gui.widget.TexturedButtonWidget;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.minecraft.world.level.storage.LevelSummary;
 import net.trueHorse.yourItemsToNewWorlds.screenHandlers.ImportWorldSelectionScreenHandler;
 
@@ -15,6 +17,7 @@ public class ImportWorldSelectionScreen extends Screen {
 
     private final ImportWorldSelectionScreenHandler handler;
     private TextFieldWidget searchBox;
+    private TexturedButtonWidget addInstanceButton;
     private ImportWorldListWidget worldList;
     private InstanceListWidget instanceList;
     private ButtonWidget selectButton;
@@ -32,10 +35,20 @@ public class ImportWorldSelectionScreen extends Screen {
         clearAndInit();
     }
 
+    public void onInstancesChanged(){
+        clearAndInit();
+    }
+
     @Override
     protected void init(){
         super.init();
         this.searchBox = new TextFieldWidget(this.textRenderer, this.width / 2 - 100, 22, 200, 20, this.searchBox, Text.translatable("selectWorld.search"));
+
+        this.addInstanceButton = new TexturedButtonWidget(this.width/2+120,22,32,32,0,0, 0, new Identifier("your_items_to_new_worlds","textures/gui/plus_icon.png"),32,32,
+                button -> handler.chooseNewInstance(),Text.of("add instance"));
+        addInstanceButton.visible = handler.getSelectedInstancePath()==null;
+        this.addDrawableChild(addInstanceButton);
+
         this.worldList = new ImportWorldListWidget(this, handler, this.client, this.width, this.height, 48, this.height - 64, 36, this.searchBox.getText());
         this.instanceList = new InstanceListWidget(this.client,this, this.handler);
 

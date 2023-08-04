@@ -8,7 +8,9 @@ import net.minecraft.world.level.storage.LevelStorageException;
 import net.minecraft.world.level.storage.LevelSummary;
 import net.trueHorse.yourItemsToNewWorlds.YourItemsToNewWorlds;
 import net.trueHorse.yourItemsToNewWorlds.gui.ImportWorldSelectionScreen;
+import org.lwjgl.util.tinyfd.TinyFileDialogs;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +28,13 @@ public class ImportWorldSelectionScreenHandler {
     public ImportWorldSelectionScreenHandler(ImportWorldSelectionScreen screen){
         this.screen = screen;
         instancePaths = new ArrayList<>(List.of(MinecraftClient.getInstance().runDirectory.toPath()));
+    }
+
+    public void chooseNewInstance(){
+        String folderPath = TinyFileDialogs.tinyfd_selectFolderDialog(Text.of("Add instance folders").getString(),MinecraftClient.getInstance().runDirectory.getAbsolutePath());
+        if(folderPath != null){
+            this.addInstance(new File(folderPath).toPath());
+        }
     }
 
     public void onInstanceSelected(Path path){
@@ -51,6 +60,7 @@ public class ImportWorldSelectionScreenHandler {
 
     public void addInstance(Path instance){
         instancePaths.add(instance);
+        screen.onInstancesChanged();
     }
 
     public List<Path> getInstances(){
@@ -59,10 +69,6 @@ public class ImportWorldSelectionScreenHandler {
 
     public Path getSelectedInstancePath(){
         return selectedInstancePath;
-    }
-
-    public void setSelectedInstancePath(Path path){
-        this.selectedInstancePath = path;
     }
 
     public List<LevelSummary> getWorlds() {
