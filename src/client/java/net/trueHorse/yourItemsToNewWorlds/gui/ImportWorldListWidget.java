@@ -35,6 +35,7 @@ public class ImportWorldListWidget extends AlwaysSelectedEntryListWidget<ImportW
     private String search;
     private final ImportWorldSelectionScreen parent;
     private final ImportWorldSelectionScreenHandler handler;
+    private boolean listRendered = false;
 
     public ImportWorldListWidget(ImportWorldSelectionScreen parent, ImportWorldSelectionScreenHandler handler, MinecraftClient minecraftClient, int width, int height, int top, int bottom, int itemHeight, String search) {
         super(minecraftClient, width, height, top, bottom, itemHeight);
@@ -71,7 +72,10 @@ public class ImportWorldListWidget extends AlwaysSelectedEntryListWidget<ImportW
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        this.showSummaries(this.search);
+        if(!listRendered){
+            this.showSummaries(this.search);
+            listRendered = true;
+        }
         super.render(context, mouseX, mouseY, delta);
     }
 
