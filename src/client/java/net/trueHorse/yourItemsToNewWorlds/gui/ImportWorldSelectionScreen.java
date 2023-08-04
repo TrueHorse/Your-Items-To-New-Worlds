@@ -6,7 +6,6 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.Text;
 import net.minecraft.world.level.storage.LevelSummary;
-import net.trueHorse.yourItemsToNewWorlds.YourItemsToNewWorlds;
 import net.trueHorse.yourItemsToNewWorlds.screenHandlers.ImportWorldSelectionScreenHandler;
 
 import java.nio.file.Path;
@@ -49,11 +48,13 @@ public class ImportWorldSelectionScreen extends Screen {
         }
 
         this.addSelectableChild(this.searchBox);
-        this.selectButton = this.addDrawableChild(ButtonWidget.builder(Text.translatable("selectWorld.select"), button -> YourItemsToNewWorlds.LOGGER.info("select")).dimensions(this.width / 2 - 154, this.height - 52, 150, 20).build());
+        this.selectButton = this.addDrawableChild(ButtonWidget.builder(Text.translatable("selectWorld.select"), button -> applyWithSelected()).dimensions(this.width / 2 - 154, this.height - 52, 150, 20).build());
+        this.selectButton.active = handler.getSelectedWorld()!=null;
     }
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+        this.renderBackground(context);
         if(handler.getSelectedInstancePath()==null){
             this.instanceList.render(context, mouseX, mouseY, delta);
         }else{
@@ -69,6 +70,14 @@ public class ImportWorldSelectionScreen extends Screen {
         this.client.setScreen(parent);
     }
 
+    public void onWorldSelected(){
+        selectButton.active = true;
+    }
+
+    public void applyWithSelected(){
+        applyAndClose(handler.getSelectedWorld());
+    }
+
     public void applyAndClose(int worldIndex){
         applier.accept(handler.getPathOfWorld(worldIndex));
         close();
@@ -76,5 +85,6 @@ public class ImportWorldSelectionScreen extends Screen {
 
     public void applyAndClose(LevelSummary worldSummary){
         applier.accept(handler.getPathOfWorld(worldSummary));
+        close();
     }
 }

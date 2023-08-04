@@ -63,6 +63,13 @@ public class ImportWorldListWidget extends AlwaysSelectedEntryListWidget<ImportW
     }
 
     @Override
+    public void setSelected(Entry entry){
+        super.setSelected(entry);
+        handler.setSelectedWorld(((WorldEntry)entry).level);
+        parent.onWorldSelected();
+    }
+
+    @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         this.showSummaries(this.search);
         super.render(context, mouseX, mouseY, delta);

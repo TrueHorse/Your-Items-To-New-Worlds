@@ -1,5 +1,6 @@
 package net.trueHorse.yourItemsToNewWorlds.screenHandlers;
 
+import com.google.gson.JsonParseException;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.JsonHelper;
 import net.minecraft.util.math.BlockPos;
@@ -68,7 +69,7 @@ public class ImportItemScreenHandler {
                         .build();
                 HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
                 playerIdNames.put(uuid,JsonHelper.deserialize(response.body()).get("name").getAsString());
-            }catch (IOException | InterruptedException | NullPointerException e){//timeout is subclass of IO
+            }catch (IOException | InterruptedException | NullPointerException | JsonParseException e){//timeout is subclass of IO
                 YourItemsToNewWorlds.LOGGER.error("Player name request failed.");
                 YourItemsToNewWorlds.LOGGER.error(e.getMessage());
                 playerIdNames.put(uuid,uuid);

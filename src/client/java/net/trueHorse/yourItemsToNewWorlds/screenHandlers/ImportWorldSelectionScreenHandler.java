@@ -21,6 +21,8 @@ public class ImportWorldSelectionScreenHandler {
     private final List<Path> instancePaths;
     private Path selectedInstancePath = null;
 
+    private LevelSummary selectedWorld;
+
     public ImportWorldSelectionScreenHandler(ImportWorldSelectionScreen screen){
         this.screen = screen;
         instancePaths = new ArrayList<>(List.of(MinecraftClient.getInstance().runDirectory.toPath()));
@@ -40,11 +42,11 @@ public class ImportWorldSelectionScreenHandler {
     }
 
     public Path getPathOfWorld(int index){
-        return selectedInstancePath.resolve("saves"+worlds.get(index).getName());
+        return selectedInstancePath.resolve("saves/"+worlds.get(index).getName());
     }
 
     public Path getPathOfWorld(LevelSummary summary){
-        return selectedInstancePath.resolve("saves"+summary.getName());
+        return selectedInstancePath.resolve("saves/"+summary.getName());
     }
 
     public void addInstance(Path instance){
@@ -69,5 +71,13 @@ public class ImportWorldSelectionScreenHandler {
 
     public void setWorlds(List<LevelSummary> worlds) {
         this.worlds = worlds;
+    }
+
+    public LevelSummary getSelectedWorld() {
+        return selectedWorld;
+    }
+
+    public void setSelectedWorld(LevelSummary selectedWorld) {
+        this.selectedWorld = selectedWorld;
     }
 }
