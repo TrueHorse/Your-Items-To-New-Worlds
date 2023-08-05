@@ -21,11 +21,11 @@ public class ImportWorldSelectionScreenHandler {
 
     private final ImportWorldSelectionScreen screen;
     private List<LevelSummary> worlds = new ArrayList<>();
-    private List<Path> instancePaths;
+    private final List<Path> instancePaths;
     private Path selectedInstancePath = null;
-    private final InstancesFileIO instancesFileIO = new InstancesFileIO();
-
     private LevelSummary selectedWorld;
+    private final InstancesFileIO instancesFileIO = new InstancesFileIO();
+    private Path lastAddedInstance;
 
     public ImportWorldSelectionScreenHandler(ImportWorldSelectionScreen screen){
         this.screen = screen;
@@ -33,9 +33,11 @@ public class ImportWorldSelectionScreenHandler {
     }
 
     public void chooseNewInstance(){
-        String folderPath = TinyFileDialogs.tinyfd_selectFolderDialog(Text.of("Add instance folder").getString(),MinecraftClient.getInstance().runDirectory.getAbsolutePath());
+        String folderPath = TinyFileDialogs.tinyfd_selectFolderDialog(Text.of("Add instance folder").getString(),lastAddedInstance==null ? MinecraftClient.getInstance().runDirectory.getAbsolutePath():lastAddedInstance.toString());
         if(folderPath != null){
-            this.addInstance(new File(folderPath).toPath());
+            Path instancePath = new File(folderPath).toPath();
+            this.addInstance(instancePath);
+            lastAddedInstance = instancePath;
         }
         instancesFileIO.saveInstances(instancePaths);
     }
