@@ -10,9 +10,11 @@ import net.trueHorse.yourItemsToNewWorlds.YourItemsToNewWorlds;
 import net.trueHorse.yourItemsToNewWorlds.gui.ImportWorldSelectionScreen;
 import org.lwjgl.util.tinyfd.TinyFileDialogs;
 
-import java.io.File;
+import java.io.*;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -20,20 +22,66 @@ public class ImportWorldSelectionScreenHandler {
 
     private final ImportWorldSelectionScreen screen;
     private List<LevelSummary> worlds = new ArrayList<>();
-    private final List<Path> instancePaths;
+    private List<Path> instancePaths;
     private Path selectedInstancePath = null;
+    private static final Path INSTANCES_FILE_PATH = MinecraftClient.getInstance().runDirectory.toPath().resolve("config/Your Items to New Worlds/instances.txt");
+    private static final Path CURRENT_INSTANCE_PATH = MinecraftClient.getInstance().runDirectory.toPath();
 
     private LevelSummary selectedWorld;
 
     public ImportWorldSelectionScreenHandler(ImportWorldSelectionScreen screen){
         this.screen = screen;
-        instancePaths = new ArrayList<>(List.of(MinecraftClient.getInstance().runDirectory.toPath()));
+        loadInstances();
     }
 
     public void chooseNewInstance(){
         String folderPath = TinyFileDialogs.tinyfd_selectFolderDialog(Text.of("Add instance folder").getString(),MinecraftClient.getInstance().runDirectory.getAbsolutePath());
         if(folderPath != null){
             this.addInstance(new File(folderPath).toPath());
+        }
+        saveInstances();
+    }
+
+    public void saveInstances(){
+       File instancesFile = INSTANCES_FILE_PATH.toFile();
+
+       if(!instancesFile.getParentFile().exists()){
+           instancesFile.getParentFile().mkdirs();
+       }
+
+       StringBuilder builder = new StringBuilder();
+       builder.append(instancePaths.isEmpty() ? "":instancePaths.get(0));
+       for(int i = 1; i<instancePaths.size();i++){
+           builder.append(',').append(instancePaths.get(i));
+       }
+
+        try {
+            FileWriter confWriter = new FileWriter(instancesFile);
+            confWriter.write(builder.toString());
+            confWriter.close();
+        } catch (IOException e) {
+            YourItemsToNewWorlds.LOGGER.error("Saving instances failed.");
+            e.printStackTrace();
+        }
+    }
+
+    public void loadInstances(){
+        instancePaths = new ArrayList<>();
+        if(!INSTANCES_FILE_PATH.toFile().exists()){
+            instancePaths.add(CURRENT_INSTANCE_PATH);
+        }else {
+            String pathsString;
+            try {
+                pathsString = Files.readAllLines(INSTANCES_FILE_PATH).get(0);
+            } catch (IOException e) {
+                YourItemsToNewWorlds.LOGGER.error("Failed to load instances.");
+                e.printStackTrace();
+                instancePaths.add(CURRENT_INSTANCE_PATH);
+                return;
+            }
+
+            String[] paths = pathsString.split(",");
+            Arrays.stream(paths).map(path -> new File(path).toPath()).forEach(instancePaths::add);
         }
     }
 
