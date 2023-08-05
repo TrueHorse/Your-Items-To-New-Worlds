@@ -18,7 +18,7 @@ public class InstanceListWidget extends ElementListWidget<InstanceListWidget.Ent
     private final ImportWorldSelectionScreen parent;
 
     public InstanceListWidget(MinecraftClient client, ImportWorldSelectionScreen parent, ImportWorldSelectionScreenHandler handler) {
-        super(client, parent.width + 45, parent.height, 45, parent.height - 32, 20);
+        super(client, parent.width+65, parent.height, 50, parent.height - 39, 20);
         this.setRenderBackground(false);
         this.setRenderHorizontalShadows(false);
         this.parent = parent;
