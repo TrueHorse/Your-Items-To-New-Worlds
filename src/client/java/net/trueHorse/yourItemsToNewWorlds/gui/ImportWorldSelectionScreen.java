@@ -44,7 +44,7 @@ public class ImportWorldSelectionScreen extends Screen {
         super.init();
         this.searchBox = new TextFieldWidget(this.textRenderer, this.width / 2 - 100, 22, 200, 20, this.searchBox, Text.translatable("selectWorld.search"));
 
-        this.addInstanceButton = new TexturedButtonWidget(this.width/2+120,22,32,32,0,0, 0, new Identifier("your_items_to_new_worlds","textures/gui/plus_icon.png"),32,32,
+        this.addInstanceButton = new TexturedButtonWidget(this.width/2+105,22,20,20,0,0, 20, new Identifier("your_items_to_new_worlds","textures/gui/plus_button.png"),20,40,
                 button -> handler.chooseNewInstance(),Text.of("add instance"));
         addInstanceButton.visible = handler.getSelectedInstancePath()==null;
         this.addDrawableChild(addInstanceButton);
