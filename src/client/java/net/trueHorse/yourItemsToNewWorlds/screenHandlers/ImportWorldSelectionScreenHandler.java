@@ -29,7 +29,7 @@ public class ImportWorldSelectionScreenHandler {
 
     public ImportWorldSelectionScreenHandler(ImportWorldSelectionScreen screen){
         this.screen = screen;
-        instancesFileIO.loadInstances();
+        instancePaths = instancesFileIO.loadInstances();
     }
 
     public void chooseNewInstance(){
