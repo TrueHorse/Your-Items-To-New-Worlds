@@ -9,6 +9,7 @@ import net.minecraft.world.level.storage.LevelSummary;
 import net.trueHorse.yourItemsToNewWorlds.YourItemsToNewWorlds;
 import net.trueHorse.yourItemsToNewWorlds.gui.ImportWorldSelectionScreen;
 import net.trueHorse.yourItemsToNewWorlds.io.InstancesFileIO;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.util.tinyfd.TinyFileDialogs;
 
 import java.io.File;
@@ -44,16 +45,19 @@ public class ImportWorldSelectionScreenHandler {
 
 
 
-    public void onInstanceSelected(Path path){
+    public void onInstanceSelected(@Nullable Path path){
         selectedInstancePath = path;
-        LevelStorage levelStorage = new LevelStorage(path.resolve("saves"),path.resolve("backups"),LevelStorage.createSymlinkFinder(path.resolve("allowed_symlinks.txt")),MinecraftClient.getInstance().getDataFixer());
-        try {
-            worlds = levelStorage.loadSummaries(levelStorage.getLevelList()).get();
-        } catch (LevelStorageException | InterruptedException | ExecutionException e) {
-            YourItemsToNewWorlds.LOGGER.error("Couldn't load level list.");
-            MinecraftClient.getInstance().setScreen(new FatalErrorScreen(Text.translatable("selectWorld.unable_to_load"), Text.of(e.getMessage())));
-            worlds = new ArrayList<>();
+        if(path!=null){
+            LevelStorage levelStorage = new LevelStorage(path.resolve("saves"),path.resolve("backups"),LevelStorage.createSymlinkFinder(path.resolve("allowed_symlinks.txt")),MinecraftClient.getInstance().getDataFixer());
+            try {
+                worlds = levelStorage.loadSummaries(levelStorage.getLevelList()).get();
+            } catch (LevelStorageException | InterruptedException | ExecutionException e) {
+                YourItemsToNewWorlds.LOGGER.error("Couldn't load level list.");
+                MinecraftClient.getInstance().setScreen(new FatalErrorScreen(Text.translatable("selectWorld.unable_to_load"), Text.of(e.getMessage())));
+                worlds = new ArrayList<>();
+            }
         }
+
         screen.onSelectedInstanceChanged();
     }
 

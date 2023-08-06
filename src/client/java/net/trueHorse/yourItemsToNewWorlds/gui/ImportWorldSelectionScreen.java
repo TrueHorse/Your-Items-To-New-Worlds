@@ -65,7 +65,12 @@ public class ImportWorldSelectionScreen extends Screen {
         this.addSelectableChild(this.searchBox);
         this.selectButton = this.addDrawableChild(ButtonWidget.builder(Text.translatable("selectWorld.title"), button -> applyWithSelected()).dimensions(this.width / 2 - 154, this.height - 29, 150, 20).build());
         this.selectButton.active = handler.getSelectedWorld()!=null;
-        this.addDrawableChild(ButtonWidget.builder(Text.translatable("gui.cancel"), button -> close()).dimensions(this.width / 2 + 5, this.height-29, 150, 20).build());
+
+        ButtonWidget cancelButton = this.addDrawableChild(ButtonWidget.builder(Text.translatable("gui.cancel"), button -> close()).dimensions(this.width / 2 + 5, this.height-29, 150, 20).build());
+        cancelButton.visible = handler.getSelectedInstancePath()==null;
+
+        ButtonWidget backButton = this.addDrawableChild(ButtonWidget.builder(Text.translatable("gui.back"), button -> handler.onInstanceSelected(null)).dimensions(this.width / 2 + 5, this.height-29, 150, 20).build());
+        backButton.visible = handler.getSelectedInstancePath()!=null;
     }
 
     @Override
