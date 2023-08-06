@@ -1,4 +1,6 @@
 {
+  "selectWorld.your_items_to_new_worlds.import_items": "Import Items",
+
   "transfer_items.your_items_to_new_worlds.spawn_point": "Spawn Point",
   "transfer_items.your_items_to_new_worlds.most_item_containers": "Most Item Containers",
   "transfer_items.your_items_to_new_worlds.longest_inhabitation": "Longest Inhabitation",
@@ -9,5 +11,9 @@
   "transfer_items.your_items_to_new_worlds.select_all": "Select All",
   "transfer_items.your_items_to_new_worlds.no_items_found": "No items found.",
   "transfer_items.your_items_to_new_worlds.mode_button_explanation": "Search the area that has:",
-  "transfer_items.your_items_to_new_worlds.player_button_explanation": "Include Inventory and Ender Chest of that player."
+  "transfer_items.your_items_to_new_worlds.player_button_explanation": "Include Inventory and Ender Chest of that player.",
+  "transfer_items.your_items_to_new_worlds.no_world_selected": "-- No World Selected --",
+  "transfer_items.your_items_to_new_worlds.add_instance": "Add Instance",
+
+  "narrator.your_items_to_new_worlds.remove_instance": "Remove Instance %s"
 }

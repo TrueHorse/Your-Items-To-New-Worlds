@@ -60,8 +60,6 @@ public class ImportItemsScreen extends Screen {
 
         ArrayList<ClickableWidget> widgets = new ArrayList<>();
 
-        widgets.add(ButtonWidget.builder(Text.of("worlds"), button -> client.setScreen(new ImportWorldSelectionScreen(Text.of("select import world"),this,path -> worldPathWidget.setText(path.toString())))).build());
-
         worldPathWidget = new TextFieldWidget(this.textRenderer,minDistanceFromEdge,margin,this.width-2*minDistanceFromEdge,20,Text.of("tempPathText"));
         worldPathWidget.setPlaceholder(Text.of("tempPathText"));
         worldPathWidget.setMaxLength(200);
@@ -69,6 +67,8 @@ public class ImportItemsScreen extends Screen {
         worldPathWidget.setChangedListener(text -> onWorldPathChanged(text));
         widgets.add(worldPathWidget);
         setInitialFocus(worldPathWidget);
+
+        widgets.add(ButtonWidget.builder(Objects.equals(worldPathWidget.getText(), "") ?Text.translatable("transfer_items.your_items_to_new_worlds.no_world_selected"):Text.of(worldPathWidget.getText()), button -> client.setScreen(new ImportWorldSelectionScreen(Text.of("select import world"),this, path -> worldPathWidget.setText(path.toString())))).build());
 
         File potentialWorldPath = new File(worldPathWidget.getText());
         YourItemsToNewWorlds.LOGGER.warn(String.valueOf(potentialWorldPath.exists()));
@@ -88,7 +88,7 @@ public class ImportItemsScreen extends Screen {
 
             final int coordRowStartX = (this.width-(3*(50+ margin)+150))/2;
             final int coordRowY = playerNameWidget.getY()+playerNameWidget.getHeight()+ margin;
-            searchLocationModeWidget = CyclingButtonWidget.<String>builder(Text::translatable).values(searchLocationDeterminationModeIDs).build(coordRowStartX,coordRowY,150,20,Text.of("tempLocationModeText"),
+            searchLocationModeWidget = CyclingButtonWidget.<String>builder(Text::translatable).values(searchLocationDeterminationModeIDs).build(coordRowStartX,coordRowY,150,20,Text.of(""),
                     (button,val)->{
                 button.setMessage(Text.translatable(val));
                 setCoordFieldsEditability(Objects.equals(val, searchLocationDeterminationModeIDs[3]));

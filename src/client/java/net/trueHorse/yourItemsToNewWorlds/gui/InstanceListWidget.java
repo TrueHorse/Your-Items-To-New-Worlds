@@ -9,7 +9,6 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ElementListWidget;
 import net.minecraft.client.gui.widget.TexturedButtonWidget;
 import net.minecraft.text.Text;
-import net.minecraft.world.level.storage.LevelSummary;
 import net.trueHorse.yourItemsToNewWorlds.screenHandlers.ImportWorldSelectionScreenHandler;
 
 import java.nio.file.Path;
@@ -64,7 +63,7 @@ public class InstanceListWidget extends ElementListWidget<InstanceListWidget.Ent
             instanceButton.setMessage(Text.of(instanceName));
 
             deleteButton = new TexturedButtonWidget(0,0,20,20,20,0,20, ImportWorldSelectionScreen.BUTTON_TEXTURE_SHEET,40,40,
-                    button -> handler.removeInstance(instancePath),Text.of("Remove instance "+instanceName));
+                    button -> handler.removeInstance(instancePath),Text.translatable("narrator.your_items_to_new_worlds.remove_instance",instanceName));
         }
 
         @Override

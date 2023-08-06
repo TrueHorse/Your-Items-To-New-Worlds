@@ -34,7 +34,7 @@ public class ImportWorldSelectionScreenHandler {
     }
 
     public void chooseNewInstance(){
-        String folderPath = TinyFileDialogs.tinyfd_selectFolderDialog(Text.of("Add instance folder").getString(),lastAddedInstance==null ? MinecraftClient.getInstance().runDirectory.getAbsolutePath():lastAddedInstance.toString());
+        String folderPath = TinyFileDialogs.tinyfd_selectFolderDialog(Text.translatable("transfer_items.your_items_to_new_worlds.add_instance").getString(),lastAddedInstance==null ? MinecraftClient.getInstance().runDirectory.getAbsolutePath():lastAddedInstance.toString());
         if(folderPath != null){
             Path instancePath = new File(folderPath).toPath();
             this.addInstance(instancePath);
