@@ -2,6 +2,7 @@ package net.trueHorse.yourItemsToNewWorlds.gui;
 
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.TexturedButtonWidget;
@@ -47,6 +48,7 @@ public class ImportWorldSelectionScreen extends Screen {
         this.addInstanceButton = new TexturedButtonWidget(this.width/2+105,22,20,20,0,0, 20, new Identifier("your_items_to_new_worlds","textures/gui/plus_button.png"),20,40,
                 button -> handler.chooseNewInstance(),Text.of("add instance"));
         addInstanceButton.visible = handler.getSelectedInstancePath()==null;
+        addInstanceButton.setTooltip(Tooltip.of(Text.of("Add Instance")));
         this.addDrawableChild(addInstanceButton);
 
         this.worldList = new ImportWorldListWidget(this, handler, this.client, this.width, this.height, 48, this.height - 64, 36, this.searchBox.getText());
