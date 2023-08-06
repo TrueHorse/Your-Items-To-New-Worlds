@@ -13,6 +13,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -26,18 +27,18 @@ public class ImportItemScreenHandler {
     private ArrayList<ItemStack> importableItemStacks = new ArrayList<>();
     private boolean[] itemSelected;
     private final Map<String,String> playerIdNames = new HashMap<>();
-
     private final Map<Integer,ArrayList<ItemStack>> itemCache = new HashMap<>();
+    private Path selectedWorldPath;
 
-    public void initImportableItemStacks(String worldPath, String playerName, int searchMode){
-        initImportableItemStacks(worldPath,playerName,searchMode,null);
+    public void initImportableItemStacks(String playerName, int searchMode){
+        initImportableItemStacks(playerName,searchMode,null);
     }
 
-    public void initImportableItemStacks(String worldPath, String playerName, int searchMode, BlockPos chosenCoords){
+    public void initImportableItemStacks(String playerName, int searchMode, BlockPos chosenCoords){
         if(itemCache.containsKey(searchMode)){
             importableItemStacks=itemCache.get(searchMode);
         }else {
-            importableItemStacks = ItemImporter.readItemsFromOtherWorld(worldPath,getUuid(playerName),searchMode,chosenCoords);
+            importableItemStacks = ItemImporter.readItemsFromOtherWorld(selectedWorldPath,getUuid(playerName),searchMode,chosenCoords);
             itemCache.put(searchMode,importableItemStacks);
             itemSelected = new boolean[importableItemStacks.size()];
             Arrays.fill(itemSelected, false);
@@ -49,9 +50,9 @@ public class ImportItemScreenHandler {
     }
 
     //@return if all name requests where successful
-    public boolean initPlayerNames(File worldFolder){
+    public boolean initPlayerNames(){
         AtomicBoolean success = new AtomicBoolean(true);
-        File playerDataFolder = new File(worldFolder.getPath()+"\\playerdata");
+        File playerDataFolder = new File(selectedWorldPath+"\\playerdata");
         ArrayList<String> uuids;
         try {
             uuids = new ArrayList<>(Arrays.stream(playerDataFolder.list()).map(name -> name.substring(0,name.lastIndexOf("."))).toList());
@@ -121,5 +122,13 @@ public class ImportItemScreenHandler {
 
     public boolean[] getItemSelected() {
         return itemSelected;
+    }
+
+    public Path getSelectedWorldPath() {
+        return selectedWorldPath;
+    }
+
+    public void setSelectedWorldPath(Path selectedWorldPath) {
+        this.selectedWorldPath = selectedWorldPath;
     }
 }

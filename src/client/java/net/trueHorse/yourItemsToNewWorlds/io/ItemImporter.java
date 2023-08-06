@@ -11,6 +11,7 @@ import org.apache.commons.lang3.NotImplementedException;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -19,16 +20,16 @@ import java.util.function.Function;
 
 public class ItemImporter {
 
-    public static ArrayList<ItemStack> readItemsFromOtherWorld(String worldPath,String playerUuid,int searchLocationDetermMode){
+    public static ArrayList<ItemStack> readItemsFromOtherWorld(Path worldPath,String playerUuid,int searchLocationDetermMode){
         return readItemsFromOtherWorld(worldPath,playerUuid,searchLocationDetermMode,null);
     }
 
-    public static ArrayList<ItemStack> readItemsFromOtherWorld(String worldPath,String playerUuid, int searchLocationDetermMode, BlockPos chosenPos) {
+    public static ArrayList<ItemStack> readItemsFromOtherWorld(Path worldPath, String playerUuid, int searchLocationDetermMode, BlockPos chosenPos) {
         ArrayList<ItemStack> items = new ArrayList<>();
 
         NbtCompound playerNbt = null;
 
-        File file = new File(worldPath + "\\playerdata", playerUuid + ".dat");
+        File file = worldPath.resolve("playerdata/"+ playerUuid + ".dat").toFile();
         if (file.exists() && file.isFile()) {
             try {
                 playerNbt = NbtIo.readCompressed(file);
@@ -45,7 +46,7 @@ public class ItemImporter {
         items.addAll(playerNbt.getList("Inventory", 10).stream().map(nbt -> ItemStack.fromNbt((NbtCompound)nbt)).filter(stack -> !stack.isEmpty()).toList());
         items.addAll(playerNbt.getList("EnderItems", 10).stream().map(nbt -> ItemStack.fromNbt((NbtCompound)nbt)).filter(stack -> !stack.isEmpty()).toList());
 
-        RegionReader regionReader = new RegionReader(new File(worldPath + "\\region").toPath(), false);
+        RegionReader regionReader = new RegionReader(worldPath.resolve("region"), false);
         ChunkPos centerChunkPos;
         try {
             centerChunkPos = switch (searchLocationDetermMode) {

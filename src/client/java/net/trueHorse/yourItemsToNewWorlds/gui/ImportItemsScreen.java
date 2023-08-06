@@ -10,10 +10,8 @@ import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.trueHorse.yourItemsToNewWorlds.YourItemsToNewWorlds;
 import net.trueHorse.yourItemsToNewWorlds.screenHandlers.ImportItemScreenHandler;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -28,7 +26,7 @@ public class ImportItemsScreen extends Screen {
             "transfer_items.your_items_to_new_worlds.most_item_containers",
             "transfer_items.your_items_to_new_worlds.longest_inhabitation",
             "transfer_items.your_items_to_new_worlds.coordinates"};
-    private TextFieldWidget worldPathWidget;
+    private ButtonWidget selectWorldButton;
     private CyclingButtonWidget<String> playerNameWidget;
     private CyclingButtonWidget<String> searchLocationModeWidget;
     private final TextFieldWidget[] coordFields = new TextFieldWidget[3];
@@ -60,23 +58,14 @@ public class ImportItemsScreen extends Screen {
 
         ArrayList<ClickableWidget> widgets = new ArrayList<>();
 
-        worldPathWidget = new TextFieldWidget(this.textRenderer,minDistanceFromEdge,margin,this.width-2*minDistanceFromEdge,20,Text.of("tempPathText"));
-        worldPathWidget.setPlaceholder(Text.of("tempPathText"));
-        worldPathWidget.setMaxLength(200);
-        worldPathWidget.setText(lastWorldPathString);
-        worldPathWidget.setChangedListener(text -> onWorldPathChanged(text));
-        widgets.add(worldPathWidget);
-        setInitialFocus(worldPathWidget);
+        selectWorldButton = ButtonWidget.builder(handler.getSelectedWorldPath()==null ?Text.translatable("transfer_items.your_items_to_new_worlds.no_world_selected"):Text.of(handler.getSelectedWorldPath().getFileName().toString()),
+                button -> client.setScreen(new ImportWorldSelectionScreen(Text.of("select import world"),this, path -> handler.setSelectedWorldPath(path)))).dimensions(minDistanceFromEdge,margin,this.width-2*minDistanceFromEdge,20).build();
+        widgets.add(selectWorldButton);
 
-        widgets.add(ButtonWidget.builder(Objects.equals(worldPathWidget.getText(), "") ?Text.translatable("transfer_items.your_items_to_new_worlds.no_world_selected"):Text.of(worldPathWidget.getText()), button -> client.setScreen(new ImportWorldSelectionScreen(Text.of("select import world"),this, path -> worldPathWidget.setText(path.toString())))).build());
+        if(handler.getSelectedWorldPath()!=null){
+            boolean successfulNameRequests = handler.initPlayerNames();
 
-        File potentialWorldPath = new File(worldPathWidget.getText());
-        YourItemsToNewWorlds.LOGGER.warn(String.valueOf(potentialWorldPath.exists()));
-        if(potentialWorldPath.exists()){
-            //TODO user-friendly world selection
-            boolean successfulNameRequests = handler.initPlayerNames(potentialWorldPath);
-
-            playerNameWidget = CyclingButtonWidget.builder(Text::of).values(handler.getPlayerNames()).build(this.width/2-50,worldPathWidget.getY()+worldPathWidget.getHeight()+ margin,100,20,Text.translatable("transfer_items.your_items_to_new_worlds.player_name"),
+            playerNameWidget = CyclingButtonWidget.builder(Text::of).values(handler.getPlayerNames()).build(this.width/2-50,selectWorldButton.getY()+selectWorldButton.getHeight()+ margin,100,20,Text.translatable("transfer_items.your_items_to_new_worlds.player_name"),
                     (button,val)-> button.setMessage(Text.of(val)));
             playerNameWidget.setMessage(Text.of(playerNameWidget.getValue()));
             if(!successfulNameRequests){
@@ -132,8 +121,7 @@ public class ImportItemsScreen extends Screen {
                 for(int j=0;j<itemColumns;j++){
                     TexturedItemButtonWidget selectButton = new TexturedItemButtonWidget(minDistanceFromEdge +12+additionalGridXMargin+j*25,searchButton.getY()+searchButton.getHeight()+ margin +additionalGridYMargin+i*25,25,25,27,0,25,textureSheet,
                             button -> {((TexturedItemButtonWidget)button).toggle();
-                            handler.toggleSelection(itemSelectButtons.indexOf(button)+gridPage*itemSelectButtons.size());
-                            YourItemsToNewWorlds.LOGGER.warn("pressed item "+((TexturedItemButtonWidget)button).itemStack);},ItemStack.EMPTY);
+                            handler.toggleSelection(itemSelectButtons.indexOf(button)+gridPage*itemSelectButtons.size());},ItemStack.EMPTY);
                     selectButton.visible = false;
                     itemSelectButtons.add(selectButton);
                 }
@@ -181,9 +169,9 @@ public class ImportItemsScreen extends Screen {
                     coordField.setText("0");
                 }
             }
-            handler.initImportableItemStacks(worldPathWidget.getText(), playerNameWidget.getValue(), modeNumber, new BlockPos(Integer.parseInt(coordFields[0].getText()),Integer.parseInt(coordFields[1].getText()),Integer.parseInt(coordFields[2].getText())));
+            handler.initImportableItemStacks(playerNameWidget.getValue(), modeNumber, new BlockPos(Integer.parseInt(coordFields[0].getText()),Integer.parseInt(coordFields[1].getText()),Integer.parseInt(coordFields[2].getText())));
         }else{
-            handler.initImportableItemStacks(worldPathWidget.getText(), playerNameWidget.getValue(),modeNumber);
+            handler.initImportableItemStacks(playerNameWidget.getValue(),modeNumber);
         }
         refreshGridArea();
     }
@@ -219,11 +207,6 @@ public class ImportItemsScreen extends Screen {
     public void render(DrawContext context, int mouseX, int mouseY, float delta){
         renderBackground(context);
         super.render(context,mouseX,mouseY,delta);
-    }
-
-    @Override
-    public void tick(){
-        worldPathWidget.tick();
     }
 
     @Override
