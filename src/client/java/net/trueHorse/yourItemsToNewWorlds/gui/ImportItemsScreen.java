@@ -160,8 +160,8 @@ public class ImportItemsScreen extends Screen {
             widgets.add(noItemsTextWidget);
         }
 
-        widgets.add(addDrawableChild(ButtonWidget.builder(Text.translatable("controls.resetAll"), button -> close()).dimensions(this.width / 2 - 155, this.height-29, 150, 20).build()));
-        widgets.add(ButtonWidget.builder(ScreenTexts.DONE, button -> applyAndClose()).dimensions(this.width / 2 - 155 + 160, this.height-29, 150, 20).build());
+        widgets.add(addDrawableChild(ButtonWidget.builder(Text.translatable("gui.cancel"), button -> close()).dimensions(this.width / 2 + 5, this.height-29, 150, 20).build()));
+        widgets.add(ButtonWidget.builder(ScreenTexts.DONE, button -> applyAndClose()).dimensions(this.width / 2 - 155, this.height-29, 150, 20).build());
 
         widgets.forEach(this::addDrawableChild);
     }
