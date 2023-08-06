@@ -7,6 +7,7 @@ import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.Selectable;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ElementListWidget;
+import net.minecraft.client.gui.widget.TexturedButtonWidget;
 import net.minecraft.text.Text;
 import net.minecraft.world.level.storage.LevelSummary;
 import net.trueHorse.yourItemsToNewWorlds.screenHandlers.ImportWorldSelectionScreenHandler;
@@ -55,11 +56,15 @@ public class InstanceListWidget extends ElementListWidget<InstanceListWidget.Ent
             extends InstanceListWidget.Entry{
 
         private final ButtonWidget instanceButton;
+        private final TexturedButtonWidget deleteButton;
 
         public InstanceEntry(Path instancePath, ImportWorldSelectionScreenHandler handler){
             String instanceName = instancePath.getFileName().toString();
             instanceButton = ButtonWidget.builder(Text.of(instanceName),button -> handler.onInstanceSelected(instancePath)).dimensions(0,0,150,20).build();
             instanceButton.setMessage(Text.of(instanceName));
+
+            deleteButton = new TexturedButtonWidget(0,0,20,20,20,0,20, ImportWorldSelectionScreen.BUTTON_TEXTURE_SHEET,40,40,
+                    button -> handler.removeInstance(instancePath),Text.of("Remove instance "+instanceName));
         }
 
         @Override
@@ -67,16 +72,22 @@ public class InstanceListWidget extends ElementListWidget<InstanceListWidget.Ent
             instanceButton.setX(x);
             instanceButton.setY(y);
             instanceButton.render(context,mouseX,mouseY,tickDelta);
+
+            if(this.isMouseOver(mouseX,mouseY)){
+                deleteButton.setX(x+instanceButton.getWidth()+5);
+                deleteButton.setY(y);
+                deleteButton.render(context,mouseX,mouseY,tickDelta);
+            }
         }
 
         @Override
         public List<? extends Selectable> selectableChildren() {
-            return ImmutableList.of(instanceButton);
+            return ImmutableList.of(instanceButton,deleteButton);
         }
 
         @Override
         public List<? extends Element> children() {
-            return ImmutableList.of(instanceButton);
+            return ImmutableList.of(instanceButton,deleteButton);
         }
     }
 

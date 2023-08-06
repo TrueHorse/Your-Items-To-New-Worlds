@@ -16,6 +16,7 @@ import java.util.function.Consumer;
 
 public class ImportWorldSelectionScreen extends Screen {
 
+    public static final Identifier BUTTON_TEXTURE_SHEET = new Identifier("your_items_to_new_worlds","textures/gui/buttons.png");
     private final ImportWorldSelectionScreenHandler handler;
     private TextFieldWidget searchBox;
     private TexturedButtonWidget addInstanceButton;
@@ -45,7 +46,7 @@ public class ImportWorldSelectionScreen extends Screen {
         super.init();
         this.searchBox = new TextFieldWidget(this.textRenderer, this.width / 2 - 100, 12, 200, 20, this.searchBox, Text.translatable("selectWorld.search"));
 
-        this.addInstanceButton = new TexturedButtonWidget(this.width/2+105,12,20,20,0,0, 20, new Identifier("your_items_to_new_worlds","textures/gui/plus_button.png"),20,40,
+        this.addInstanceButton = new TexturedButtonWidget(this.width/2+105,12,20,20,0,0, 20, BUTTON_TEXTURE_SHEET,40,40,
                 button -> handler.chooseNewInstance(),Text.of("add instance"));
         addInstanceButton.visible = handler.getSelectedInstancePath()==null;
         addInstanceButton.setTooltip(Tooltip.of(Text.of("Add Instance")));

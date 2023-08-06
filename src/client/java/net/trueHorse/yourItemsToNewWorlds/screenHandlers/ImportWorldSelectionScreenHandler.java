@@ -40,7 +40,6 @@ public class ImportWorldSelectionScreenHandler {
             this.addInstance(instancePath);
             lastAddedInstance = instancePath;
         }
-        instancesFileIO.saveInstances(instancePaths);
     }
 
 
@@ -71,6 +70,13 @@ public class ImportWorldSelectionScreenHandler {
 
     public void addInstance(Path instance){
         instancePaths.add(instance);
+        instancesFileIO.saveInstances(instancePaths);
+        screen.onInstancesChanged();
+    }
+
+    public void removeInstance(Path instance){
+        instancePaths.remove(instance);
+        instancesFileIO.saveInstances(instancePaths);
         screen.onInstancesChanged();
     }
 
