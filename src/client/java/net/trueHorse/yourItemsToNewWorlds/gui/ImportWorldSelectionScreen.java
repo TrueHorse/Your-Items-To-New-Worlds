@@ -43,15 +43,15 @@ public class ImportWorldSelectionScreen extends Screen {
     @Override
     protected void init(){
         super.init();
-        this.searchBox = new TextFieldWidget(this.textRenderer, this.width / 2 - 100, 22, 200, 20, this.searchBox, Text.translatable("selectWorld.search"));
+        this.searchBox = new TextFieldWidget(this.textRenderer, this.width / 2 - 100, 12, 200, 20, this.searchBox, Text.translatable("selectWorld.search"));
 
-        this.addInstanceButton = new TexturedButtonWidget(this.width/2+105,22,20,20,0,0, 20, new Identifier("your_items_to_new_worlds","textures/gui/plus_button.png"),20,40,
+        this.addInstanceButton = new TexturedButtonWidget(this.width/2+105,12,20,20,0,0, 20, new Identifier("your_items_to_new_worlds","textures/gui/plus_button.png"),20,40,
                 button -> handler.chooseNewInstance(),Text.of("add instance"));
         addInstanceButton.visible = handler.getSelectedInstancePath()==null;
         addInstanceButton.setTooltip(Tooltip.of(Text.of("Add Instance")));
         this.addDrawableChild(addInstanceButton);
 
-        this.worldList = new ImportWorldListWidget(this, handler, this.client, this.width, this.height, 48, this.height - 64, 36, this.searchBox.getText());
+        this.worldList = new ImportWorldListWidget(this, handler, this.client, this.width, this.height, 38, this.height - 64, 36, this.searchBox.getText());
         this.instanceList = new InstanceListWidget(this.client,this, this.handler);
 
         if(handler.getSelectedInstancePath()==null){
@@ -82,7 +82,6 @@ public class ImportWorldSelectionScreen extends Screen {
             this.worldList.render(context, mouseX, mouseY, delta);
         }
         this.searchBox.render(context, mouseX, mouseY, delta);
-        context.drawCenteredTextWithShadow(this.textRenderer, this.title, this.width / 2, 8, 0xFFFFFF);
         super.render(context, mouseX, mouseY, delta);
     }
 
