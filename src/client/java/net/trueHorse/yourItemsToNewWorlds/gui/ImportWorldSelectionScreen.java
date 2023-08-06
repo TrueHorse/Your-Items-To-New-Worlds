@@ -52,7 +52,7 @@ public class ImportWorldSelectionScreen extends Screen {
         this.addDrawableChild(addInstanceButton);
 
         this.worldList = new ImportWorldListWidget(this, handler, this.client, this.width, this.height, 38, this.height - 64, 36, this.searchBox.getText());
-        this.instanceList = new InstanceListWidget(this.client,this, this.handler);
+        this.instanceList = new InstanceListWidget(this.client,this, this.handler, this.searchBox.getText());
 
         if(handler.getSelectedInstancePath()==null){
             this.searchBox.setChangedListener(search -> this.instanceList.search(search));

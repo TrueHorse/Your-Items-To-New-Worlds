@@ -8,34 +8,48 @@ import net.minecraft.client.gui.Selectable;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.ElementListWidget;
 import net.minecraft.text.Text;
+import net.minecraft.world.level.storage.LevelSummary;
 import net.trueHorse.yourItemsToNewWorlds.screenHandlers.ImportWorldSelectionScreenHandler;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Locale;
 
 public class InstanceListWidget extends ElementListWidget<InstanceListWidget.Entry> {
 
     private final ImportWorldSelectionScreen parent;
+    private String search;
+    private final ImportWorldSelectionScreenHandler handler;
 
-    public InstanceListWidget(MinecraftClient client, ImportWorldSelectionScreen parent, ImportWorldSelectionScreenHandler handler) {
+    public InstanceListWidget(MinecraftClient client, ImportWorldSelectionScreen parent, ImportWorldSelectionScreenHandler handler, String search) {
         super(client, parent.width+65, parent.height, 40, parent.height - 39, 20);
         this.setRenderBackground(false);
         this.setRenderHorizontalShadows(false);
         this.parent = parent;
+        this.handler = handler;
+        this.search = search;
         for(Path path:handler.getInstances()){
             this.addEntry(new InstanceEntry(path,handler));
         }
     }
 
-    public void pclearEntries(){
-       this.clearEntries();
-    }
-
     public void search(String search){
-
+        if (handler.getInstances() != null && !search.equals(this.search)) {
+            this.showInstances(search);
+        }
+        this.search = search;
     }
 
-    //TODO path still exists
+    private void showInstances(String search) {
+        this.clearEntries();
+        search = search.toLowerCase(Locale.ROOT);
+        for (Path instancePath : handler.getInstances()) {
+            if (instancePath.getFileName().toString().toLowerCase().contains(search)){
+                this.addEntry(new InstanceEntry(instancePath,handler));
+            }
+        }
+        this.parent.narrateScreenIfNarrationEnabled(true);
+    }
 
     public final class InstanceEntry
             extends InstanceListWidget.Entry{
