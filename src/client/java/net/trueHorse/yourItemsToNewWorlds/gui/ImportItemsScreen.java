@@ -10,7 +10,7 @@ import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.trueHorse.yourItemsToNewWorlds.screenHandlers.ImportItemScreenHandler;
+import net.trueHorse.yourItemsToNewWorlds.gui.handlers.ImportItemScreenHandler;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -15,7 +15,7 @@ import net.minecraft.util.path.SymlinkEntry;
 import net.minecraft.util.path.SymlinkValidationException;
 import net.minecraft.world.level.storage.LevelSummary;
 import net.trueHorse.yourItemsToNewWorlds.YourItemsToNewWorlds;
-import net.trueHorse.yourItemsToNewWorlds.screenHandlers.ImportWorldSelectionScreenHandler;
+import net.trueHorse.yourItemsToNewWorlds.gui.handlers.ImportWorldSelectionScreenHandler;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;

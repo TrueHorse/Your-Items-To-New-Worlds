@@ -1,4 +1,4 @@
-package net.trueHorse.yourItemsToNewWorlds.screenHandlers;
+package net.trueHorse.yourItemsToNewWorlds.gui.handlers;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.FatalErrorScreen;

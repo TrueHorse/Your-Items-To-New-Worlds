@@ -1,4 +1,4 @@
-package net.trueHorse.yourItemsToNewWorlds.screenHandlers;
+package net.trueHorse.yourItemsToNewWorlds.gui.handlers;
 
 import com.google.gson.JsonParseException;
 import net.minecraft.item.ItemStack;

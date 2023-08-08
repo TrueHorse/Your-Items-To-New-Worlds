@@ -9,7 +9,7 @@ import net.minecraft.client.gui.widget.TexturedButtonWidget;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.level.storage.LevelSummary;
-import net.trueHorse.yourItemsToNewWorlds.screenHandlers.ImportWorldSelectionScreenHandler;
+import net.trueHorse.yourItemsToNewWorlds.gui.handlers.ImportWorldSelectionScreenHandler;
 
 import java.nio.file.Path;
 import java.util.function.Consumer;
