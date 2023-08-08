@@ -130,5 +130,6 @@ public class ImportItemScreenHandler {
 
     public void setSelectedWorldPath(Path selectedWorldPath) {
         this.selectedWorldPath = selectedWorldPath;
+        this.clearCache();
     }
 }

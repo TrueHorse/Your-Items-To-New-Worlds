@@ -40,7 +40,6 @@ public class ImportItemsScreen extends Screen {
     private TextWidget noItemsTextWidget;
     private final Screen parent;
     private final ImportItemScreenHandler handler = new ImportItemScreenHandler();
-    private String lastWorldPathString = "";
     private int gridPage = 0;
 
     public ImportItemsScreen(Screen parent, Consumer<ArrayList<ItemStack>> applier){
@@ -76,7 +75,6 @@ public class ImportItemsScreen extends Screen {
             }
             widgets.add(playerNameWidget);
 
-            final int coordRowStartX = (this.width-(3*(50+ margin)+150))/2;
             final int coordRowY = playerNameWidget.getY()+playerNameWidget.getHeight()+ margin;
             searchLocationModeWidget = CyclingButtonWidget.<String>builder(Text::translatable).values(searchLocationDeterminationModeIDs).build(minDistanceFromEdge,coordRowY,150,20,Text.of(""),
                     (button,val)->{
@@ -229,15 +227,5 @@ public class ImportItemsScreen extends Screen {
     public void applyAndClose(){
         applier.accept(handler.getSelectedItems());
         close();
-    }
-
-    private void onWorldPathChanged(String newPath){
-        handler.clearCache();
-        updateUI(newPath);
-    }
-
-    private void updateUI(String newPathFieldContent){
-        lastWorldPathString = newPathFieldContent;
-        this.clearAndInit();
     }
 }
