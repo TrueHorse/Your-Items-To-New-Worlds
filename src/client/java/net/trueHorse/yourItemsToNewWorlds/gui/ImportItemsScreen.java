@@ -91,12 +91,15 @@ public class ImportItemsScreen extends Screen {
             for(TextFieldWidget coordField:coordFields){
                 //checks, if text only consists of digits
                 coordField.setTextPredicate(string -> string.matches("\\d*"));
+                coordField.setPlaceholder(coordField.getMessage());
             }
             setCoordFieldsEditability(false);
             widgets.addAll(List.of(coordFields));
 
             radiusWidget = new TextFieldWidget(this.textRenderer,this.width-minDistanceFromEdge-43,coordRowY,40,20,Text.translatable("transfer_items.your_items_to_new_worlds.radius_from_chunk"));
             radiusWidget.setTextPredicate(string -> string.matches("\\d*"));
+            radiusWidget.setTooltip(Tooltip.of(radiusWidget.getMessage()));
+            radiusWidget.setPlaceholder(Text.translatable("transfer_items.your_items_to_new_worlds.radius"));
             radiusWidget.setMaxLength(1);
             radiusWidget.setText("1");
             widgets.add(radiusWidget);
