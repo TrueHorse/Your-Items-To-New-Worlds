@@ -9,13 +9,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
 import net.trueHorse.yourItemsToNewWorlds.gui.handlers.ImportItemScreenHandler;
+import net.trueHorse.yourItemsToNewWorlds.io.ItemImporter;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Consumer;
 
 public class ImportItemsScreen extends Screen {
@@ -28,7 +26,7 @@ public class ImportItemsScreen extends Screen {
             "transfer_items.your_items_to_new_worlds.coordinates"};
     private ButtonWidget selectWorldButton;
     private CyclingButtonWidget<String> playerNameWidget;
-    private CyclingButtonWidget<String> searchLocationModeWidget;
+    private CyclingButtonWidget<ItemImporter.SearchLocationDeterminationMode> searchLocationModeWidget;
     private final TextFieldWidget[] coordFields = new TextFieldWidget[3];
     private TextFieldWidget radiusWidget;
     private ButtonWidget searchButton;
@@ -66,7 +64,10 @@ public class ImportItemsScreen extends Screen {
             boolean successfulNameRequests = handler.initPlayerNames();
 
             playerNameWidget = CyclingButtonWidget.builder(Text::of).values(handler.getPlayerNames()).build(this.width/2-50,selectWorldButton.getY()+selectWorldButton.getHeight()+ margin,100,20,Text.translatable("transfer_items.your_items_to_new_worlds.player_name"),
-                    (button,val)-> button.setMessage(Text.of(val)));
+                    (button,val)-> {
+                        button.setMessage(Text.of(val));
+                        handler.setSelectedPlayerName(val);
+                    });
             playerNameWidget.setMessage(Text.of(playerNameWidget.getValue()));
             if(!successfulNameRequests){
                 playerNameWidget.setTooltip(Tooltip.of(Text.translatable("transfer_items.your_items_to_new_worlds.request_error_tooltip")));
@@ -74,14 +75,16 @@ public class ImportItemsScreen extends Screen {
                 playerNameWidget.setTooltip(Tooltip.of(Text.translatable("transfer_items.your_items_to_new_worlds.player_button_explanation")));
             }
             widgets.add(playerNameWidget);
+            handler.setSelectedPlayerName(playerNameWidget.getValue());
 
             final int coordRowY = playerNameWidget.getY()+playerNameWidget.getHeight()+ margin;
-            searchLocationModeWidget = CyclingButtonWidget.<String>builder(Text::translatable).values(searchLocationDeterminationModeIDs).build(minDistanceFromEdge,coordRowY,150,20,Text.of(""),
+            searchLocationModeWidget = CyclingButtonWidget.<ItemImporter.SearchLocationDeterminationMode>builder(val -> Text.translatable(searchLocationDeterminationModeIDs[val.ordinal()])).values(ItemImporter.SearchLocationDeterminationMode.values()).build(minDistanceFromEdge,coordRowY,150,20,Text.of(""),
                     (button,val)->{
-                button.setMessage(Text.translatable(val));
-                setCoordFieldsEditability(Objects.equals(val, searchLocationDeterminationModeIDs[3]));
+                button.setMessage(Text.translatable(searchLocationDeterminationModeIDs[val.ordinal()]));
+                setCoordFieldsEditability(val.ordinal()==3);
+                handler.setSearchLocationDeterminationMode(val);
                     });
-            searchLocationModeWidget.setMessage(Text.translatable(searchLocationModeWidget.getValue()));
+            searchLocationModeWidget.setMessage(Text.translatable(searchLocationDeterminationModeIDs[searchLocationModeWidget.getValue().ordinal()]));
             searchLocationModeWidget.setTooltip(Tooltip.of(Text.translatable("transfer_items.your_items_to_new_worlds.mode_button_explanation")));
             widgets.add(searchLocationModeWidget);
 
@@ -92,6 +95,11 @@ public class ImportItemsScreen extends Screen {
                 //checks, if text only consists of digits
                 coordField.setTextPredicate(string -> string.matches("(^(-|\\d|))\\d*"));
                 coordField.setPlaceholder(coordField.getMessage());
+                coordField.setChangedListener(string -> {
+                    if(!string.isEmpty()){
+                        handler.setCoordinate(Integer.parseInt(string),coordField.getMessage().toString());
+                    }
+                });
             }
             setCoordFieldsEditability(false);
             widgets.addAll(List.of(coordFields));
@@ -102,6 +110,11 @@ public class ImportItemsScreen extends Screen {
             radiusWidget.setPlaceholder(Text.translatable("transfer_items.your_items_to_new_worlds.radius"));
             radiusWidget.setMaxLength(1);
             radiusWidget.setText("1");
+            radiusWidget.setChangedListener(string -> {
+                if(!string.isEmpty()){
+                    handler.setSearchRadius(Integer.parseInt(string));
+                }
+            });
             widgets.add(radiusWidget);
 
             searchButton = ButtonWidget.builder(Text.translatable("itemGroup.search"),button-> generateAndDisplayGridArea()).dimensions(this.width/2-75,searchLocationModeWidget.getY()+searchLocationModeWidget.getHeight()+ margin,150,20).build();
@@ -181,22 +194,19 @@ public class ImportItemsScreen extends Screen {
     }
 
     public void generateAndDisplayGridArea(){
-        int modeNumber = Arrays.asList(searchLocationDeterminationModeIDs).indexOf(searchLocationModeWidget.getValue());
         if(radiusWidget.getText().isEmpty()){
             searchButton.setTooltip(Tooltip.of(Text.translatable("transfer_items.your_items_to_new_worlds.missing_radius_tooltip")));
             return;
         }
-        if(modeNumber==3) {
+        if(handler.getSearchLocationDeterminationMode().ordinal()==3) {
             for (TextFieldWidget coordField : coordFields) {
                 if (coordField.getText().isEmpty()) {
                     searchButton.setTooltip(Tooltip.of(Text.translatable("transfer_items.your_items_to_new_worlds.missing_coordinates_tooltip")));
                     return;
                 }
             }
-            handler.initImportableItemStacks(playerNameWidget.getValue(), modeNumber,Integer.parseInt(radiusWidget.getText()), new BlockPos(Integer.parseInt(coordFields[0].getText()),Integer.parseInt(coordFields[1].getText()),Integer.parseInt(coordFields[2].getText())));
-        }else{
-            handler.initImportableItemStacks(playerNameWidget.getValue(),modeNumber,Integer.parseInt(radiusWidget.getText()));
         }
+        handler.initImportableItemStacks();
         refreshGridArea();
     }
 

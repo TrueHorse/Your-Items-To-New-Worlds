@@ -27,19 +27,19 @@ public class ImportItemScreenHandler {
     private ArrayList<ItemStack> importableItemStacks = new ArrayList<>();
     private boolean[] itemSelected;
     private final Map<String,String> playerIdNames = new HashMap<>();
-    private final Map<Integer,ArrayList<ItemStack>> itemCache = new HashMap<>();
+    private final Map<ItemImporter.SearchLocationDeterminationMode,ArrayList<ItemStack>> itemCache = new HashMap<>();
     private Path selectedWorldPath;
+    private String selectedPlayerName;
+    private ItemImporter.SearchLocationDeterminationMode searchLocationDeterminationMode;
+    private final BlockPos.Mutable selectedPos = new BlockPos.Mutable();
+    private int searchRadius;
 
-    public void initImportableItemStacks(String playerName, int searchMode, int searchRadius){
-        initImportableItemStacks(playerName,searchMode,searchRadius,null);
-    }
-
-    public void initImportableItemStacks(String playerName, int searchMode, int searchRadius, BlockPos chosenCoords){
-        if(itemCache.containsKey(searchMode)){
-            importableItemStacks=itemCache.get(searchMode);
+    public void initImportableItemStacks(){
+        if(itemCache.containsKey(searchLocationDeterminationMode)){
+            importableItemStacks=itemCache.get(searchLocationDeterminationMode);
         }else {
-            importableItemStacks = ItemImporter.readItemsFromOtherWorld(selectedWorldPath,getUuid(playerName),searchMode,searchRadius,chosenCoords);
-            itemCache.put(searchMode,importableItemStacks);
+            importableItemStacks = ItemImporter.readItemsFromOtherWorld(selectedWorldPath,getUuid(selectedPlayerName),searchLocationDeterminationMode,searchRadius,selectedPos);
+            itemCache.put(searchLocationDeterminationMode,importableItemStacks);
             itemSelected = new boolean[importableItemStacks.size()];
             Arrays.fill(itemSelected, false);
         }
@@ -111,6 +111,15 @@ public class ImportItemScreenHandler {
         return null;
     }
 
+    public void setCoordinate(int val, String coord){
+        switch (coord) {
+            case "X" -> selectedPos.setX(val);
+            case "Y" -> selectedPos.setY(val);
+            case "Z" -> selectedPos.setZ(val);
+            default -> throw new IllegalArgumentException();
+        }
+    }
+
     public ArrayList<ItemStack> getImportableItems() {
         return importableItemStacks;
     }
@@ -131,5 +140,29 @@ public class ImportItemScreenHandler {
     public void setSelectedWorldPath(Path selectedWorldPath) {
         this.selectedWorldPath = selectedWorldPath;
         this.clearCache();
+    }
+
+    public String getSelectedPlayerName() {
+        return selectedPlayerName;
+    }
+
+    public void setSelectedPlayerName(String selectedPlayerName) {
+        this.selectedPlayerName = selectedPlayerName;
+    }
+
+    public ItemImporter.SearchLocationDeterminationMode getSearchLocationDeterminationMode() {
+        return searchLocationDeterminationMode;
+    }
+
+    public void setSearchLocationDeterminationMode(ItemImporter.SearchLocationDeterminationMode searchLocationDeterminationMode) {
+        this.searchLocationDeterminationMode = searchLocationDeterminationMode;
+    }
+
+    public int getSearchRadius() {
+        return searchRadius;
+    }
+
+    public void setSearchRadius(int searchRadius) {
+        this.searchRadius = searchRadius;
     }
 }

@@ -7,7 +7,6 @@ import net.minecraft.nbt.NbtList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.trueHorse.yourItemsToNewWorlds.YourItemsToNewWorlds;
-import org.apache.commons.lang3.NotImplementedException;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,11 +19,14 @@ import java.util.function.Function;
 
 public class ItemImporter {
 
-    public static ArrayList<ItemStack> readItemsFromOtherWorld(Path worldPath,String playerUuid,int searchLocationDetermMode,int searchRadius){
-        return readItemsFromOtherWorld(worldPath,playerUuid,searchLocationDetermMode,searchRadius,null);
+    public enum SearchLocationDeterminationMode {
+        SPAWN_POINT,
+        MOST_ITEM_CONTAINERS,
+        LONGEST_INHABITATION,
+        COORDINATES
     }
 
-    public static ArrayList<ItemStack> readItemsFromOtherWorld(Path worldPath, String playerUuid, int searchLocationDetermMode, int searchRadius, BlockPos chosenPos) {
+    public static ArrayList<ItemStack> readItemsFromOtherWorld(Path worldPath, String playerUuid, SearchLocationDeterminationMode searchLocationDetermMode, int searchRadius, BlockPos chosenPos) {
         ArrayList<ItemStack> items = new ArrayList<>();
 
         NbtCompound playerNbt = null;
@@ -50,11 +52,10 @@ public class ItemImporter {
         ChunkPos centerChunkPos;
         try {
             centerChunkPos = switch (searchLocationDetermMode) {
-                case 0 -> new ChunkPos(new BlockPos(playerNbt.getInt("SpawnX"), playerNbt.getInt("SpawnY"), playerNbt.getInt("SpawnZ")));
-                case 1 -> getContainerChunkPos(regionReader,searchRadius);
-                case 2 -> getInhabitationChunkPos(regionReader,searchRadius);
-                case 3 -> new ChunkPos(chosenPos);
-                default -> throw new NotImplementedException();
+                case SPAWN_POINT -> new ChunkPos(new BlockPos(playerNbt.getInt("SpawnX"), playerNbt.getInt("SpawnY"), playerNbt.getInt("SpawnZ")));
+                case MOST_ITEM_CONTAINERS-> getContainerChunkPos(regionReader,searchRadius);
+                case LONGEST_INHABITATION -> getInhabitationChunkPos(regionReader,searchRadius);
+                case COORDINATES -> new ChunkPos(chosenPos);
             };
         }catch (NoSuchElementException e){
             YourItemsToNewWorlds.LOGGER.error("Failed to process region files.");
