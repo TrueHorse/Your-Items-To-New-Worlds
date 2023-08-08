@@ -16,6 +16,8 @@
   "transfer_items.your_items_to_new_worlds.add_instance": "Add Instance",
   "transfer_items.your_items_to_new_worlds.radius_from_chunk": "search radius from the chunk",
   "transfer_items.your_items_to_new_worlds.radius": "radius",
+  "transfer_items.your_items_to_new_worlds.missing_coordinates_tooltip": "Not all coordinates are specified.",
+  "transfer_items.your_items_to_new_worlds.missing_radius_tooltip": "The item search radius isn't specified.",
 
   "narrator.your_items_to_new_worlds.remove_instance": "Remove Instance %s"
 }

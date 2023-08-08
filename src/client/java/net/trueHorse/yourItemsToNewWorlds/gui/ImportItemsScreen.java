@@ -172,7 +172,8 @@ public class ImportItemsScreen extends Screen {
         if(modeNumber==3) {
             for (TextFieldWidget coordField : coordFields) {
                 if (coordField.getText().isEmpty()) {
-                    coordField.setText("0");
+                    searchButton.setTooltip(Tooltip.of(Text.translatable("transfer_items.your_items_to_new_worlds.missing_coordinates_tooltip")));
+                    return;
                 }
             }
             handler.initImportableItemStacks(playerNameWidget.getValue(), modeNumber, new BlockPos(Integer.parseInt(coordFields[0].getText()),Integer.parseInt(coordFields[1].getText()),Integer.parseInt(coordFields[2].getText())));
