@@ -179,6 +179,7 @@ public class ImportItemsScreen extends Screen {
         for(TextFieldWidget coordField:coordFields){
             coordField.setEditable(coordsEditable);
             coordField.active = coordsEditable;
+            coordField.setPlaceholder(coordsEditable ? coordField.getMessage():Text.of(""));
         }
     }
 
