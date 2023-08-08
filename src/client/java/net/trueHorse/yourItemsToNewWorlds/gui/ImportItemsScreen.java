@@ -30,6 +30,7 @@ public class ImportItemsScreen extends Screen {
     private CyclingButtonWidget<String> playerNameWidget;
     private CyclingButtonWidget<String> searchLocationModeWidget;
     private final TextFieldWidget[] coordFields = new TextFieldWidget[3];
+    private TextFieldWidget radiusWidget;
     private ButtonWidget searchButton;
     private CyclingButtonWidget<Boolean> selectAllButton;
 
@@ -77,7 +78,7 @@ public class ImportItemsScreen extends Screen {
 
             final int coordRowStartX = (this.width-(3*(50+ margin)+150))/2;
             final int coordRowY = playerNameWidget.getY()+playerNameWidget.getHeight()+ margin;
-            searchLocationModeWidget = CyclingButtonWidget.<String>builder(Text::translatable).values(searchLocationDeterminationModeIDs).build(coordRowStartX,coordRowY,150,20,Text.of(""),
+            searchLocationModeWidget = CyclingButtonWidget.<String>builder(Text::translatable).values(searchLocationDeterminationModeIDs).build(minDistanceFromEdge,coordRowY,150,20,Text.of(""),
                     (button,val)->{
                 button.setMessage(Text.translatable(val));
                 setCoordFieldsEditability(Objects.equals(val, searchLocationDeterminationModeIDs[3]));
@@ -86,15 +87,20 @@ public class ImportItemsScreen extends Screen {
             searchLocationModeWidget.setTooltip(Tooltip.of(Text.translatable("transfer_items.your_items_to_new_worlds.mode_button_explanation")));
             widgets.add(searchLocationModeWidget);
 
-            coordFields[0] = new TextFieldWidget(this.textRenderer,searchLocationModeWidget.getX()+searchLocationModeWidget.getWidth()+ margin,coordRowY,50,20,Text.of("X"));
-            coordFields[1] = new TextFieldWidget(this.textRenderer,coordFields[0].getX()+coordFields[0].getWidth()+ margin,coordRowY,50,20,Text.of("Y"));
-            coordFields[2] = new TextFieldWidget(this.textRenderer,coordFields[1].getX()+coordFields[1].getWidth()+ margin,coordRowY,50,20,Text.of("Z"));
+            coordFields[0] = new TextFieldWidget(this.textRenderer,searchLocationModeWidget.getX()+searchLocationModeWidget.getWidth()+ margin,coordRowY,43,20,Text.of("X"));
+            coordFields[1] = new TextFieldWidget(this.textRenderer,coordFields[0].getX()+coordFields[0].getWidth()+ margin,coordRowY,43,20,Text.of("Y"));
+            coordFields[2] = new TextFieldWidget(this.textRenderer,coordFields[1].getX()+coordFields[1].getWidth()+ margin,coordRowY,43,20,Text.of("Z"));
             for(TextFieldWidget coordField:coordFields){
                 //checks, if text only consists of digits
                 coordField.setTextPredicate(string -> string.matches("\\d*"));
             }
             setCoordFieldsEditability(false);
             widgets.addAll(List.of(coordFields));
+
+            radiusWidget = new TextFieldWidget(this.textRenderer,this.width-minDistanceFromEdge-43,coordRowY,40,20,Text.translatable("transfer_items.your_items_to_new_worlds.radius_from_chunk"));
+            radiusWidget.setTextPredicate(string -> string.matches("\\d*"));
+            radiusWidget.setMaxLength(1);
+            widgets.add(radiusWidget);
 
             searchButton = ButtonWidget.builder(Text.translatable("itemGroup.search"),button-> generateAndDisplayGridArea()).dimensions(this.width/2-75,searchLocationModeWidget.getY()+searchLocationModeWidget.getHeight()+ margin,150,20).build();
             widgets.add(searchButton);
