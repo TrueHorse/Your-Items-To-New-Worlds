@@ -90,7 +90,7 @@ public class ImportItemsScreen extends Screen {
             coordFields[2] = new TextFieldWidget(this.textRenderer,coordFields[1].getX()+coordFields[1].getWidth()+ margin,coordRowY,43,20,Text.of("Z"));
             for(TextFieldWidget coordField:coordFields){
                 //checks, if text only consists of digits
-                coordField.setTextPredicate(string -> string.matches("\\d*"));
+                coordField.setTextPredicate(string -> string.matches("(^(-|\\d|))\\d*"));
                 coordField.setPlaceholder(coordField.getMessage());
             }
             setCoordFieldsEditability(false);
@@ -172,10 +172,12 @@ public class ImportItemsScreen extends Screen {
     @Override
     public void tick(){
         super.tick();
-        for(TextFieldWidget field:coordFields){
-            field.tick();
+        if(handler.getSelectedWorldPath()!=null){
+            for(TextFieldWidget field:coordFields){
+                field.tick();
+            }
+            radiusWidget.tick();
         }
-        radiusWidget.tick();
     }
 
     public void generateAndDisplayGridArea(){
