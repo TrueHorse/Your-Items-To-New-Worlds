@@ -100,6 +100,7 @@ public class ImportItemsScreen extends Screen {
             radiusWidget = new TextFieldWidget(this.textRenderer,this.width-minDistanceFromEdge-43,coordRowY,40,20,Text.translatable("transfer_items.your_items_to_new_worlds.radius_from_chunk"));
             radiusWidget.setTextPredicate(string -> string.matches("\\d*"));
             radiusWidget.setMaxLength(1);
+            radiusWidget.setText("1");
             widgets.add(radiusWidget);
 
             searchButton = ButtonWidget.builder(Text.translatable("itemGroup.search"),button-> generateAndDisplayGridArea()).dimensions(this.width/2-75,searchLocationModeWidget.getY()+searchLocationModeWidget.getHeight()+ margin,150,20).build();
@@ -169,6 +170,10 @@ public class ImportItemsScreen extends Screen {
 
     public void generateAndDisplayGridArea(){
         int modeNumber = Arrays.asList(searchLocationDeterminationModeIDs).indexOf(searchLocationModeWidget.getValue());
+        if(radiusWidget.getText().isEmpty()){
+            searchButton.setTooltip(Tooltip.of(Text.translatable("transfer_items.your_items_to_new_worlds.missing_radius_tooltip")));
+            return;
+        }
         if(modeNumber==3) {
             for (TextFieldWidget coordField : coordFields) {
                 if (coordField.getText().isEmpty()) {
@@ -176,9 +181,9 @@ public class ImportItemsScreen extends Screen {
                     return;
                 }
             }
-            handler.initImportableItemStacks(playerNameWidget.getValue(), modeNumber, new BlockPos(Integer.parseInt(coordFields[0].getText()),Integer.parseInt(coordFields[1].getText()),Integer.parseInt(coordFields[2].getText())));
+            handler.initImportableItemStacks(playerNameWidget.getValue(), modeNumber,Integer.parseInt(radiusWidget.getText()), new BlockPos(Integer.parseInt(coordFields[0].getText()),Integer.parseInt(coordFields[1].getText()),Integer.parseInt(coordFields[2].getText())));
         }else{
-            handler.initImportableItemStacks(playerNameWidget.getValue(),modeNumber);
+            handler.initImportableItemStacks(playerNameWidget.getValue(),modeNumber,Integer.parseInt(radiusWidget.getText()));
         }
         refreshGridArea();
     }

@@ -30,15 +30,15 @@ public class ImportItemScreenHandler {
     private final Map<Integer,ArrayList<ItemStack>> itemCache = new HashMap<>();
     private Path selectedWorldPath;
 
-    public void initImportableItemStacks(String playerName, int searchMode){
-        initImportableItemStacks(playerName,searchMode,null);
+    public void initImportableItemStacks(String playerName, int searchMode, int searchRadius){
+        initImportableItemStacks(playerName,searchMode,searchRadius,null);
     }
 
-    public void initImportableItemStacks(String playerName, int searchMode, BlockPos chosenCoords){
+    public void initImportableItemStacks(String playerName, int searchMode, int searchRadius, BlockPos chosenCoords){
         if(itemCache.containsKey(searchMode)){
             importableItemStacks=itemCache.get(searchMode);
         }else {
-            importableItemStacks = ItemImporter.readItemsFromOtherWorld(selectedWorldPath,getUuid(playerName),searchMode,chosenCoords);
+            importableItemStacks = ItemImporter.readItemsFromOtherWorld(selectedWorldPath,getUuid(playerName),searchMode,searchRadius,chosenCoords);
             itemCache.put(searchMode,importableItemStacks);
             itemSelected = new boolean[importableItemStacks.size()];
             Arrays.fill(itemSelected, false);

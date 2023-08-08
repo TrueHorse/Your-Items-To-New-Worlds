@@ -20,11 +20,11 @@ import java.util.function.Function;
 
 public class ItemImporter {
 
-    public static ArrayList<ItemStack> readItemsFromOtherWorld(Path worldPath,String playerUuid,int searchLocationDetermMode){
-        return readItemsFromOtherWorld(worldPath,playerUuid,searchLocationDetermMode,null);
+    public static ArrayList<ItemStack> readItemsFromOtherWorld(Path worldPath,String playerUuid,int searchLocationDetermMode,int searchRadius){
+        return readItemsFromOtherWorld(worldPath,playerUuid,searchLocationDetermMode,searchRadius,null);
     }
 
-    public static ArrayList<ItemStack> readItemsFromOtherWorld(Path worldPath, String playerUuid, int searchLocationDetermMode, BlockPos chosenPos) {
+    public static ArrayList<ItemStack> readItemsFromOtherWorld(Path worldPath, String playerUuid, int searchLocationDetermMode, int searchRadius, BlockPos chosenPos) {
         ArrayList<ItemStack> items = new ArrayList<>();
 
         NbtCompound playerNbt = null;
@@ -51,8 +51,8 @@ public class ItemImporter {
         try {
             centerChunkPos = switch (searchLocationDetermMode) {
                 case 0 -> new ChunkPos(new BlockPos(playerNbt.getInt("SpawnX"), playerNbt.getInt("SpawnY"), playerNbt.getInt("SpawnZ")));
-                case 1 -> getContainerChunkPos(regionReader);
-                case 2 -> getInhabitationChunkPos(regionReader);
+                case 1 -> getContainerChunkPos(regionReader,searchRadius);
+                case 2 -> getInhabitationChunkPos(regionReader,searchRadius);
                 case 3 -> new ChunkPos(chosenPos);
                 default -> throw new NotImplementedException();
             };
@@ -63,8 +63,8 @@ public class ItemImporter {
         YourItemsToNewWorlds.LOGGER.info("chunkPos: "+centerChunkPos);
         NbtList surroundingChunks = new NbtList();
 
-        for (int i = -1; i <= 1; i++) {
-            for (int j = -1; j <= 1; j++) {
+        for (int i = searchRadius*-1; i <= searchRadius; i++) {
+            for (int j = searchRadius*-1; j <= searchRadius; j++) {
                 try {
                     surroundingChunks.add(regionReader.getNbtAt(new ChunkPos(centerChunkPos.x + i, centerChunkPos.z + j)));
                 } catch (IOException e) {
@@ -81,7 +81,7 @@ public class ItemImporter {
         return items;
     }
 
-    private static ChunkPos getChunkPosWithBiggestSurroundingVal(RegionReader regionReader, Function<ChunkPos,Integer> chunkToValFunc){
+    private static ChunkPos getChunkPosWithBiggestSurroundingVal(RegionReader regionReader, int searchRadius, Function<ChunkPos,Integer> chunkToValFunc){
         //creating two-dimensional array of values of Chunks
         String[] regionNames = regionReader.getAllRegionFileNames();
         int smallestChunkX = Arrays.stream(regionNames).map(name -> Integer.parseInt(name.split("[.]")[1])).min(Comparator.naturalOrder()).get()*32;
@@ -99,8 +99,8 @@ public class ItemImporter {
         for(int i = smallestChunkY+1;i<biggestChunkY;i++){
             for(int j = smallestChunkX+1;j<biggestChunkX;j++){
                 long sum = 0;
-                for(int k = -1;k<=1;k++){
-                    for(int l = -1;l<=1;l++){
+                for(int k = searchRadius*-1;k<=searchRadius;k++){
+                    for(int l = searchRadius*-1;l<=searchRadius;l++){
                         int chunkIndex1 = j+l-smallestChunkX;
                         int chunkIndex2 = i+k-smallestChunkY;
                         //YourItemsToNewWorlds.LOGGER.info("i j k l"+i+" "+j+" "+k+" "+l);
@@ -128,8 +128,8 @@ public class ItemImporter {
         return containerChunk;
     }
 
-    private static ChunkPos getContainerChunkPos(RegionReader regionReader) throws NoSuchElementException{
-        return getChunkPosWithBiggestSurroundingVal(regionReader,chunkPos -> {
+    private static ChunkPos getContainerChunkPos(RegionReader regionReader,int searchRadius) throws NoSuchElementException{
+        return getChunkPosWithBiggestSurroundingVal(regionReader,searchRadius,chunkPos -> {
             try {
                 NbtCompound chunkNbt = regionReader.getNbtAt(chunkPos);
                 return (int)chunkNbt.getList("block_entities", 10).stream().filter(nbt -> !((NbtCompound)nbt).getList("Items",10).isEmpty()).count()
@@ -143,8 +143,8 @@ public class ItemImporter {
         });
     }
 
-    private static ChunkPos getInhabitationChunkPos(RegionReader regionReader){
-        return getChunkPosWithBiggestSurroundingVal(regionReader,chunkPos -> {
+    private static ChunkPos getInhabitationChunkPos(RegionReader regionReader, int searchRadius){
+        return getChunkPosWithBiggestSurroundingVal(regionReader,searchRadius,chunkPos -> {
             try {
                 NbtCompound chunkNbt = regionReader.getNbtAt(chunkPos);
                 return Math.toIntExact(chunkNbt.getLong("InhabitedTime"))
