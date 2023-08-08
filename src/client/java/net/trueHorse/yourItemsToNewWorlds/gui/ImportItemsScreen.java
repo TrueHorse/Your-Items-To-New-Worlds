@@ -82,6 +82,7 @@ public class ImportItemsScreen extends Screen {
                     (button,val)->{
                 button.setMessage(Text.translatable(searchLocationDeterminationModeIDs[val.ordinal()]));
                 setCoordFieldsEditability(val.ordinal()==3);
+                button.setTooltip(Tooltip.of(Text.translatable("transfer_items.your_items_to_new_worlds.mode_button_explanation")));
                 handler.setSearchLocationDeterminationMode(val);
                     });
             searchLocationModeWidget.setMessage(Text.translatable(searchLocationDeterminationModeIDs[searchLocationModeWidget.getValue().ordinal()]));
