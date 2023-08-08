@@ -38,7 +38,7 @@ public class ImportItemScreenHandler {
         if(itemCache.containsKey(searchLocationDeterminationMode)){
             importableItemStacks=itemCache.get(searchLocationDeterminationMode);
         }else {
-            importableItemStacks = ItemImporter.readItemsFromOtherWorld(selectedWorldPath,getUuid(selectedPlayerName),searchLocationDeterminationMode,searchRadius,selectedPos);
+            importableItemStacks = ItemImporter.readItemsFromOtherWorld(selectedWorldPath,playerIdNames.containsKey(selectedPlayerName) ? selectedPlayerName:getUuid(selectedPlayerName),searchLocationDeterminationMode,searchRadius,selectedPos);
             itemCache.put(searchLocationDeterminationMode,importableItemStacks);
             itemSelected = new boolean[importableItemStacks.size()];
             Arrays.fill(itemSelected, false);
