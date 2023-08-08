@@ -169,6 +169,15 @@ public class ImportItemsScreen extends Screen {
         }
     }
 
+    @Override
+    public void tick(){
+        super.tick();
+        for(TextFieldWidget field:coordFields){
+            field.tick();
+        }
+        radiusWidget.tick();
+    }
+
     public void generateAndDisplayGridArea(){
         int modeNumber = Arrays.asList(searchLocationDeterminationModeIDs).indexOf(searchLocationModeWidget.getValue());
         if(radiusWidget.getText().isEmpty()){
