@@ -29,7 +29,7 @@ public class ImportItemScreenHandler {
     private ArrayList<ItemStack> importableItemStacks = new ArrayList<>();
     private boolean[] itemSelected;
     private final Map<String,String> playerIdNames = new HashMap<>();
-    private final Map<ItemImporter.SearchLocationDeterminationMode,ArrayList<ItemStack>> itemCache = new HashMap<>();
+    private final Map<ItemSearchConfig,ArrayList<ItemStack>> itemCache = new HashMap<>();
     private boolean nameRequestSucessful;
     private Path selectedWorldPath;
     private String selectedPlayerName;
@@ -43,26 +43,23 @@ public class ImportItemScreenHandler {
     }
 
     public void initImportableItemStacks(){
-        if(itemCache.containsKey(searchLocationDeterminationMode)){
-            importableItemStacks=itemCache.get(searchLocationDeterminationMode);
+        ItemSearchConfig currentConfig = new ItemSearchConfig(selectedWorldPath,selectedPlayerName,searchLocationDeterminationMode,searchLocationDeterminationMode==ItemImporter.SearchLocationDeterminationMode.COORDINATES ? selectedPos:null,searchRadius);
+        if(itemCache.containsKey(currentConfig)){
+            importableItemStacks=itemCache.get(currentConfig);
         }else {
             ItemImporter importer = new ItemImporter(selectedWorldPath,playerIdNames.containsKey(selectedPlayerName) ? selectedPlayerName:getUuid(selectedPlayerName));
             ChunkPos searchChunkPos = importer.getSearchChunkPos(searchLocationDeterminationMode,searchRadius,selectedPos);
             importableItemStacks = importer.getPlayerItems();
             importableItemStacks.addAll(importer.getItemsInArea(searchChunkPos,searchRadius));
 
-            itemCache.put(searchLocationDeterminationMode,importableItemStacks);
             itemSelected = new boolean[importableItemStacks.size()];
             Arrays.fill(itemSelected, false);
             if(searchLocationDeterminationMode != ItemImporter.SearchLocationDeterminationMode.COORDINATES){
                 selectedPos.set(searchChunkPos.getBlockPos(0,0,0));
                 screen.updateCoordinateFields();
             }
+            itemCache.put(currentConfig,importableItemStacks);
         }
-    }
-
-    public void clearCache(){
-        itemCache.clear();
     }
 
     //@return if all name requests where successful
@@ -166,7 +163,6 @@ public class ImportItemScreenHandler {
 
     public void setSelectedWorldPath(Path selectedWorldPath) {
         this.selectedWorldPath = selectedWorldPath;
-        this.clearCache();
         this.initPlayerNames();
     }
 
