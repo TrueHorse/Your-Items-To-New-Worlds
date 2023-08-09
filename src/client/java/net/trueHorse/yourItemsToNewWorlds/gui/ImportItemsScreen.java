@@ -5,10 +5,12 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.*;
+import net.minecraft.client.item.TooltipContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.trueHorse.yourItemsToNewWorlds.YourItemsToNewWorlds;
 import net.trueHorse.yourItemsToNewWorlds.gui.handlers.ImportItemScreenHandler;
 import net.trueHorse.yourItemsToNewWorlds.io.ItemImporter;
 
@@ -217,6 +219,7 @@ public class ImportItemsScreen extends Screen {
         int pageItemCount;
         if(handler.getImportableItems().size() - gridPage * itemSelectButtons.size()<=itemSelectButtons.size()){
             pageItemCount = handler.getImportableItems().size() - gridPage * itemSelectButtons.size();
+            YourItemsToNewWorlds.LOGGER.info("pageItemCount: "+pageItemCount);
             rightArrowButton.visible = false;
             for(int i=pageItemCount;i<itemSelectButtons.size();i++){
                 itemSelectButtons.get(i).visible = false;
@@ -228,7 +231,18 @@ public class ImportItemsScreen extends Screen {
 
         for(int i=0;i<pageItemCount;i++){
             TexturedItemButtonWidget button = itemSelectButtons.get(i);
-            button.setItemStack(handler.getImportableItems().get(i+gridPage*itemSelectButtons.size()));
+            ItemStack itemStack = handler.getImportableItems().get(i+gridPage*itemSelectButtons.size());
+
+            button.setItemStack(itemStack);
+
+            StringBuilder tooltipBuilder = new StringBuilder();
+            List<Text> tooltipLines = itemStack.getTooltip(null, TooltipContext.BASIC);
+            for(Text line:tooltipLines){
+                tooltipBuilder.append(line.getString()).append("\n");
+            }
+            tooltipBuilder.deleteCharAt(tooltipBuilder.length()-1);
+            button.setTooltip(Tooltip.of(Text.of(tooltipBuilder.toString())));
+
             button.setToggled(handler.getItemSelected()[i+gridPage*itemSelectButtons.size()]);
             button.visible = true;
         }
