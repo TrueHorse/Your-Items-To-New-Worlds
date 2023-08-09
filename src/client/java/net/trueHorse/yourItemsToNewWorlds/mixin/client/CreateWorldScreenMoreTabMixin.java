@@ -19,10 +19,16 @@ public class CreateWorldScreenMoreTabMixin {
 
     @Shadow
     private CreateWorldScreen field_42178;
+    private ImportItemsScreen oldImportItemScreen = null;
 
     @Inject(method = "<init>", at = @At("TAIL"), locals = LocalCapture.CAPTURE_FAILSOFT)
     private void addItemTransferButton(CreateWorldScreen createWorldScreen, CallbackInfo ci, GridWidget.Adder adder) {
-        adder.add(ButtonWidget.builder(Text.translatable("selectWorld.your_items_to_new_worlds.import_items"), button -> MinecraftClient.getInstance().setScreen(new ImportItemsScreen(field_42178, importItems -> ((WorldCreatorAccess)field_42178.getWorldCreator()).setImportItems(importItems)))).width(210).build());
+        adder.add(ButtonWidget.builder(Text.translatable("selectWorld.your_items_to_new_worlds.import_items"),
+                button -> MinecraftClient.getInstance().setScreen(oldImportItemScreen!=null ? oldImportItemScreen : new ImportItemsScreen(field_42178,
+                (importItems,closedScreen) -> {
+                    ((WorldCreatorAccess)field_42178.getWorldCreator()).setImportItems(importItems);
+                    oldImportItemScreen = closedScreen;
+                }))).width(210).build());
     }
 
 }

@@ -14,12 +14,12 @@ import net.trueHorse.yourItemsToNewWorlds.io.ItemImporter;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 public class ImportItemsScreen extends Screen {
 
     private final Identifier textureSheet = new Identifier("your_items_to_new_worlds","textures/gui/import_items_screen.png");
-    private final Consumer<ArrayList<ItemStack>> applier;
+    private final BiConsumer<ArrayList<ItemStack>,ImportItemsScreen> applier;
     private final String[] searchLocationDeterminationModeIDs = {"transfer_items.your_items_to_new_worlds.spawn_point",
             "transfer_items.your_items_to_new_worlds.most_item_containers",
             "transfer_items.your_items_to_new_worlds.longest_inhabitation",
@@ -40,7 +40,7 @@ public class ImportItemsScreen extends Screen {
     private final ImportItemScreenHandler handler = new ImportItemScreenHandler(this);
     private int gridPage = 0;
 
-    public ImportItemsScreen(Screen parent, Consumer<ArrayList<ItemStack>> applier){
+    public ImportItemsScreen(Screen parent, BiConsumer<ArrayList<ItemStack>,ImportItemsScreen> applier){
         super(Text.translatable("transfer_items.your_items_to_new_worlds.select_transfer_items"));
         this.applier = applier;
         this.parent = parent;
@@ -256,7 +256,7 @@ public class ImportItemsScreen extends Screen {
     }
 
     public void applyAndClose(){
-        applier.accept(handler.getSelectedItems());
+        applier.accept(handler.getSelectedItems(),this);
         close();
     }
 }
