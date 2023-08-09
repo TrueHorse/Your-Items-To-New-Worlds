@@ -95,7 +95,7 @@ public class ImportItemsScreen extends Screen {
                 coordField.setTextPredicate(string -> string.matches("(^(-|\\d|))\\d*"));
                 coordField.setPlaceholder(coordField.getMessage());
                 coordField.setChangedListener(string -> {
-                    if(!string.isEmpty()){
+                    if(!string.isEmpty()&& !string.equals("-")){
                         handler.setCoordinate(Integer.parseInt(string),coordField.getMessage().getString());
                     }
                 });
@@ -201,7 +201,7 @@ public class ImportItemsScreen extends Screen {
         }
         if(handler.getSearchLocationDeterminationMode().ordinal()==3) {
             for (TextFieldWidget coordField : coordFields) {
-                if (coordField.getText().isEmpty()) {
+                if (coordField.getText().isEmpty()||coordField.getText().equals("-")) {
                     searchButton.setTooltip(Tooltip.of(Text.translatable("transfer_items.your_items_to_new_worlds.missing_coordinates_tooltip")));
                     return;
                 }
