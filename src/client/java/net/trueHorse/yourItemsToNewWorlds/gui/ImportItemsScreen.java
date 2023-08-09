@@ -27,7 +27,7 @@ public class ImportItemsScreen extends Screen {
     private ButtonWidget selectWorldButton;
     private CyclingButtonWidget<String> playerNameWidget;
     private CyclingButtonWidget<ItemImporter.SearchLocationDeterminationMode> searchLocationModeWidget;
-    private final TextFieldWidget[] coordFields = new TextFieldWidget[3];
+    private final TextFieldWidget[] coordFields = new TextFieldWidget[2];
     private TextFieldWidget radiusWidget;
     private ButtonWidget searchButton;
     private CyclingButtonWidget<Boolean> selectAllButton;
@@ -89,8 +89,7 @@ public class ImportItemsScreen extends Screen {
             handler.setSearchLocationDeterminationMode(searchLocationModeWidget.getValue());
 
             coordFields[0] = new TextFieldWidget(this.textRenderer,searchLocationModeWidget.getX()+searchLocationModeWidget.getWidth()+ margin,coordRowY,43,20,Text.of("X"));
-            coordFields[1] = new TextFieldWidget(this.textRenderer,coordFields[0].getX()+coordFields[0].getWidth()+ margin,coordRowY,43,20,Text.of("Y"));
-            coordFields[2] = new TextFieldWidget(this.textRenderer,coordFields[1].getX()+coordFields[1].getWidth()+ margin,coordRowY,43,20,Text.of("Z"));
+            coordFields[1] = new TextFieldWidget(this.textRenderer,coordFields[0].getX()+coordFields[0].getWidth()+ margin,coordRowY,43,20,Text.of("Z"));
             for(TextFieldWidget coordField:coordFields){
                 //checks, if text only consists of digits
                 coordField.setTextPredicate(string -> string.matches("(^(-|\\d|))\\d*"));
@@ -104,7 +103,7 @@ public class ImportItemsScreen extends Screen {
             setCoordFieldsEditability(false);
             widgets.addAll(List.of(coordFields));
 
-            radiusWidget = new TextFieldWidget(this.textRenderer,this.width-minDistanceFromEdge-43,coordRowY,40,20,Text.translatable("transfer_items.your_items_to_new_worlds.radius_from_chunk"));
+            radiusWidget = new TextFieldWidget(this.textRenderer,coordFields[1].getX()+coordFields[0].getWidth()+ margin*2,coordRowY,40,20,Text.translatable("transfer_items.your_items_to_new_worlds.radius_from_chunk"));
             radiusWidget.setTextPredicate(string -> string.matches("\\d*"));
             radiusWidget.setTooltip(Tooltip.of(radiusWidget.getMessage()));
             radiusWidget.setPlaceholder(Text.translatable("transfer_items.your_items_to_new_worlds.radius"));
