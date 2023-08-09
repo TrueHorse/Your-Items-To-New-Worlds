@@ -37,7 +37,7 @@ public class ImportItemsScreen extends Screen {
     private final ArrayList<TexturedItemButtonWidget> itemSelectButtons= new ArrayList<>();
     private TextWidget noItemsTextWidget;
     private final Screen parent;
-    private final ImportItemScreenHandler handler = new ImportItemScreenHandler();
+    private final ImportItemScreenHandler handler = new ImportItemScreenHandler(this);
     private int gridPage = 0;
 
     public ImportItemsScreen(Screen parent, Consumer<ArrayList<ItemStack>> applier){
@@ -88,6 +88,7 @@ public class ImportItemsScreen extends Screen {
             searchLocationModeWidget.setMessage(Text.translatable(searchLocationDeterminationModeIDs[searchLocationModeWidget.getValue().ordinal()]));
             searchLocationModeWidget.setTooltip(Tooltip.of(Text.translatable("transfer_items.your_items_to_new_worlds.mode_button_explanation")));
             widgets.add(searchLocationModeWidget);
+            handler.setSearchLocationDeterminationMode(searchLocationModeWidget.getValue());
 
             coordFields[0] = new TextFieldWidget(this.textRenderer,searchLocationModeWidget.getX()+searchLocationModeWidget.getWidth()+ margin,coordRowY,43,20,Text.of("X"));
             coordFields[1] = new TextFieldWidget(this.textRenderer,coordFields[0].getX()+coordFields[0].getWidth()+ margin,coordRowY,43,20,Text.of("Y"));
@@ -98,7 +99,7 @@ public class ImportItemsScreen extends Screen {
                 coordField.setPlaceholder(coordField.getMessage());
                 coordField.setChangedListener(string -> {
                     if(!string.isEmpty()){
-                        handler.setCoordinate(Integer.parseInt(string),coordField.getMessage().toString());
+                        handler.setCoordinate(Integer.parseInt(string),coordField.getMessage().getString());
                     }
                 });
             }
@@ -117,6 +118,7 @@ public class ImportItemsScreen extends Screen {
                 }
             });
             widgets.add(radiusWidget);
+            handler.setSearchRadius(Integer.parseInt(radiusWidget.getText()));
 
             searchButton = ButtonWidget.builder(Text.translatable("itemGroup.search"),button-> generateAndDisplayGridArea()).dimensions(this.width/2-75,searchLocationModeWidget.getY()+searchLocationModeWidget.getHeight()+ margin,150,20).build();
             widgets.add(searchButton);
@@ -237,6 +239,12 @@ public class ImportItemsScreen extends Screen {
         boolean noItems = pageItemCount == 0;
         selectAllButton.visible = !noItems;
         noItemsTextWidget.visible = noItems;
+    }
+
+    public void updateCoordinateFields(){
+        for(TextFieldWidget coordField:coordFields){
+            coordField.setText(handler.getCoordinate(coordField.getMessage().getString()).toString());
+        }
     }
 
     @Override

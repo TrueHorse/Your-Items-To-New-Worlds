@@ -6,6 +6,7 @@ import net.minecraft.util.JsonHelper;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.trueHorse.yourItemsToNewWorlds.YourItemsToNewWorlds;
+import net.trueHorse.yourItemsToNewWorlds.gui.ImportItemsScreen;
 import net.trueHorse.yourItemsToNewWorlds.io.ItemImporter;
 
 import java.io.File;
@@ -34,6 +35,11 @@ public class ImportItemScreenHandler {
     private ItemImporter.SearchLocationDeterminationMode searchLocationDeterminationMode;
     private final BlockPos.Mutable selectedPos = new BlockPos.Mutable();
     private int searchRadius;
+    private final ImportItemsScreen screen;
+
+    public ImportItemScreenHandler(ImportItemsScreen screen){
+        this.screen = screen;
+    }
 
     public void initImportableItemStacks(){
         if(itemCache.containsKey(searchLocationDeterminationMode)){
@@ -47,6 +53,10 @@ public class ImportItemScreenHandler {
             itemCache.put(searchLocationDeterminationMode,importableItemStacks);
             itemSelected = new boolean[importableItemStacks.size()];
             Arrays.fill(itemSelected, false);
+            if(searchLocationDeterminationMode != ItemImporter.SearchLocationDeterminationMode.COORDINATES){
+                selectedPos.set(searchChunkPos.getBlockPos(0,0,0));
+                screen.updateCoordinateFields();
+            }
         }
     }
 
@@ -123,6 +133,16 @@ public class ImportItemScreenHandler {
             case "Z" -> selectedPos.setZ(val);
             default -> throw new IllegalArgumentException();
         }
+    }
+
+    public Integer getCoordinate(String coord){
+        YourItemsToNewWorlds.LOGGER.info("coord: "+coord);
+        return switch (coord) {
+            case "X" -> selectedPos.getX();
+            case "Y" -> selectedPos.getY();
+            case "Z" -> selectedPos.getZ();
+            default -> throw new IllegalArgumentException();
+        };
     }
 
     public ArrayList<ItemStack> getImportableItems() {
