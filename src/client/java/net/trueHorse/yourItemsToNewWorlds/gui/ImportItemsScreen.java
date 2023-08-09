@@ -78,7 +78,7 @@ public class ImportItemsScreen extends Screen {
             handler.setSelectedPlayerName(playerNameWidget.getValue());
 
             final int coordRowY = playerNameWidget.getY()+playerNameWidget.getHeight()+ margin;
-            searchLocationModeWidget = CyclingButtonWidget.<ItemImporter.SearchLocationDeterminationMode>builder(val -> Text.translatable(searchLocationDeterminationModeIDs[val.ordinal()])).values(ItemImporter.SearchLocationDeterminationMode.values()).build(minDistanceFromEdge,coordRowY,150,20,Text.of(""),
+            searchLocationModeWidget = CyclingButtonWidget.<ItemImporter.SearchLocationDeterminationMode>builder(val -> Text.translatable(searchLocationDeterminationModeIDs[val.ordinal()])).values(ItemImporter.SearchLocationDeterminationMode.values()).build(Math.max(minDistanceFromEdge,this.width/2-152),coordRowY,150,20,Text.of(""),
                     (button,val)->{
                 button.setMessage(Text.translatable(searchLocationDeterminationModeIDs[val.ordinal()]));
                 setCoordFieldsEditability(val.ordinal()==3);
