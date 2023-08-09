@@ -41,6 +41,7 @@ public class ItemImporter {
                 tempPlayerNbt = null;
             }
         }else{
+            YourItemsToNewWorlds.LOGGER.error(file.getName()+" doesn't exist.");
             tempPlayerNbt = null;
         }
         playerNbt = tempPlayerNbt;

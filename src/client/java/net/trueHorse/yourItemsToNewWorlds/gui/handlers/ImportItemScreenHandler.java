@@ -30,6 +30,7 @@ public class ImportItemScreenHandler {
     private boolean[] itemSelected;
     private final Map<String,String> playerIdNames = new HashMap<>();
     private final Map<ItemImporter.SearchLocationDeterminationMode,ArrayList<ItemStack>> itemCache = new HashMap<>();
+    private boolean nameRequestSucessful;
     private Path selectedWorldPath;
     private String selectedPlayerName;
     private ItemImporter.SearchLocationDeterminationMode searchLocationDeterminationMode;
@@ -65,7 +66,8 @@ public class ImportItemScreenHandler {
     }
 
     //@return if all name requests where successful
-    public boolean initPlayerNames(){
+    public void initPlayerNames(){
+        playerIdNames.clear();
         AtomicBoolean success = new AtomicBoolean(true);
         File playerDataFolder = new File(selectedWorldPath+"\\playerdata");
         ArrayList<String> uuids;
@@ -92,7 +94,7 @@ public class ImportItemScreenHandler {
                 success.set(false);
             }
         });
-        return success.get();
+        nameRequestSucessful = success.get();
     }
 
     public ArrayList<ItemStack> getSelectedItems(){
@@ -165,6 +167,7 @@ public class ImportItemScreenHandler {
     public void setSelectedWorldPath(Path selectedWorldPath) {
         this.selectedWorldPath = selectedWorldPath;
         this.clearCache();
+        this.initPlayerNames();
     }
 
     public String getSelectedPlayerName() {
@@ -189,5 +192,9 @@ public class ImportItemScreenHandler {
 
     public void setSearchRadius(int searchRadius) {
         this.searchRadius = searchRadius;
+    }
+
+    public boolean wasNameRequestSucessful() {
+        return nameRequestSucessful;
     }
 }

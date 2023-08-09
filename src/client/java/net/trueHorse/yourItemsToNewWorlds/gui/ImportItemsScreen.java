@@ -61,15 +61,13 @@ public class ImportItemsScreen extends Screen {
         widgets.add(selectWorldButton);
 
         if(handler.getSelectedWorldPath()!=null){
-            boolean successfulNameRequests = handler.initPlayerNames();
-
             playerNameWidget = CyclingButtonWidget.builder(Text::of).values(handler.getPlayerNames()).build(this.width/2-50,selectWorldButton.getY()+selectWorldButton.getHeight()+ margin,100,20,Text.translatable("transfer_items.your_items_to_new_worlds.player_name"),
                     (button,val)-> {
                         button.setMessage(Text.of(val));
                         handler.setSelectedPlayerName(val);
                     });
             playerNameWidget.setMessage(Text.of(playerNameWidget.getValue()));
-            if(!successfulNameRequests){
+            if(!handler.wasNameRequestSucessful()){
                 playerNameWidget.setTooltip(Tooltip.of(Text.translatable("transfer_items.your_items_to_new_worlds.request_error_tooltip")));
             }else{
                 playerNameWidget.setTooltip(Tooltip.of(Text.translatable("transfer_items.your_items_to_new_worlds.player_button_explanation")));
