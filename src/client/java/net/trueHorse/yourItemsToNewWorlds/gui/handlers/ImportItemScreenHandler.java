@@ -4,6 +4,7 @@ import com.google.gson.JsonParseException;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.JsonHelper;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.trueHorse.yourItemsToNewWorlds.YourItemsToNewWorlds;
 import net.trueHorse.yourItemsToNewWorlds.io.ItemImporter;
 
@@ -38,7 +39,11 @@ public class ImportItemScreenHandler {
         if(itemCache.containsKey(searchLocationDeterminationMode)){
             importableItemStacks=itemCache.get(searchLocationDeterminationMode);
         }else {
-            importableItemStacks = ItemImporter.readItemsFromOtherWorld(selectedWorldPath,playerIdNames.containsKey(selectedPlayerName) ? selectedPlayerName:getUuid(selectedPlayerName),searchLocationDeterminationMode,searchRadius,selectedPos);
+            ItemImporter importer = new ItemImporter(selectedWorldPath,playerIdNames.containsKey(selectedPlayerName) ? selectedPlayerName:getUuid(selectedPlayerName));
+            ChunkPos searchChunkPos = importer.getSearchChunkPos(searchLocationDeterminationMode,searchRadius,selectedPos);
+            importableItemStacks = importer.getPlayerItems();
+            importableItemStacks.addAll(importer.getItemsInArea(searchChunkPos,searchRadius));
+
             itemCache.put(searchLocationDeterminationMode,importableItemStacks);
             itemSelected = new boolean[importableItemStacks.size()];
             Arrays.fill(itemSelected, false);

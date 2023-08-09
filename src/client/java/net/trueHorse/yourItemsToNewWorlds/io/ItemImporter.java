@@ -25,43 +25,39 @@ public class ItemImporter {
         LONGEST_INHABITATION,
         COORDINATES
     }
+    private final RegionReader regionReader;
+    private final NbtCompound playerNbt;
 
-    public static ArrayList<ItemStack> readItemsFromOtherWorld(Path worldPath, String playerUuid, SearchLocationDeterminationMode searchLocationDetermMode, int searchRadius, BlockPos chosenPos) {
-        ArrayList<ItemStack> items = new ArrayList<>();
+    public ItemImporter(Path worldPath, String playerUuid){
+        regionReader = new RegionReader(worldPath.resolve("region"), false);
 
-        NbtCompound playerNbt = null;
-
+        NbtCompound tempPlayerNbt;
         File file = worldPath.resolve("playerdata/"+ playerUuid + ".dat").toFile();
         if (file.exists() && file.isFile()) {
             try {
-                playerNbt = NbtIo.readCompressed(file);
+                tempPlayerNbt = NbtIo.readCompressed(file);
             } catch (IOException e) {
                 YourItemsToNewWorlds.LOGGER.error("Couldn't read player data file.\n"+e.getMessage());
-                return new ArrayList<>();
+                tempPlayerNbt = null;
             }
+        }else{
+            tempPlayerNbt = null;
         }
+        playerNbt = tempPlayerNbt;
+    }
 
+    public ArrayList<ItemStack> getPlayerItems(){
         if (playerNbt == null) {
             return new ArrayList<>();
         }
 
+        ArrayList<ItemStack> items = new ArrayList<>();
         items.addAll(playerNbt.getList("Inventory", 10).stream().map(nbt -> ItemStack.fromNbt((NbtCompound)nbt)).filter(stack -> !stack.isEmpty()).toList());
         items.addAll(playerNbt.getList("EnderItems", 10).stream().map(nbt -> ItemStack.fromNbt((NbtCompound)nbt)).filter(stack -> !stack.isEmpty()).toList());
+        return items;
+    }
 
-        RegionReader regionReader = new RegionReader(worldPath.resolve("region"), false);
-        ChunkPos centerChunkPos;
-        try {
-            centerChunkPos = switch (searchLocationDetermMode) {
-                case SPAWN_POINT -> new ChunkPos(new BlockPos(playerNbt.getInt("SpawnX"), playerNbt.getInt("SpawnY"), playerNbt.getInt("SpawnZ")));
-                case MOST_ITEM_CONTAINERS-> getContainerChunkPos(regionReader,searchRadius);
-                case LONGEST_INHABITATION -> getInhabitationChunkPos(regionReader,searchRadius);
-                case COORDINATES -> new ChunkPos(chosenPos);
-            };
-        }catch (NoSuchElementException e){
-            YourItemsToNewWorlds.LOGGER.error("Failed to process region files.");
-            return new ArrayList<>();
-        }
-        YourItemsToNewWorlds.LOGGER.info("chunkPos: "+centerChunkPos);
+    public ArrayList<ItemStack> getItemsInArea(ChunkPos centerChunkPos, int searchRadius) {
         NbtList surroundingChunks = new NbtList();
 
         for (int i = searchRadius*-1; i <= searchRadius; i++) {
@@ -78,11 +74,10 @@ public class ItemImporter {
         surroundingChunks.forEach(chunkNbt -> ((NbtCompound) chunkNbt).getList("block_entities", 10).forEach(be -> itemsInBlockEntitiesNbts.addAll(((NbtCompound) be).getList("Items", 10))));
         surroundingChunks.forEach(chunkNbt -> ((NbtCompound) chunkNbt).getCompound("Level").getList("TileEntities", 10).forEach(be -> itemsInBlockEntitiesNbts.addAll(((NbtCompound) be).getList("Items", 10))));
 
-        items.addAll(itemsInBlockEntitiesNbts.stream().map(nbt -> ItemStack.fromNbt((NbtCompound) nbt)).filter(stack -> !stack.isEmpty()).toList());
-        return items;
+        return new ArrayList<>(itemsInBlockEntitiesNbts.stream().map(nbt -> ItemStack.fromNbt((NbtCompound) nbt)).filter(stack -> !stack.isEmpty()).toList());
     }
 
-    private static ChunkPos getChunkPosWithBiggestSurroundingVal(RegionReader regionReader, int searchRadius, Function<ChunkPos,Integer> chunkToValFunc){
+    private ChunkPos getChunkPosWithBiggestSurroundingVal(RegionReader regionReader, int searchRadius, Function<ChunkPos,Integer> chunkToValFunc){
         //creating two-dimensional array of values of Chunks
         String[] regionNames = regionReader.getAllRegionFileNames();
         int smallestChunkX = Arrays.stream(regionNames).map(name -> Integer.parseInt(name.split("[.]")[1])).min(Comparator.naturalOrder()).get()*32;
@@ -129,7 +124,23 @@ public class ItemImporter {
         return containerChunk;
     }
 
-    private static ChunkPos getContainerChunkPos(RegionReader regionReader,int searchRadius) throws NoSuchElementException{
+    public ChunkPos getSearchChunkPos(SearchLocationDeterminationMode searchLocationDetermMode, int searchRadius, BlockPos chosenPos){
+        ChunkPos centerChunkPos;
+        try {
+            centerChunkPos = switch (searchLocationDetermMode) {
+                case SPAWN_POINT -> new ChunkPos(new BlockPos(playerNbt.getInt("SpawnX"), playerNbt.getInt("SpawnY"), playerNbt.getInt("SpawnZ")));
+                case MOST_ITEM_CONTAINERS-> getContainerChunkPos(regionReader,searchRadius);
+                case LONGEST_INHABITATION -> getInhabitationChunkPos(regionReader,searchRadius);
+                case COORDINATES -> new ChunkPos(chosenPos);
+            };
+        }catch (NoSuchElementException e){
+            YourItemsToNewWorlds.LOGGER.error("Failed to process region files.");
+            centerChunkPos = null;
+        }
+        return  centerChunkPos;
+    }
+
+    private ChunkPos getContainerChunkPos(RegionReader regionReader,int searchRadius) throws NoSuchElementException{
         return getChunkPosWithBiggestSurroundingVal(regionReader,searchRadius,chunkPos -> {
             try {
                 NbtCompound chunkNbt = regionReader.getNbtAt(chunkPos);
@@ -144,7 +155,7 @@ public class ItemImporter {
         });
     }
 
-    private static ChunkPos getInhabitationChunkPos(RegionReader regionReader, int searchRadius){
+    private ChunkPos getInhabitationChunkPos(RegionReader regionReader, int searchRadius){
         return getChunkPosWithBiggestSurroundingVal(regionReader,searchRadius,chunkPos -> {
             try {
                 NbtCompound chunkNbt = regionReader.getNbtAt(chunkPos);
