@@ -65,7 +65,7 @@ public class ItemImporter {
             for (int j = searchRadius*-1; j <= searchRadius; j++) {
                 try {
                     surroundingChunks.add(regionReader.getNbtAt(new ChunkPos(centerChunkPos.x + i, centerChunkPos.z + j)));
-                } catch (IOException e) {
+                } catch (IOException | NullPointerException e) {
                     YourItemsToNewWorlds.LOGGER.error("Couldn't get chunk at " + (i+centerChunkPos.x) + " " + (j+ centerChunkPos.z));
                 }
             }
