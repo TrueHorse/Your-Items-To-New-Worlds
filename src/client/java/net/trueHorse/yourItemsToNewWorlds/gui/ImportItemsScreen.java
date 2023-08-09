@@ -59,7 +59,7 @@ public class ImportItemsScreen extends Screen {
         ArrayList<ClickableWidget> widgets = new ArrayList<>();
 
         selectWorldButton = ButtonWidget.builder(handler.getSelectedWorldPath()==null ?Text.translatable("transfer_items.your_items_to_new_worlds.no_world_selected"):Text.of(handler.getSelectedWorldPath().getFileName().toString()),
-                button -> client.setScreen(new ImportWorldSelectionScreen(Text.of("select import world"),this, path -> handler.setSelectedWorldPath(path)))).dimensions(minDistanceFromEdge,margin,this.width-2*minDistanceFromEdge,20).build();
+                button -> client.setScreen(new ImportWorldSelectionScreen(Text.translatable("narrator.your_items_to_new_worlds.select_import_world"),this, path -> handler.setSelectedWorldPath(path)))).dimensions(minDistanceFromEdge,margin,this.width-2*minDistanceFromEdge,20).build();
         widgets.add(selectWorldButton);
 
         if(handler.getSelectedWorldPath()!=null){
