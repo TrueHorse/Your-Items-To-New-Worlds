@@ -2,20 +2,20 @@ package net.trueHorse.yourItemsToNewWorlds.gui;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.Element;
-import net.minecraft.client.gui.Selectable;
-import net.minecraft.client.gui.widget.Button;
-import net.minecraft.client.gui.widget.ElementListWidget;
-import net.minecraft.client.gui.widget.ImageButton;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.ContainerObjectSelectionList;
+import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratableEntry;
+import net.minecraft.network.chat.Component;
 import net.trueHorse.yourItemsToNewWorlds.gui.handlers.ImportWorldSelectionScreenHandler;
 
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
 
-public class InstanceListWidget extends ElementListWidget<InstanceListWidget.Entry> {
+public class InstanceListWidget extends ContainerObjectSelectionList<InstanceListWidget.Entry> {
 
     private final ImportWorldSelectionScreen parent;
     private String search;
@@ -24,7 +24,7 @@ public class InstanceListWidget extends ElementListWidget<InstanceListWidget.Ent
     public InstanceListWidget(Minecraft client, ImportWorldSelectionScreen parent, ImportWorldSelectionScreenHandler handler, String search) {
         super(client, parent.width+65, parent.height, 40, parent.height - 39, 20);
         this.setRenderBackground(false);
-        this.setRenderHorizontalShadows(false);
+        this.setRenderTopAndBottom(false);
         this.parent = parent;
         this.handler = handler;
         this.search = search;
@@ -48,7 +48,7 @@ public class InstanceListWidget extends ElementListWidget<InstanceListWidget.Ent
                 this.addEntry(new InstanceEntry(instancePath,handler));
             }
         }
-        this.parent.narrateScreenIfNarrationEnabled(true);
+        this.parent.triggerImmediateNarration(true);
     }
 
     public final class InstanceEntry
@@ -59,7 +59,7 @@ public class InstanceListWidget extends ElementListWidget<InstanceListWidget.Ent
 
         public InstanceEntry(Path instancePath, ImportWorldSelectionScreenHandler handler){
             String instanceName = instancePath.getFileName().toString();
-            instanceButton = Button.builder(Component.literal(instanceName),button -> handler.onInstanceSelected(instancePath)).dimensions(0,0,150,20).build();
+            instanceButton = Button.builder(Component.literal(instanceName), button -> handler.onInstanceSelected(instancePath)).bounds(0,0,150,20).build();
             instanceButton.setMessage(Component.literal(instanceName));
 
             deleteButton = new ImageButton(0,0,20,20,20,0,20, ImportWorldSelectionScreen.BUTTON_TEXTURE_SHEET,40,40,
@@ -67,7 +67,7 @@ public class InstanceListWidget extends ElementListWidget<InstanceListWidget.Ent
         }
 
         @Override
-        public void render(DrawContext context, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+        public void render(GuiGraphics context, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
             instanceButton.setX(x);
             instanceButton.setY(y);
             instanceButton.render(context,mouseX,mouseY,tickDelta);
@@ -80,18 +80,18 @@ public class InstanceListWidget extends ElementListWidget<InstanceListWidget.Ent
         }
 
         @Override
-        public List<? extends Selectable> selectableChildren() {
+        public List<? extends NarratableEntry> narratables() {
             return ImmutableList.of(instanceButton,deleteButton);
         }
 
         @Override
-        public List<? extends Element> children() {
+        public List<? extends GuiEventListener> children() {
             return ImmutableList.of(instanceButton,deleteButton);
         }
     }
 
     public static abstract class Entry
-            extends ElementListWidget.Entry<InstanceListWidget.Entry> {
+            extends ContainerObjectSelectionList.Entry<InstanceListWidget.Entry> {
 
     }
 }

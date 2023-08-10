@@ -58,7 +58,7 @@ public class ImportItemsScreen extends Screen {
         ArrayList<AbstractWidget> widgets = new ArrayList<>();
 
         selectWorldButton = Button.builder(handler.getSelectedWorldPath()==null ?Component.translatable("transfer_items.your_items_to_new_worlds.no_world_selected"):Component.literal(handler.getSelectedWorldPath().getFileName().toString()),
-                button -> minecraft.setScreen(new ImportWorldSelectionScreen(Component.translatable("narrator.your_items_to_new_worlds.select_import_world"),this, path -> handler.setSelectedWorldPath(path)))).dimensions(minDistanceFromEdge,margin,this.width-2*minDistanceFromEdge,20).build();
+                button -> minecraft.setScreen(new ImportWorldSelectionScreen(Component.translatable("narrator.your_items_to_new_worlds.select_import_world"),this, path -> handler.setSelectedWorldPath(path)))).bounds(minDistanceFromEdge,margin,this.width-2*minDistanceFromEdge,20).build();
         widgets.add(selectWorldButton);
 
         if(handler.getSelectedWorldPath()!=null){
@@ -144,7 +144,7 @@ public class ImportItemsScreen extends Screen {
                     TexturedItemButtonWidget selectButton = new TexturedItemButtonWidget(minDistanceFromEdge +12+additionalGridXMargin+j*25,searchButton.getY()+searchButton.getHeight()+ margin +additionalGridYMargin+i*25,25,25,27,0,25,textureSheet,
                             button -> {((TexturedItemButtonWidget)button).toggle();
                             handler.toggleSelection(itemSelectButtons.indexOf(button)+gridPage*itemSelectButtons.size());},ItemStack.EMPTY);
-                    selectButton.visable = false;
+                    selectButton.visible = false;
                     itemSelectButtons.add(selectButton);
                 }
             }
@@ -174,7 +174,7 @@ public class ImportItemsScreen extends Screen {
             widgets.add(searchingTextWidget);
         }
 
-        widgets.add(addRenderableWidget(Button.builder(Component.translatable("gui.cancel"), button -> close()).bounds(this.width / 2 + 5, this.height-29, 150, 20).build()));
+        widgets.add(addRenderableWidget(Button.builder(Component.translatable("gui.cancel"), button -> onClose()).bounds(this.width / 2 + 5, this.height-29, 150, 20).build()));
         widgets.add(Button.builder(CommonComponents.GUI_DONE, button -> applyAndClose()).bounds(this.width / 2 - 155, this.height-29, 150, 20).build());
 
         widgets.forEach(this::addRenderableWidget);
@@ -280,12 +280,12 @@ public class ImportItemsScreen extends Screen {
     }
 
     @Override
-    public void close(){
+    public void onClose(){
         minecraft.setScreen(parent);
     }
 
     public void applyAndClose(){
         applier.accept(handler.getSelectedItems(),this);
-        close();
+        onClose();
     }
 }

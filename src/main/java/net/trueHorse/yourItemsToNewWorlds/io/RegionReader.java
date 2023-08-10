@@ -1,9 +1,9 @@
 package net.trueHorse.yourItemsToNewWorlds.io;
 
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.storage.RegionFile;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.chunk.storage.RegionFile;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.DataInputStream;
@@ -25,14 +25,14 @@ public class RegionReader {
     }
 
     @Nullable
-    public NbtCompound getNbtAt(ChunkPos pos) throws IOException {
+    public CompoundTag getNbtAt(ChunkPos pos) throws IOException {
         RegionFile regionFile = this.getRegionFile(pos);
-        DataInputStream dataInputStream = regionFile.getChunkInputStream(pos);
+        DataInputStream dataInputStream = regionFile.getChunkDataInputStream(pos);
         if (dataInputStream == null) {
             return null;
         }
 
-        NbtCompound nbt;
+        CompoundTag nbt;
         try {
             nbt = NbtIo.read(dataInputStream);
         } catch (Throwable var7) {

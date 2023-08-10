@@ -14,8 +14,8 @@ import java.util.List;
 
 public class InstancesFileIO {
 
-    private static final Path INSTANCES_FILE_PATH = Minecraft.getInstance().runDirectory.toPath().resolve("config/Your Items to New Worlds/instances.txt");
-    private static final Path CURRENT_INSTANCE_PATH = Minecraft.getInstance().runDirectory.toPath();
+    private static final Path INSTANCES_FILE_PATH = Minecraft.getInstance().gameDirectory.toPath().resolve("config/Your Items to New Worlds/instances.txt");
+    private static final Path CURRENT_INSTANCE_PATH = Minecraft.getInstance().gameDirectory.toPath();
 
     public void saveInstances(List<Path> instancePaths){
         File instancesFile = INSTANCES_FILE_PATH.toFile();

@@ -1,46 +1,46 @@
 package net.trueHorse.yourItemsToNewWorlds.gui;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.widget.ImageButton;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 
 public class TexturedItemButtonWidget extends ImageButton {
 
     private ItemStack itemStack;
     private boolean toggled;
 
-    public TexturedItemButtonWidget(int x, int y, int width, int height, int u, int v, ResourceLocation texture, PressAction pressAction, ItemStack itemStack) {
+    public TexturedItemButtonWidget(int x, int y, int width, int height, int u, int v, ResourceLocation texture, OnPress pressAction, ItemStack itemStack) {
         super(x, y, width, height, u, v, texture, pressAction);
         setItemStack(itemStack);
     }
 
-    public TexturedItemButtonWidget(int x, int y, int width, int height, int u, int v, int hoveredVOffset, ResourceLocation texture, PressAction pressAction, ItemStack itemStack) {
+    public TexturedItemButtonWidget(int x, int y, int width, int height, int u, int v, int hoveredVOffset, ResourceLocation texture, OnPress pressAction, ItemStack itemStack) {
         super(x, y, width, height, u, v, hoveredVOffset, texture, pressAction);
         setItemStack(itemStack);
     }
 
-    public TexturedItemButtonWidget(int x, int y, int width, int height, int u, int v, int hoveredVOffset, ResourceLocation texture, int textureWidth, int textureHeight, PressAction pressAction, ItemStack itemStack) {
+    public TexturedItemButtonWidget(int x, int y, int width, int height, int u, int v, int hoveredVOffset, ResourceLocation texture, int textureWidth, int textureHeight, OnPress pressAction, ItemStack itemStack) {
         super(x, y, width, height, u, v, hoveredVOffset, texture, textureWidth, textureHeight, pressAction);
         setItemStack(itemStack);
     }
 
-    public TexturedItemButtonWidget(int x, int y, int width, int height, int u, int v, int hoveredVOffset, ResourceLocation texture, int textureWidth, int textureHeight, PressAction pressAction, Text message, ItemStack itemStack) {
+    public TexturedItemButtonWidget(int x, int y, int width, int height, int u, int v, int hoveredVOffset, ResourceLocation texture, int textureWidth, int textureHeight, OnPress pressAction, Component message, ItemStack itemStack) {
         super(x, y, width, height, u, v, hoveredVOffset, texture, textureWidth, textureHeight, pressAction, message);
         setItemStack(itemStack);
     }
 
     @Override
-    public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
         if(toggled){
-            this.drawTexture(context, this.texture, this.getX(), this.getY(), this.u, this.v, this.hoveredVOffset, this.width, this.height, this.textureWidth, this.textureHeight);
+            this.renderTexture(context, this.resourceLocation, this.getX(), this.getY(), this.xTexStart, this.yTexStart, this.yDiffTex, this.width, this.height, this.textureWidth, this.textureHeight);
         }else{
-            this.drawTexture(context, this.texture, this.getX(), this.getY(), this.u+this.width, this.v, this.hoveredVOffset, this.width, this.height, this.textureWidth, this.textureHeight);
+            this.renderTexture(context, this.resourceLocation, this.getX(), this.getY(), this.xTexStart+this.width, this.yTexStart, this.yDiffTex, this.width, this.height, this.textureWidth, this.textureHeight);
         }
-        context.drawItem(itemStack,this.getX()+5,this.getY()+4);
-        context.drawItemInSlot(Minecraft.getInstance().font,itemStack,this.getX()+5,this.getY()+4);
+        context.renderItem(itemStack,this.getX()+5,this.getY()+4);
+        context.renderItemDecorations(Minecraft.getInstance().font,itemStack,this.getX()+5,this.getY()+4);
     }
 
     public void toggle(){

@@ -61,11 +61,11 @@ public class ImportWorldSelectionScreenHandler {
     }
 
     public Path getPathOfWorld(int index){
-        return selectedInstancePath.resolve("saves/"+worlds.get(index).getLevelName());
+        return selectedInstancePath.resolve("saves/"+worlds.get(index).getLevelId());
     }
 
     public Path getPathOfWorld(LevelSummary summary){
-        return selectedInstancePath.resolve("saves/"+summary.getLevelName());
+        return selectedInstancePath.resolve("saves/"+summary.getLevelId());
     }
 
     public void addInstance(Path instance){

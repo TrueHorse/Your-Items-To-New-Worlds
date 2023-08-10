@@ -1,11 +1,11 @@
 package net.trueHorse.yourItemsToNewWorlds.io;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtIo;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ChunkPos;
 import net.trueHorse.yourItemsToNewWorlds.YourItemsToNewWorlds;
 
 import java.io.File;
@@ -26,12 +26,12 @@ public class ItemImporter {
         COORDINATES
     }
     private final RegionReader regionReader;
-    private final NbtCompound playerNbt;
+    private final CompoundTag playerNbt;
 
     public ItemImporter(Path worldPath, String playerUuid){
         regionReader = new RegionReader(worldPath.resolve("region"), false);
 
-        NbtCompound tempPlayerNbt;
+        CompoundTag tempPlayerNbt;
         File file = worldPath.resolve("playerdata/"+ playerUuid + ".dat").toFile();
         if (file.exists() && file.isFile()) {
             try {
@@ -53,13 +53,13 @@ public class ItemImporter {
         }
 
         ArrayList<ItemStack> items = new ArrayList<>();
-        items.addAll(playerNbt.getList("Inventory", 10).stream().map(nbt -> ItemStack.fromNbt((NbtCompound)nbt)).filter(stack -> !stack.isEmpty()).toList());
-        items.addAll(playerNbt.getList("EnderItems", 10).stream().map(nbt -> ItemStack.fromNbt((NbtCompound)nbt)).filter(stack -> !stack.isEmpty()).toList());
+        items.addAll(playerNbt.getList("Inventory", 10).stream().map(nbt -> ItemStack.of((CompoundTag)nbt)).filter(stack -> !stack.isEmpty()).toList());
+        items.addAll(playerNbt.getList("EnderItems", 10).stream().map(nbt -> ItemStack.of((CompoundTag)nbt)).filter(stack -> !stack.isEmpty()).toList());
         return items;
     }
 
     public ArrayList<ItemStack> getItemsInArea(ChunkPos centerChunkPos, int searchRadius) {
-        NbtList surroundingChunks = new NbtList();
+        ListTag surroundingChunks = new ListTag();
 
         for (int i = searchRadius*-1; i <= searchRadius; i++) {
             for (int j = searchRadius*-1; j <= searchRadius; j++) {
@@ -71,11 +71,11 @@ public class ItemImporter {
             }
         }
 
-        NbtList itemsInBlockEntitiesNbts = new NbtList();
-        surroundingChunks.forEach(chunkNbt -> ((NbtCompound) chunkNbt).getList("block_entities", 10).forEach(be -> itemsInBlockEntitiesNbts.addAll(((NbtCompound) be).getList("Items", 10))));
-        surroundingChunks.forEach(chunkNbt -> ((NbtCompound) chunkNbt).getCompound("Level").getList("TileEntities", 10).forEach(be -> itemsInBlockEntitiesNbts.addAll(((NbtCompound) be).getList("Items", 10))));
+        ListTag itemsInBlockEntitiesNbts = new ListTag();
+        surroundingChunks.forEach(chunkNbt -> ((CompoundTag) chunkNbt).getList("block_entities", 10).forEach(be -> itemsInBlockEntitiesNbts.addAll(((CompoundTag) be).getList("Items", 10))));
+        surroundingChunks.forEach(chunkNbt -> ((CompoundTag) chunkNbt).getCompound("Level").getList("TileEntities", 10).forEach(be -> itemsInBlockEntitiesNbts.addAll(((CompoundTag) be).getList("Items", 10))));
 
-        return new ArrayList<>(itemsInBlockEntitiesNbts.stream().map(nbt -> ItemStack.fromNbt((NbtCompound) nbt)).filter(stack -> !stack.isEmpty()).toList());
+        return new ArrayList<>(itemsInBlockEntitiesNbts.stream().map(nbt -> ItemStack.of((CompoundTag) nbt)).filter(stack -> !stack.isEmpty()).toList());
     }
 
     private ChunkPos getChunkPosWithBiggestSurroundingVal(RegionReader regionReader, int searchRadius, Function<ChunkPos,Integer> chunkToValFunc){
@@ -144,9 +144,9 @@ public class ItemImporter {
     private ChunkPos getContainerChunkPos(RegionReader regionReader,int searchRadius) throws NoSuchElementException{
         return getChunkPosWithBiggestSurroundingVal(regionReader,searchRadius,chunkPos -> {
             try {
-                NbtCompound chunkNbt = regionReader.getNbtAt(chunkPos);
-                return (int)chunkNbt.getList("block_entities", 10).stream().filter(nbt -> !((NbtCompound)nbt).getList("Items",10).isEmpty()).count()
-                        + (int)chunkNbt.getCompound("Level").getList("TileEntities", 10).stream().filter(nbt -> !((NbtCompound)nbt).getList("Items",10).isEmpty()).count();
+                CompoundTag chunkNbt = regionReader.getNbtAt(chunkPos);
+                return (int)chunkNbt.getList("block_entities", 10).stream().filter(nbt -> !((CompoundTag)nbt).getList("Items",10).isEmpty()).count()
+                        + (int)chunkNbt.getCompound("Level").getList("TileEntities", 10).stream().filter(nbt -> !((CompoundTag)nbt).getList("Items",10).isEmpty()).count();
             } catch (IOException e) {
                 YourItemsToNewWorlds.LOGGER.error("Couldn't read region file "+(Math.floor(chunkPos.x/32.0))+"."+(Math.floor(chunkPos.z/32.0)));
                 return 0;
@@ -159,7 +159,7 @@ public class ItemImporter {
     private ChunkPos getInhabitationChunkPos(RegionReader regionReader, int searchRadius){
         return getChunkPosWithBiggestSurroundingVal(regionReader,searchRadius,chunkPos -> {
             try {
-                NbtCompound chunkNbt = regionReader.getNbtAt(chunkPos);
+                CompoundTag chunkNbt = regionReader.getNbtAt(chunkPos);
                 return Math.toIntExact(chunkNbt.getLong("InhabitedTime"))
                         + Math.toIntExact(chunkNbt.getCompound("Level").getLong("InhabitedTime"));
             } catch (IOException e) {
