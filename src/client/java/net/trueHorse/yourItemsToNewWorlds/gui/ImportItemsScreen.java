@@ -38,6 +38,7 @@ public class ImportItemsScreen extends Screen {
     private TexturedButtonWidget rightArrowButton;
     private final ArrayList<TexturedItemButtonWidget> itemSelectButtons= new ArrayList<>();
     private TextWidget noItemsTextWidget;
+    private TextWidget searchingTextWidget;
     private final Screen parent;
     private final ImportItemScreenHandler handler = new ImportItemScreenHandler(this);
     private int gridPage = 0;
@@ -169,6 +170,10 @@ public class ImportItemsScreen extends Screen {
             noItemsTextWidget = new TextWidget(this.width/2-100,pageArrowY,200,20,Text.translatable("transfer_items.your_items_to_new_worlds.no_items_found"), MinecraftClient.getInstance().textRenderer);
             noItemsTextWidget.visible = false;
             widgets.add(noItemsTextWidget);
+
+            searchingTextWidget = new TextWidget(this.width/2-50,pageArrowY,100,20,Text.translatable("transfer_items.your_items_to_new_worlds.searching"), MinecraftClient.getInstance().textRenderer);
+            searchingTextWidget.visible = false;
+            widgets.add(searchingTextWidget);
         }
 
         widgets.add(addDrawableChild(ButtonWidget.builder(Text.translatable("gui.cancel"), button -> close()).dimensions(this.width / 2 + 5, this.height-29, 150, 20).build()));
@@ -194,6 +199,7 @@ public class ImportItemsScreen extends Screen {
             }
             radiusWidget.tick();
         }
+        handler.tick();
     }
 
     public void generateAndDisplayGridArea(){
@@ -209,8 +215,7 @@ public class ImportItemsScreen extends Screen {
                 }
             }
         }
-        handler.initImportableItemStacks();
-        refreshGridArea();
+        handler.searchImportableItemStacks();
     }
 
     public void refreshGridArea(){
@@ -250,6 +255,19 @@ public class ImportItemsScreen extends Screen {
         boolean noItems = pageItemCount == 0;
         selectAllButton.visible = !noItems;
         noItemsTextWidget.visible = noItems;
+    }
+
+    public void onSearchStatusChanged(boolean searching){
+        searchingTextWidget.visible = searching;
+        selectWorldButton.active = !searching;
+        playerNameWidget.active = !searching;
+        searchLocationModeWidget.active = !searching;
+        setCoordFieldsEditability(!searching && handler.getSearchLocationDeterminationMode() == ItemImporter.SearchLocationDeterminationMode.COORDINATES);
+        radiusWidget.active = !searching;
+        searchButton.active = !searching;
+        if(!searching){
+            refreshGridArea();
+        }
     }
 
     public void updateCoordinateFields(){

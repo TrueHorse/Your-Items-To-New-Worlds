@@ -18,6 +18,7 @@
   "transfer_items.your_items_to_new_worlds.radius": "radius",
   "transfer_items.your_items_to_new_worlds.missing_coordinates_tooltip": "Not all coordinates are specified.",
   "transfer_items.your_items_to_new_worlds.missing_radius_tooltip": "The item search radius isn't specified.",
+  "transfer_items.your_items_to_new_worlds.searching": "Searching ...",
 
   "narrator.your_items_to_new_worlds.select_import_world": "select import world",
   "narrator.your_items_to_new_worlds.instance_search": "instance search",

@@ -3,6 +3,7 @@ package net.trueHorse.yourItemsToNewWorlds.gui.handlers;
 import com.google.gson.JsonParseException;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.JsonHelper;
+import net.minecraft.util.Pair;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.trueHorse.yourItemsToNewWorlds.YourItemsToNewWorlds;
@@ -22,6 +23,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ImportItemScreenHandler {
@@ -37,29 +42,55 @@ public class ImportItemScreenHandler {
     private final BlockPos.Mutable selectedPos = new BlockPos.Mutable();
     private int searchRadius;
     private final ImportItemsScreen screen;
+    private CompletableFuture<Pair<ChunkPos,ArrayList<ItemStack>>> importResult;
 
     public ImportItemScreenHandler(ImportItemsScreen screen){
         this.screen = screen;
     }
 
-    public void initImportableItemStacks(){
+    public void searchImportableItemStacks(){
         ItemSearchConfig currentConfig = new ItemSearchConfig(selectedWorldPath,selectedPlayerName,searchLocationDeterminationMode,searchLocationDeterminationMode==ItemImporter.SearchLocationDeterminationMode.COORDINATES ? selectedPos:null,searchRadius);
         if(itemCache.containsKey(currentConfig)){
             importableItemStacks=itemCache.get(currentConfig);
+            //TODO coordinate fields
         }else {
-            ItemImporter importer = new ItemImporter(selectedWorldPath,playerIdNames.containsKey(selectedPlayerName) ? selectedPlayerName:getUuid(selectedPlayerName));
-            ChunkPos searchChunkPos = importer.getSearchChunkPos(searchLocationDeterminationMode,searchRadius,selectedPos);
-            importableItemStacks = importer.getPlayerItems();
-            importableItemStacks.addAll(importer.getItemsInArea(searchChunkPos,searchRadius));
-
-            itemSelected = new boolean[importableItemStacks.size()];
-            Arrays.fill(itemSelected, false);
-            if(searchLocationDeterminationMode != ItemImporter.SearchLocationDeterminationMode.COORDINATES){
-                selectedPos.set(searchChunkPos.getBlockPos(0,0,0));
-                screen.updateCoordinateFields();
-            }
-            itemCache.put(currentConfig,importableItemStacks);
+            screen.onSearchStatusChanged(true);
+            importResult = CompletableFuture.supplyAsync(()->{
+                ItemImporter importer = new ItemImporter(selectedWorldPath,playerIdNames.containsKey(selectedPlayerName) ? selectedPlayerName:getUuid(selectedPlayerName));
+                ChunkPos searchChunkPos = importer.getSearchChunkPos(searchLocationDeterminationMode,searchRadius,selectedPos);
+                ArrayList<ItemStack> importableItemStacks = importer.getPlayerItems();
+                importableItemStacks.addAll(importer.getItemsInArea(searchChunkPos,searchRadius));
+                return new Pair<>(searchChunkPos, importableItemStacks);
+            });
         }
+    }
+
+    public void tick(){
+        try {
+            if (importResult != null && importResult.getNow(null) != null) {
+                onItemSearchComplete(importResult.get());
+            }
+        }catch (InterruptedException|CompletionException| ExecutionException| CancellationException e){
+            YourItemsToNewWorlds.LOGGER.error("An error occurred during item search.\n"+e.getMessage());
+            onItemSearchComplete(new Pair<>(new ChunkPos(0,0),new ArrayList<>()));
+        }
+    }
+
+    private void onItemSearchComplete(Pair<ChunkPos, ArrayList<ItemStack>> result){
+        importResult = null;
+
+        ChunkPos searchChunkPos = result.getLeft();
+        importableItemStacks = result.getRight();
+        itemSelected = new boolean[importableItemStacks.size()];
+        Arrays.fill(itemSelected, false);
+        if(searchLocationDeterminationMode != ItemImporter.SearchLocationDeterminationMode.COORDINATES){
+            selectedPos.set(searchChunkPos.getBlockPos(0,0,0));
+            screen.updateCoordinateFields();
+        }
+        itemCache.put(new ItemSearchConfig(selectedWorldPath,selectedPlayerName,searchLocationDeterminationMode,searchLocationDeterminationMode==ItemImporter.SearchLocationDeterminationMode.COORDINATES ? selectedPos:null,searchRadius)
+                ,importableItemStacks);
+
+        screen.onSearchStatusChanged(false);
     }
 
     //@return if all name requests where successful
