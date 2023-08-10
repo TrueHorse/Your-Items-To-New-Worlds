@@ -49,7 +49,7 @@ public class ImportItemScreenHandler {
     }
 
     public void searchImportableItemStacks(){
-        ItemSearchConfig currentConfig = new ItemSearchConfig(selectedWorldPath,selectedPlayerName,searchLocationDeterminationMode,searchLocationDeterminationMode==ItemImporter.SearchLocationDeterminationMode.COORDINATES ? chosenPos :null,searchRadius);
+        ItemSearchConfig currentConfig = new ItemSearchConfig(selectedWorldPath,selectedPlayerName,searchLocationDeterminationMode,searchLocationDeterminationMode==ItemImporter.SearchLocationDeterminationMode.COORDINATES ? new ChunkPos(chosenPos) :null,searchRadius);
         if(itemCache.containsKey(currentConfig)){
             Pair<ArrayList<ItemStack>,ChunkPos> pair =itemCache.get(currentConfig);
             importableItemStacks = pair.getLeft();
@@ -91,7 +91,7 @@ public class ImportItemScreenHandler {
             chosenPos.set(searchChunkPos.getBlockPos(0,0,0));
             screen.updateCoordinateFields();
         }
-        itemCache.put(new ItemSearchConfig(selectedWorldPath,selectedPlayerName,searchLocationDeterminationMode,searchLocationDeterminationMode==ItemImporter.SearchLocationDeterminationMode.COORDINATES ? chosenPos :null,searchRadius)
+        itemCache.put(new ItemSearchConfig(selectedWorldPath,selectedPlayerName,searchLocationDeterminationMode,searchLocationDeterminationMode==ItemImporter.SearchLocationDeterminationMode.COORDINATES ? new ChunkPos(chosenPos) :null,searchRadius)
                 ,new Pair<>(result.getRight(),result.getLeft()));
 
         screen.onSearchStatusChanged(false);
