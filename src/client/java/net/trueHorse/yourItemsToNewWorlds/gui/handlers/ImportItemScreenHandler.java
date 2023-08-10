@@ -34,12 +34,12 @@ public class ImportItemScreenHandler {
     private ArrayList<ItemStack> importableItemStacks = new ArrayList<>();
     private boolean[] itemSelected;
     private final Map<String,String> playerIdNames = new HashMap<>();
-    private final Map<ItemSearchConfig,ArrayList<ItemStack>> itemCache = new HashMap<>();
+    private final Map<ItemSearchConfig,Pair<ArrayList<ItemStack>,ChunkPos>> itemCache = new HashMap<>();
     private boolean nameRequestSucessful;
     private Path selectedWorldPath;
     private String selectedPlayerName;
     private ItemImporter.SearchLocationDeterminationMode searchLocationDeterminationMode;
-    private final BlockPos.Mutable selectedPos = new BlockPos.Mutable();
+    private final BlockPos.Mutable chosenPos = new BlockPos.Mutable();
     private int searchRadius;
     private final ImportItemsScreen screen;
     private CompletableFuture<Pair<ChunkPos,ArrayList<ItemStack>>> importResult;
@@ -49,15 +49,19 @@ public class ImportItemScreenHandler {
     }
 
     public void searchImportableItemStacks(){
-        ItemSearchConfig currentConfig = new ItemSearchConfig(selectedWorldPath,selectedPlayerName,searchLocationDeterminationMode,searchLocationDeterminationMode==ItemImporter.SearchLocationDeterminationMode.COORDINATES ? selectedPos:null,searchRadius);
+        ItemSearchConfig currentConfig = new ItemSearchConfig(selectedWorldPath,selectedPlayerName,searchLocationDeterminationMode,searchLocationDeterminationMode==ItemImporter.SearchLocationDeterminationMode.COORDINATES ? chosenPos :null,searchRadius);
         if(itemCache.containsKey(currentConfig)){
-            importableItemStacks=itemCache.get(currentConfig);
-            //TODO coordinate fields
+            Pair<ArrayList<ItemStack>,ChunkPos> pair =itemCache.get(currentConfig);
+            importableItemStacks = pair.getLeft();
+            if(searchLocationDeterminationMode != ItemImporter.SearchLocationDeterminationMode.COORDINATES) {
+                chosenPos.set(pair.getRight().getBlockPos(0, 0, 0));
+                screen.updateCoordinateFields();
+            }
         }else {
             screen.onSearchStatusChanged(true);
             importResult = CompletableFuture.supplyAsync(()->{
                 ItemImporter importer = new ItemImporter(selectedWorldPath,playerIdNames.containsKey(selectedPlayerName) ? selectedPlayerName:getUuid(selectedPlayerName));
-                ChunkPos searchChunkPos = importer.getSearchChunkPos(searchLocationDeterminationMode,searchRadius,selectedPos);
+                ChunkPos searchChunkPos = importer.getSearchChunkPos(searchLocationDeterminationMode,searchRadius, chosenPos);
                 ArrayList<ItemStack> importableItemStacks = importer.getPlayerItems();
                 importableItemStacks.addAll(importer.getItemsInArea(searchChunkPos,searchRadius));
                 return new Pair<>(searchChunkPos, importableItemStacks);
@@ -84,11 +88,11 @@ public class ImportItemScreenHandler {
         itemSelected = new boolean[importableItemStacks.size()];
         Arrays.fill(itemSelected, false);
         if(searchLocationDeterminationMode != ItemImporter.SearchLocationDeterminationMode.COORDINATES){
-            selectedPos.set(searchChunkPos.getBlockPos(0,0,0));
+            chosenPos.set(searchChunkPos.getBlockPos(0,0,0));
             screen.updateCoordinateFields();
         }
-        itemCache.put(new ItemSearchConfig(selectedWorldPath,selectedPlayerName,searchLocationDeterminationMode,searchLocationDeterminationMode==ItemImporter.SearchLocationDeterminationMode.COORDINATES ? selectedPos:null,searchRadius)
-                ,importableItemStacks);
+        itemCache.put(new ItemSearchConfig(selectedWorldPath,selectedPlayerName,searchLocationDeterminationMode,searchLocationDeterminationMode==ItemImporter.SearchLocationDeterminationMode.COORDINATES ? chosenPos :null,searchRadius)
+                ,new Pair<>(result.getRight(),result.getLeft()));
 
         screen.onSearchStatusChanged(false);
     }
@@ -158,9 +162,9 @@ public class ImportItemScreenHandler {
 
     public void setCoordinate(int val, String coord){
         switch (coord) {
-            case "X" -> selectedPos.setX(val);
-            case "Y" -> selectedPos.setY(val);
-            case "Z" -> selectedPos.setZ(val);
+            case "X" -> chosenPos.setX(val);
+            case "Y" -> chosenPos.setY(val);
+            case "Z" -> chosenPos.setZ(val);
             default -> throw new IllegalArgumentException();
         }
     }
@@ -168,9 +172,9 @@ public class ImportItemScreenHandler {
     public Integer getCoordinate(String coord){
         YourItemsToNewWorlds.LOGGER.info("coord: "+coord);
         return switch (coord) {
-            case "X" -> selectedPos.getX();
-            case "Y" -> selectedPos.getY();
-            case "Z" -> selectedPos.getZ();
+            case "X" -> chosenPos.getX();
+            case "Y" -> chosenPos.getY();
+            case "Z" -> chosenPos.getZ();
             default -> throw new IllegalArgumentException();
         };
     }
