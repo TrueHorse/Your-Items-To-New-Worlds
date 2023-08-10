@@ -1,11 +1,11 @@
 package net.trueHorse.yourItemsToNewWorlds.gui.handlers;
 
 import com.google.gson.JsonParseException;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.JsonHelper;
-import net.minecraft.util.Pair;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
+import com.mojang.datafixers.util.Pair;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ChunkPos;
 import net.trueHorse.yourItemsToNewWorlds.YourItemsToNewWorlds;
 import net.trueHorse.yourItemsToNewWorlds.gui.ImportItemsScreen;
 import net.trueHorse.yourItemsToNewWorlds.io.ItemImporter;
@@ -34,12 +34,12 @@ public class ImportItemScreenHandler {
     private ArrayList<ItemStack> importableItemStacks = new ArrayList<>();
     private boolean[] itemSelected;
     private final Map<String,String> playerIdNames = new HashMap<>();
-    private final Map<ItemSearchConfig,Pair<ArrayList<ItemStack>,ChunkPos>> itemCache = new HashMap<>();
+    private final Map<ItemSearchConfig, Pair<ArrayList<ItemStack>, ChunkPos>> itemCache = new HashMap<>();
     private boolean nameRequestSucessful;
     private Path selectedWorldPath;
     private String selectedPlayerName;
     private ItemImporter.SearchLocationDeterminationMode searchLocationDeterminationMode;
-    private final BlockPos.Mutable chosenPos = new BlockPos.Mutable();
+    private final BlockPos.MutableBlockPos chosenPos = new BlockPos.MutableBlockPos();
     private int searchRadius;
     private final ImportItemsScreen screen;
     private CompletableFuture<Pair<ChunkPos,ArrayList<ItemStack>>> importResult;
@@ -52,9 +52,9 @@ public class ImportItemScreenHandler {
         ItemSearchConfig currentConfig = new ItemSearchConfig(selectedWorldPath,selectedPlayerName,searchLocationDeterminationMode,searchLocationDeterminationMode==ItemImporter.SearchLocationDeterminationMode.COORDINATES ? new ChunkPos(chosenPos) :null,searchRadius);
         if(itemCache.containsKey(currentConfig)){
             Pair<ArrayList<ItemStack>,ChunkPos> pair =itemCache.get(currentConfig);
-            importableItemStacks = pair.getLeft();
+            importableItemStacks = pair.getFirst();
             if(searchLocationDeterminationMode != ItemImporter.SearchLocationDeterminationMode.COORDINATES) {
-                chosenPos.set(pair.getRight().getBlockPos(0, 0, 0));
+                chosenPos.set(pair.getSecond().getBlockAt(0, 0, 0));
                 screen.updateCoordinateFields();
             }
         }else {
@@ -83,16 +83,16 @@ public class ImportItemScreenHandler {
     private void onItemSearchComplete(Pair<ChunkPos, ArrayList<ItemStack>> result){
         importResult = null;
 
-        ChunkPos searchChunkPos = result.getLeft();
-        importableItemStacks = result.getRight();
+        ChunkPos searchChunkPos = result.getFirst();
+        importableItemStacks = result.getSecond();
         itemSelected = new boolean[importableItemStacks.size()];
         Arrays.fill(itemSelected, false);
         if(searchLocationDeterminationMode != ItemImporter.SearchLocationDeterminationMode.COORDINATES){
-            chosenPos.set(searchChunkPos.getBlockPos(0,0,0));
+            chosenPos.set(searchChunkPos.getBlockAt(0,0,0));
             screen.updateCoordinateFields();
         }
         itemCache.put(new ItemSearchConfig(selectedWorldPath,selectedPlayerName,searchLocationDeterminationMode,searchLocationDeterminationMode==ItemImporter.SearchLocationDeterminationMode.COORDINATES ? new ChunkPos(chosenPos) :null,searchRadius)
-                ,new Pair<>(result.getRight(),result.getLeft()));
+                ,new Pair<>(result.getSecond(),result.getFirst()));
 
         screen.onSearchStatusChanged(false);
     }
@@ -118,7 +118,7 @@ public class ImportItemScreenHandler {
                         .timeout(Duration.of(5, ChronoUnit.SECONDS))
                         .build();
                 HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-                playerIdNames.put(uuid,JsonHelper.deserialize(response.body()).get("name").getAsString());
+                playerIdNames.put(uuid, GsonHelper.parse(response.body()).get("name").getAsString());
             }catch (IOException | InterruptedException | NullPointerException | JsonParseException e){//timeout is subclass of IO
                 YourItemsToNewWorlds.LOGGER.error("Player name request failed.");
                 YourItemsToNewWorlds.LOGGER.error(e.getMessage());

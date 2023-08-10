@@ -1,6 +1,6 @@
 package net.trueHorse.yourItemsToNewWorlds.io;
 
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 import net.trueHorse.yourItemsToNewWorlds.YourItemsToNewWorlds;
 
 import java.io.File;
@@ -14,8 +14,8 @@ import java.util.List;
 
 public class InstancesFileIO {
 
-    private static final Path INSTANCES_FILE_PATH = MinecraftClient.getInstance().runDirectory.toPath().resolve("config/Your Items to New Worlds/instances.txt");
-    private static final Path CURRENT_INSTANCE_PATH = MinecraftClient.getInstance().runDirectory.toPath();
+    private static final Path INSTANCES_FILE_PATH = Minecraft.getInstance().runDirectory.toPath().resolve("config/Your Items to New Worlds/instances.txt");
+    private static final Path CURRENT_INSTANCE_PATH = Minecraft.getInstance().runDirectory.toPath();
 
     public void saveInstances(List<Path> instancePaths){
         File instancesFile = INSTANCES_FILE_PATH.toFile();

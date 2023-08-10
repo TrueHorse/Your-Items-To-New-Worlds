@@ -1,10 +1,10 @@
 package net.trueHorse.yourItemsToNewWorlds.gui.handlers;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.FatalErrorScreen;
-import net.minecraft.text.Text;
-import net.minecraft.world.level.storage.LevelStorage;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.ErrorScreen;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.storage.LevelStorageException;
+import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.LevelSummary;
 import net.trueHorse.yourItemsToNewWorlds.YourItemsToNewWorlds;
 import net.trueHorse.yourItemsToNewWorlds.gui.ImportWorldSelectionScreen;
@@ -34,7 +34,7 @@ public class ImportWorldSelectionScreenHandler {
     }
 
     public void chooseNewInstance(){
-        String folderPath = TinyFileDialogs.tinyfd_selectFolderDialog(Text.translatable("transfer_items.your_items_to_new_worlds.add_instance").getString(),lastAddedInstance==null ? MinecraftClient.getInstance().runDirectory.getAbsolutePath():lastAddedInstance.toString());
+        String folderPath = TinyFileDialogs.tinyfd_selectFolderDialog(Component.translatable("transfer_items.your_items_to_new_worlds.add_instance").getString(),lastAddedInstance==null ? Minecraft.getInstance().gameDirectory.getAbsolutePath():lastAddedInstance.toString());
         if(folderPath != null){
             Path instancePath = new File(folderPath).toPath();
             this.addInstance(instancePath);
@@ -47,12 +47,12 @@ public class ImportWorldSelectionScreenHandler {
     public void onInstanceSelected(@Nullable Path path){
         selectedInstancePath = path;
         if(path!=null){
-            LevelStorage levelStorage = new LevelStorage(path.resolve("saves"),path.resolve("backups"),LevelStorage.createSymlinkFinder(path.resolve("allowed_symlinks.txt")),MinecraftClient.getInstance().getDataFixer());
+            LevelStorageSource levelStorage = new LevelStorageSource(path.resolve("saves"),path.resolve("backups"),LevelStorageSource.parseValidator(path.resolve("allowed_symlinks.txt")),Minecraft.getInstance().getFixerUpper());
             try {
-                worlds = levelStorage.loadSummaries(levelStorage.getLevelList()).get();
+                worlds = levelStorage.loadLevelSummaries(levelStorage.findLevelCandidates()).get();
             } catch (LevelStorageException | InterruptedException | ExecutionException e) {
                 YourItemsToNewWorlds.LOGGER.error("Couldn't load level list.");
-                MinecraftClient.getInstance().setScreen(new FatalErrorScreen(Text.translatable("selectWorld.unable_to_load"), Text.of(e.getMessage())));
+                Minecraft.getInstance().setScreen(new ErrorScreen(Component.translatable("selectWorld.unable_to_load"), Component.literal(e.getMessage())));
                 worlds = new ArrayList<>();
             }
         }
@@ -61,11 +61,11 @@ public class ImportWorldSelectionScreenHandler {
     }
 
     public Path getPathOfWorld(int index){
-        return selectedInstancePath.resolve("saves/"+worlds.get(index).getName());
+        return selectedInstancePath.resolve("saves/"+worlds.get(index).getLevelName());
     }
 
     public Path getPathOfWorld(LevelSummary summary){
-        return selectedInstancePath.resolve("saves/"+summary.getName());
+        return selectedInstancePath.resolve("saves/"+summary.getLevelName());
     }
 
     public void addInstance(Path instance){

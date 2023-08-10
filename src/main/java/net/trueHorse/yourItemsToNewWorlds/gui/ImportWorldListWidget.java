@@ -2,7 +2,7 @@ package net.trueHorse.yourItemsToNewWorlds.gui;
 
 import com.ibm.icu.text.SimpleDateFormat;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.world.WorldIcon;
 import net.minecraft.client.gui.widget.AlwaysSelectedEntryListWidget;
@@ -37,8 +37,8 @@ public class ImportWorldListWidget extends AlwaysSelectedEntryListWidget<ImportW
     private final ImportWorldSelectionScreenHandler handler;
     private boolean listRendered = false;
 
-    public ImportWorldListWidget(ImportWorldSelectionScreen parent, ImportWorldSelectionScreenHandler handler, MinecraftClient minecraftClient, int width, int height, int top, int bottom, int itemHeight, String search) {
-        super(minecraftClient, width, height, top, bottom, itemHeight);
+    public ImportWorldListWidget(ImportWorldSelectionScreen parent, ImportWorldSelectionScreenHandler handler, Minecraft Minecraft, int width, int height, int top, int bottom, int itemHeight, String search) {
+        super(Minecraft, width, height, top, bottom, itemHeight);
         this.setRenderBackground(false);
         this.setRenderHorizontalShadows(false);
         this.parent = parent;
@@ -130,7 +130,7 @@ public class ImportWorldListWidget extends AlwaysSelectedEntryListWidget<ImportW
     public final class WorldEntry
             extends ImportWorldListWidget.Entry
             implements AutoCloseable {
-        private final MinecraftClient client;
+        private final Minecraft client;
         private final ImportWorldSelectionScreen screen;
         private final LevelSummary level;
         private final WorldIcon icon;
@@ -177,8 +177,8 @@ public class ImportWorldListWidget extends AlwaysSelectedEntryListWidget<ImportW
 
         @Override
         public Text getNarration() {
-            MutableText text = Text.translatable("narrator.select.world_info", this.level.getDisplayName(), new Date(this.level.getLastPlayed()), this.level.getDetails());
-            return Text.translatable("narrator.select", text);
+            MutableText text = Component.translatable("narrator.select.world_info", this.level.getDisplayName(), new Date(this.level.getLastPlayed()), this.level.getDetails());
+            return Component.translatable("narrator.select", text);
         }
 
         @Override
@@ -191,12 +191,12 @@ public class ImportWorldListWidget extends AlwaysSelectedEntryListWidget<ImportW
 
             }
             if (displayName.isEmpty()) {
-                displayName = Text.translatable("selectWorld.world") + " " + (index + 1);
+                displayName = Component.translatable("selectWorld.world") + " " + (index + 1);
             }
             Text text = this.level.getDetails();
-            context.drawText(this.client.textRenderer, displayName, x + 32 + 3, y + 1, 0xFFFFFF, false);
-            context.drawText(this.client.textRenderer, folderName, x + 32 + 3, y + this.client.textRenderer.fontHeight + 3, 0x808080, false);
-            context.drawText(this.client.textRenderer, text, x + 32 + 3, y + this.client.textRenderer.fontHeight + this.client.textRenderer.fontHeight + 3, 0x808080, false);
+            context.drawText(this.client.font, displayName, x + 32 + 3, y + 1, 0xFFFFFF, false);
+            context.drawText(this.client.font, folderName, x + 32 + 3, y + this.client.font.fontHeight + 3, 0x808080, false);
+            context.drawText(this.client.font, text, x + 32 + 3, y + this.client.font.fontHeight + this.client.font.fontHeight + 3, 0x808080, false);
             RenderSystem.enableBlend();
             context.drawTexture(this.icon.getTextureId(), x, y, 0.0f, 0.0f, 32, 32, 32, 32);
             RenderSystem.disableBlend();

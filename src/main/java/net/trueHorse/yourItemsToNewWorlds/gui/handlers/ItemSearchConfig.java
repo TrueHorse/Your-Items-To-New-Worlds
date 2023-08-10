@@ -1,6 +1,6 @@
 package net.trueHorse.yourItemsToNewWorlds.gui.handlers;
 
-import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.level.ChunkPos;
 import net.trueHorse.yourItemsToNewWorlds.io.ItemImporter;
 
 import java.nio.file.Path;

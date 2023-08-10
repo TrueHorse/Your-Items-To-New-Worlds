@@ -1,13 +1,13 @@
 package net.trueHorse.yourItemsToNewWorlds.gui;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.Selectable;
-import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.gui.widget.Button;
 import net.minecraft.client.gui.widget.ElementListWidget;
-import net.minecraft.client.gui.widget.TexturedButtonWidget;
+import net.minecraft.client.gui.widget.ImageButton;
 import net.minecraft.text.Text;
 import net.trueHorse.yourItemsToNewWorlds.gui.handlers.ImportWorldSelectionScreenHandler;
 
@@ -21,7 +21,7 @@ public class InstanceListWidget extends ElementListWidget<InstanceListWidget.Ent
     private String search;
     private final ImportWorldSelectionScreenHandler handler;
 
-    public InstanceListWidget(MinecraftClient client, ImportWorldSelectionScreen parent, ImportWorldSelectionScreenHandler handler, String search) {
+    public InstanceListWidget(Minecraft client, ImportWorldSelectionScreen parent, ImportWorldSelectionScreenHandler handler, String search) {
         super(client, parent.width+65, parent.height, 40, parent.height - 39, 20);
         this.setRenderBackground(false);
         this.setRenderHorizontalShadows(false);
@@ -54,16 +54,16 @@ public class InstanceListWidget extends ElementListWidget<InstanceListWidget.Ent
     public final class InstanceEntry
             extends InstanceListWidget.Entry{
 
-        private final ButtonWidget instanceButton;
-        private final TexturedButtonWidget deleteButton;
+        private final Button instanceButton;
+        private final ImageButton deleteButton;
 
         public InstanceEntry(Path instancePath, ImportWorldSelectionScreenHandler handler){
             String instanceName = instancePath.getFileName().toString();
-            instanceButton = ButtonWidget.builder(Text.of(instanceName),button -> handler.onInstanceSelected(instancePath)).dimensions(0,0,150,20).build();
-            instanceButton.setMessage(Text.of(instanceName));
+            instanceButton = Button.builder(Component.literal(instanceName),button -> handler.onInstanceSelected(instancePath)).dimensions(0,0,150,20).build();
+            instanceButton.setMessage(Component.literal(instanceName));
 
-            deleteButton = new TexturedButtonWidget(0,0,20,20,20,0,20, ImportWorldSelectionScreen.BUTTON_TEXTURE_SHEET,40,40,
-                    button -> handler.removeInstance(instancePath),Text.translatable("narrator.your_items_to_new_worlds.remove_instance",instanceName));
+            deleteButton = new ImageButton(0,0,20,20,20,0,20, ImportWorldSelectionScreen.BUTTON_TEXTURE_SHEET,40,40,
+                    button -> handler.removeInstance(instancePath),Component.translatable("narrator.your_items_to_new_worlds.remove_instance",instanceName));
         }
 
         @Override

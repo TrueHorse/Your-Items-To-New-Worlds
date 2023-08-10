@@ -1,16 +1,14 @@
 package net.trueHorse.yourItemsToNewWorlds.gui;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.tooltip.Tooltip;
-import net.minecraft.client.gui.widget.*;
-import net.minecraft.client.item.TooltipContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.ScreenTexts;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.trueHorse.yourItemsToNewWorlds.YourItemsToNewWorlds;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.*;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import net.trueHorse.yourItemsToNewWorlds.gui.handlers.ImportItemScreenHandler;
 import net.trueHorse.yourItemsToNewWorlds.io.ItemImporter;
 
@@ -20,31 +18,31 @@ import java.util.function.BiConsumer;
 
 public class ImportItemsScreen extends Screen {
 
-    private final Identifier textureSheet = new Identifier("your_items_to_new_worlds","textures/gui/import_items_screen.png");
+    private final ResourceLocation textureSheet = new ResourceLocation("your_items_to_new_worlds","textures/gui/import_items_screen.png");
     private final BiConsumer<ArrayList<ItemStack>,ImportItemsScreen> applier;
     private final String[] searchLocationDeterminationModeIDs = {"transfer_items.your_items_to_new_worlds.spawn_point",
             "transfer_items.your_items_to_new_worlds.most_item_containers",
             "transfer_items.your_items_to_new_worlds.longest_inhabitation",
             "transfer_items.your_items_to_new_worlds.coordinates"};
-    private ButtonWidget selectWorldButton;
-    private CyclingButtonWidget<String> playerNameWidget;
-    private CyclingButtonWidget<ItemImporter.SearchLocationDeterminationMode> searchLocationModeWidget;
-    private final TextFieldWidget[] coordFields = new TextFieldWidget[2];
-    private TextFieldWidget radiusWidget;
-    private ButtonWidget searchButton;
-    private CyclingButtonWidget<Boolean> selectAllButton;
+    private Button selectWorldButton;
+    private CycleButton<String> playerNameWidget;
+    private CycleButton<ItemImporter.SearchLocationDeterminationMode> searchLocationModeWidget;
+    private final EditBox[] coordFields = new EditBox[2];
+    private EditBox radiusWidget;
+    private Button searchButton;
+    private CycleButton<Boolean> selectAllButton;
 
-    private TexturedButtonWidget leftArrowButton;
-    private TexturedButtonWidget rightArrowButton;
+    private ImageButton leftArrowButton;
+    private ImageButton rightArrowButton;
     private final ArrayList<TexturedItemButtonWidget> itemSelectButtons= new ArrayList<>();
-    private TextWidget noItemsTextWidget;
-    private TextWidget searchingTextWidget;
+    private StringWidget noItemsTextWidget;
+    private StringWidget searchingTextWidget;
     private final Screen parent;
     private final ImportItemScreenHandler handler = new ImportItemScreenHandler(this);
     private int gridPage = 0;
 
     public ImportItemsScreen(Screen parent, BiConsumer<ArrayList<ItemStack>,ImportItemsScreen> applier){
-        super(Text.translatable("transfer_items.your_items_to_new_worlds.select_transfer_items"));
+        super(Component.translatable("transfer_items.your_items_to_new_worlds.select_transfer_items"));
         this.applier = applier;
         this.parent = parent;
     }
@@ -57,47 +55,47 @@ public class ImportItemsScreen extends Screen {
         final int margin = 10;
         final int minDistanceFromEdge = 25;
 
-        ArrayList<ClickableWidget> widgets = new ArrayList<>();
+        ArrayList<AbstractWidget> widgets = new ArrayList<>();
 
-        selectWorldButton = ButtonWidget.builder(handler.getSelectedWorldPath()==null ?Text.translatable("transfer_items.your_items_to_new_worlds.no_world_selected"):Text.of(handler.getSelectedWorldPath().getFileName().toString()),
-                button -> client.setScreen(new ImportWorldSelectionScreen(Text.translatable("narrator.your_items_to_new_worlds.select_import_world"),this, path -> handler.setSelectedWorldPath(path)))).dimensions(minDistanceFromEdge,margin,this.width-2*minDistanceFromEdge,20).build();
+        selectWorldButton = Button.builder(handler.getSelectedWorldPath()==null ?Component.translatable("transfer_items.your_items_to_new_worlds.no_world_selected"):Component.literal(handler.getSelectedWorldPath().getFileName().toString()),
+                button -> minecraft.setScreen(new ImportWorldSelectionScreen(Component.translatable("narrator.your_items_to_new_worlds.select_import_world"),this, path -> handler.setSelectedWorldPath(path)))).dimensions(minDistanceFromEdge,margin,this.width-2*minDistanceFromEdge,20).build();
         widgets.add(selectWorldButton);
 
         if(handler.getSelectedWorldPath()!=null){
-            playerNameWidget = CyclingButtonWidget.builder(Text::of).values(handler.getPlayerNames()).build(this.width/2-50,selectWorldButton.getY()+selectWorldButton.getHeight()+ margin,100,20,Text.translatable("transfer_items.your_items_to_new_worlds.player_name"),
+            playerNameWidget = CycleButton.builder(Component::literal).withValues(handler.getPlayerNames()).create(this.width/2-50,selectWorldButton.getY()+selectWorldButton.getHeight()+ margin,100,20,Component.translatable("transfer_items.your_items_to_new_worlds.player_name"),
                     (button,val)-> {
-                        button.setMessage(Text.of(val));
+                        button.setMessage(Component.literal(val));
                         handler.setSelectedPlayerName(val);
                     });
-            playerNameWidget.setMessage(Text.of(playerNameWidget.getValue()));
+            playerNameWidget.setMessage(Component.literal(playerNameWidget.getValue()));
             if(!handler.wasNameRequestSucessful()){
-                playerNameWidget.setTooltip(Tooltip.of(Text.translatable("transfer_items.your_items_to_new_worlds.request_error_tooltip")));
+                playerNameWidget.setTooltip(Tooltip.create(Component.translatable("transfer_items.your_items_to_new_worlds.request_error_tooltip")));
             }else{
-                playerNameWidget.setTooltip(Tooltip.of(Text.translatable("transfer_items.your_items_to_new_worlds.player_button_explanation")));
+                playerNameWidget.setTooltip(Tooltip.create(Component.translatable("transfer_items.your_items_to_new_worlds.player_button_explanation")));
             }
             widgets.add(playerNameWidget);
             handler.setSelectedPlayerName(playerNameWidget.getValue());
 
             final int coordRowY = playerNameWidget.getY()+playerNameWidget.getHeight()+ margin;
-            searchLocationModeWidget = CyclingButtonWidget.<ItemImporter.SearchLocationDeterminationMode>builder(val -> Text.translatable(searchLocationDeterminationModeIDs[val.ordinal()])).values(ItemImporter.SearchLocationDeterminationMode.values()).build(Math.max(minDistanceFromEdge,this.width/2-152),coordRowY,150,20,Text.of(""),
+            searchLocationModeWidget = CycleButton.<ItemImporter.SearchLocationDeterminationMode>builder(val -> Component.translatable(searchLocationDeterminationModeIDs[val.ordinal()])).withValues(ItemImporter.SearchLocationDeterminationMode.values()).create(Math.max(minDistanceFromEdge,this.width/2-152),coordRowY,150,20,Component.literal(""),
                     (button,val)->{
-                button.setMessage(Text.translatable(searchLocationDeterminationModeIDs[val.ordinal()]));
+                button.setMessage(Component.translatable(searchLocationDeterminationModeIDs[val.ordinal()]));
                 setCoordFieldsEditability(val.ordinal()==3);
-                button.setTooltip(Tooltip.of(Text.translatable("transfer_items.your_items_to_new_worlds.mode_button_explanation")));
+                button.setTooltip(Tooltip.create(Component.translatable("transfer_items.your_items_to_new_worlds.mode_button_explanation")));
                 handler.setSearchLocationDeterminationMode(val);
                     });
-            searchLocationModeWidget.setMessage(Text.translatable(searchLocationDeterminationModeIDs[searchLocationModeWidget.getValue().ordinal()]));
-            searchLocationModeWidget.setTooltip(Tooltip.of(Text.translatable("transfer_items.your_items_to_new_worlds.mode_button_explanation")));
+            searchLocationModeWidget.setMessage(Component.translatable(searchLocationDeterminationModeIDs[searchLocationModeWidget.getValue().ordinal()]));
+            searchLocationModeWidget.setTooltip(Tooltip.create(Component.translatable("transfer_items.your_items_to_new_worlds.mode_button_explanation")));
             widgets.add(searchLocationModeWidget);
             handler.setSearchLocationDeterminationMode(searchLocationModeWidget.getValue());
 
-            coordFields[0] = new TextFieldWidget(this.textRenderer,searchLocationModeWidget.getX()+searchLocationModeWidget.getWidth()+ margin,coordRowY,43,20,Text.of("X"));
-            coordFields[1] = new TextFieldWidget(this.textRenderer,coordFields[0].getX()+coordFields[0].getWidth()+ margin,coordRowY,43,20,Text.of("Z"));
-            for(TextFieldWidget coordField:coordFields){
+            coordFields[0] = new EditBox(this.font,searchLocationModeWidget.getX()+searchLocationModeWidget.getWidth()+ margin,coordRowY,43,20,Component.literal("X"));
+            coordFields[1] = new EditBox(this.font,coordFields[0].getX()+coordFields[0].getWidth()+ margin,coordRowY,43,20,Component.literal("Z"));
+            for(EditBox coordField:coordFields){
                 //checks, if text only consists of digits
-                coordField.setTextPredicate(string -> string.matches("(^(-|\\d|))\\d*"));
-                coordField.setPlaceholder(coordField.getMessage());
-                coordField.setChangedListener(string -> {
+                coordField.setFilter(string -> string.matches("(^(-|\\d|))\\d*"));
+                coordField.setHint(coordField.getMessage());
+                coordField.setResponder(string -> {
                     if(!string.isEmpty()&& !string.equals("-")){
                         handler.setCoordinate(Integer.parseInt(string),coordField.getMessage().getString());
                     }
@@ -106,32 +104,32 @@ public class ImportItemsScreen extends Screen {
             setCoordFieldsEditability(false);
             widgets.addAll(List.of(coordFields));
 
-            radiusWidget = new TextFieldWidget(this.textRenderer,coordFields[1].getX()+coordFields[0].getWidth()+ margin*2,coordRowY,40,20,Text.translatable("transfer_items.your_items_to_new_worlds.radius_from_chunk"));
-            radiusWidget.setTextPredicate(string -> string.matches("\\d*"));
-            radiusWidget.setTooltip(Tooltip.of(radiusWidget.getMessage()));
-            radiusWidget.setPlaceholder(Text.translatable("transfer_items.your_items_to_new_worlds.radius"));
+            radiusWidget = new EditBox(this.font,coordFields[1].getX()+coordFields[0].getWidth()+ margin*2,coordRowY,40,20,Component.translatable("transfer_items.your_items_to_new_worlds.radius_from_chunk"));
+            radiusWidget.setFilter(string -> string.matches("\\d*"));
+            radiusWidget.setTooltip(Tooltip.create(radiusWidget.getMessage()));
+            radiusWidget.setHint(Component.translatable("transfer_items.your_items_to_new_worlds.radius"));
             radiusWidget.setMaxLength(1);
-            radiusWidget.setText("1");
-            radiusWidget.setChangedListener(string -> {
+            radiusWidget.setValue("1");
+            radiusWidget.setResponder(string -> {
                 if(!string.isEmpty()){
                     handler.setSearchRadius(Integer.parseInt(string));
                 }
             });
             widgets.add(radiusWidget);
-            handler.setSearchRadius(Integer.parseInt(radiusWidget.getText()));
+            handler.setSearchRadius(Integer.parseInt(radiusWidget.getValue()));
 
-            searchButton = ButtonWidget.builder(Text.translatable("itemGroup.search"),button-> generateAndDisplayGridArea()).dimensions(this.width/2-75,searchLocationModeWidget.getY()+searchLocationModeWidget.getHeight()+ margin,150,20).build();
+            searchButton = Button.builder(Component.translatable("itemGroup.search"),button-> generateAndDisplayGridArea()).bounds(this.width/2-75,searchLocationModeWidget.getY()+searchLocationModeWidget.getHeight()+ margin,150,20).build();
             widgets.add(searchButton);
 
             final int pixelsBetweenSearchAndBack = this.height-29-(searchButton.getY()+searchButton.getHeight());
             final int pageArrowY = searchButton.getY()+searchButton.getHeight()+(pixelsBetweenSearchAndBack)/2-9;
-            leftArrowButton = new TexturedButtonWidget(minDistanceFromEdge,pageArrowY,12,17,14,2,18,textureSheet,
+            leftArrowButton = new ImageButton(minDistanceFromEdge,pageArrowY,12,17,14,2,18,textureSheet,
                     button -> {gridPage--;
                     refreshGridArea();});
             leftArrowButton.visible = false;
             widgets.add(leftArrowButton);
 
-            rightArrowButton = new TexturedButtonWidget(this.width- minDistanceFromEdge -12,pageArrowY,12,17,0,2,18,textureSheet,
+            rightArrowButton = new ImageButton(this.width- minDistanceFromEdge -12,pageArrowY,12,17,0,2,18,textureSheet,
                     button -> {gridPage++;
                         refreshGridArea();});
             rightArrowButton.visible = false;
@@ -146,47 +144,47 @@ public class ImportItemsScreen extends Screen {
                     TexturedItemButtonWidget selectButton = new TexturedItemButtonWidget(minDistanceFromEdge +12+additionalGridXMargin+j*25,searchButton.getY()+searchButton.getHeight()+ margin +additionalGridYMargin+i*25,25,25,27,0,25,textureSheet,
                             button -> {((TexturedItemButtonWidget)button).toggle();
                             handler.toggleSelection(itemSelectButtons.indexOf(button)+gridPage*itemSelectButtons.size());},ItemStack.EMPTY);
-                    selectButton.visible = false;
+                    selectButton.visable = false;
                     itemSelectButtons.add(selectButton);
                 }
             }
 
-            selectAllButton = CyclingButtonWidget.onOffBuilder(false).build(this.width-minDistanceFromEdge-30-rightArrowButton.getWidth()-additionalGridXMargin,searchButton.getY()+searchButton.getHeight()+margin+additionalGridYMargin-12,30,12,Text.translatable("transfer_items.your_items_to_new_worlds.select_all"),
+            selectAllButton = CycleButton.onOffBuilder(false).create(this.width-minDistanceFromEdge-30-rightArrowButton.getWidth()-additionalGridXMargin,searchButton.getY()+searchButton.getHeight()+margin+additionalGridYMargin-12,30,12,Component.translatable("transfer_items.your_items_to_new_worlds.select_all"),
                     (button,selectAll)->{
                         if(selectAll){
-                            button.setMessage(Text.translatable("gui.none"));
+                            button.setMessage(Component.translatable("gui.none"));
                         }else {
-                            button.setMessage(Text.translatable("gui.all"));
+                            button.setMessage(Component.translatable("gui.all"));
                         }
                         handler.setAllSelections(selectAll);
                         refreshGridArea();
                     });
-            selectAllButton.setMessage(Text.translatable("gui.all"));
+            selectAllButton.setMessage(Component.translatable("gui.all"));
             selectAllButton.visible = false;
 
             widgets.add(selectAllButton);
             widgets.addAll(itemSelectButtons);
 
-            noItemsTextWidget = new TextWidget(this.width/2-100,pageArrowY,200,20,Text.translatable("transfer_items.your_items_to_new_worlds.no_items_found"), MinecraftClient.getInstance().textRenderer);
+            noItemsTextWidget = new StringWidget(this.width/2-100,pageArrowY,200,20,Component.translatable("transfer_items.your_items_to_new_worlds.no_items_found"), Minecraft.getInstance().font);
             noItemsTextWidget.visible = false;
             widgets.add(noItemsTextWidget);
 
-            searchingTextWidget = new TextWidget(this.width/2-50,pageArrowY,100,20,Text.translatable("transfer_items.your_items_to_new_worlds.searching"), MinecraftClient.getInstance().textRenderer);
+            searchingTextWidget = new StringWidget(this.width/2-50,pageArrowY,100,20,Component.translatable("transfer_items.your_items_to_new_worlds.searching"), Minecraft.getInstance().font);
             searchingTextWidget.visible = false;
             widgets.add(searchingTextWidget);
         }
 
-        widgets.add(addDrawableChild(ButtonWidget.builder(Text.translatable("gui.cancel"), button -> close()).dimensions(this.width / 2 + 5, this.height-29, 150, 20).build()));
-        widgets.add(ButtonWidget.builder(ScreenTexts.DONE, button -> applyAndClose()).dimensions(this.width / 2 - 155, this.height-29, 150, 20).build());
+        widgets.add(addRenderableWidget(Button.builder(Component.translatable("gui.cancel"), button -> close()).bounds(this.width / 2 + 5, this.height-29, 150, 20).build()));
+        widgets.add(Button.builder(CommonComponents.GUI_DONE, button -> applyAndClose()).bounds(this.width / 2 - 155, this.height-29, 150, 20).build());
 
-        widgets.forEach(this::addDrawableChild);
+        widgets.forEach(this::addRenderableWidget);
     }
 
     public void setCoordFieldsEditability(boolean coordsEditable){
-        for(TextFieldWidget coordField:coordFields){
+        for(EditBox coordField:coordFields){
             coordField.setEditable(coordsEditable);
             coordField.active = coordsEditable;
-            coordField.setPlaceholder(coordsEditable ? coordField.getMessage():Text.of(""));
+            coordField.setHint(coordsEditable ? coordField.getMessage():Component.literal(""));
         }
     }
 
@@ -194,7 +192,7 @@ public class ImportItemsScreen extends Screen {
     public void tick(){
         super.tick();
         if(handler.getSelectedWorldPath()!=null){
-            for(TextFieldWidget field:coordFields){
+            for(EditBox field:coordFields){
                 field.tick();
             }
             radiusWidget.tick();
@@ -203,14 +201,14 @@ public class ImportItemsScreen extends Screen {
     }
 
     public void generateAndDisplayGridArea(){
-        if(radiusWidget.getText().isEmpty()){
-            searchButton.setTooltip(Tooltip.of(Text.translatable("transfer_items.your_items_to_new_worlds.missing_radius_tooltip")));
+        if(radiusWidget.getValue().isEmpty()){
+            searchButton.setTooltip(Tooltip.create(Component.translatable("transfer_items.your_items_to_new_worlds.missing_radius_tooltip")));
             return;
         }
         if(handler.getSearchLocationDeterminationMode().ordinal()==3) {
-            for (TextFieldWidget coordField : coordFields) {
-                if (coordField.getText().isEmpty()||coordField.getText().equals("-")) {
-                    searchButton.setTooltip(Tooltip.of(Text.translatable("transfer_items.your_items_to_new_worlds.missing_coordinates_tooltip")));
+            for (EditBox coordField : coordFields) {
+                if (coordField.getValue().isEmpty()||coordField.getValue().equals("-")) {
+                    searchButton.setTooltip(Tooltip.create(Component.translatable("transfer_items.your_items_to_new_worlds.missing_coordinates_tooltip")));
                     return;
                 }
             }
@@ -240,12 +238,12 @@ public class ImportItemsScreen extends Screen {
             button.setItemStack(itemStack);
 
             StringBuilder tooltipBuilder = new StringBuilder();
-            List<Text> tooltipLines = itemStack.getTooltip(null, TooltipContext.BASIC);
-            for(Text line:tooltipLines){
+            List<Component> tooltipLines = itemStack.getTooltipLines(null, TooltipFlag.NORMAL);
+            for(Component line:tooltipLines){
                 tooltipBuilder.append(line.getString()).append("\n");
             }
             tooltipBuilder.deleteCharAt(tooltipBuilder.length()-1);
-            button.setTooltip(Tooltip.of(Text.of(tooltipBuilder.toString())));
+            button.setTooltip(Tooltip.create(Component.literal(tooltipBuilder.toString())));
 
             button.setToggled(handler.getItemSelected()[i+gridPage*itemSelectButtons.size()]);
             button.visible = true;
@@ -270,20 +268,20 @@ public class ImportItemsScreen extends Screen {
     }
 
     public void updateCoordinateFields(){
-        for(TextFieldWidget coordField:coordFields){
-            coordField.setText(handler.getCoordinate(coordField.getMessage().getString()).toString());
+        for(EditBox coordField:coordFields){
+            coordField.setValue(handler.getCoordinate(coordField.getMessage().getString()).toString());
         }
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta){
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta){
         renderBackground(context);
         super.render(context,mouseX,mouseY,delta);
     }
 
     @Override
     public void close(){
-        client.setScreen(parent);
+        minecraft.setScreen(parent);
     }
 
     public void applyAndClose(){
