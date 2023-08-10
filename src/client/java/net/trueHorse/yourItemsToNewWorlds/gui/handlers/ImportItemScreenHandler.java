@@ -170,7 +170,6 @@ public class ImportItemScreenHandler {
     }
 
     public Integer getCoordinate(String coord){
-        YourItemsToNewWorlds.LOGGER.info("coord: "+coord);
         return switch (coord) {
             case "X" -> chosenPos.getX();
             case "Y" -> chosenPos.getY();

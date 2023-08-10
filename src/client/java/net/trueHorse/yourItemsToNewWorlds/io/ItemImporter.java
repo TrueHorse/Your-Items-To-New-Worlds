@@ -87,7 +87,7 @@ public class ItemImporter {
         int biggestChunkY = Arrays.stream(regionNames).map(name -> Integer.parseInt(name.split("[.]")[2])).max(Comparator.naturalOrder()).get()*32+31;
         int worldWidthInChunks = biggestChunkX-(smallestChunkX-1);
         int worldDepthInChunks = biggestChunkY-(smallestChunkY-1);
-        YourItemsToNewWorlds.LOGGER.info("smallX: "+smallestChunkX+"\nsmallY: "+smallestChunkY+"\nbigX: "+biggestChunkX+"\nbigY: "+biggestChunkY+"\nwidth: "+worldWidthInChunks+"\ndepth: "+worldDepthInChunks);
+        //YourItemsToNewWorlds.LOGGER.info("smallX: "+smallestChunkX+"\nsmallY: "+smallestChunkY+"\nbigX: "+biggestChunkX+"\nbigY: "+biggestChunkY+"\nwidth: "+worldWidthInChunks+"\ndepth: "+worldDepthInChunks);
         Integer[][] itemEntitiesInChunks = new Integer[worldWidthInChunks][worldDepthInChunks];
 
         //getting number for each chunk, summing up 3x3 squares and saving chunk with highest val to return later

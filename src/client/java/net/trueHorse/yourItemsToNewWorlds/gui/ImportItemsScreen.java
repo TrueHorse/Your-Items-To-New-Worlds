@@ -224,7 +224,6 @@ public class ImportItemsScreen extends Screen {
         int pageItemCount;
         if(handler.getImportableItems().size() - gridPage * itemSelectButtons.size()<=itemSelectButtons.size()){
             pageItemCount = handler.getImportableItems().size() - gridPage * itemSelectButtons.size();
-            YourItemsToNewWorlds.LOGGER.info("pageItemCount: "+pageItemCount);
             rightArrowButton.visible = false;
             for(int i=pageItemCount;i<itemSelectButtons.size();i++){
                 itemSelectButtons.get(i).visible = false;
