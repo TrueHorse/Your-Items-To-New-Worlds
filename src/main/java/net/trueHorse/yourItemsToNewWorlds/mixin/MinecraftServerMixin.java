@@ -7,6 +7,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.ServerLevelData;
+import net.trueHorse.yourItemsToNewWorlds.YourItemsToNewWorlds;
 import net.trueHorse.yourItemsToNewWorlds.duck.GeneratorOptionsAccess;
 import net.trueHorse.yourItemsToNewWorlds.feature.ImportChestsFeature;
 import net.trueHorse.yourItemsToNewWorlds.feature.YourItemsToNewWorldsFeatures;
@@ -20,8 +21,9 @@ import java.util.ArrayList;
 @Mixin(MinecraftServer.class)
 public class MinecraftServerMixin {
 
-    @Inject(method = "setupSpawn",at=@At("TAIL"))
+    @Inject(method = "setInitialSpawn",at=@At("TAIL"))
     private static void setupImportChests(ServerLevel world, ServerLevelData worldProperties, boolean bonusChest, boolean debugWorld, CallbackInfo ci){
+        YourItemsToNewWorlds.LOGGER.error("injected");
         if(debugWorld) return;
         ArrayList<ItemStack> importItems = ((GeneratorOptionsAccess)((PrimaryLevelData)worldProperties).worldGenOptions()).getImportItems();
         if(!importItems.isEmpty()){

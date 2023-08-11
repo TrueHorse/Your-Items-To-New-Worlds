@@ -2,6 +2,10 @@
 	"required": true,
 	"package": "net.trueHorse.yourItemsToNewWorlds.mixin",
 	"compatibilityLevel": "JAVA_17",
+	"client": [
+		"CreateWorldScreenMoreTabMixin",
+		"WorldCreatorMixin"
+	],
 	"mixins": [
 		"GeneratorOptionsMixin",
 		"MinecraftServerMixin"

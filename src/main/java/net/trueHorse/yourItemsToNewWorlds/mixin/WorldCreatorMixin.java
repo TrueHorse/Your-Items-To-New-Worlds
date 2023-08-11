@@ -1,4 +1,4 @@
-package net.trueHorse.yourItemsToNewWorlds.mixin.client;
+package net.trueHorse.yourItemsToNewWorlds.mixin;
 
 import net.minecraft.client.gui.screens.worldselection.WorldCreationContext;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
@@ -17,19 +17,19 @@ import java.util.ArrayList;
 public abstract class WorldCreatorMixin implements WorldCreatorAccess {
 
     @Shadow
-    abstract public void update();
+    abstract public void onChanged();
     @Shadow
-    private WorldCreationContext generatorOptionsHolder;
+    private WorldCreationContext settings;
 
     ArrayList<ItemStack> importItems = new ArrayList<>();
 
     public void setImportItems(ArrayList<ItemStack> importItems){
         this.importItems = importItems;
-        update();
+        onChanged();
     }
 
-    @Inject(method = "update",at=@At("TAIL"))
+    @Inject(method = "onChanged",at=@At("TAIL"))
     private void updateImportItems(CallbackInfo ci){
-        generatorOptionsHolder.withOptions(options -> ((GeneratorOptionsAccess)options).withImportItems(importItems));
+        settings.withOptions(options -> ((GeneratorOptionsAccess)options).withImportItems(importItems));
     }
 }
