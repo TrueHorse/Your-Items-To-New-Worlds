@@ -2,6 +2,7 @@ package net.trueHorse.yourItemsToNewWorlds;
 
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -22,15 +23,20 @@ public class YourItemsToNewWorlds
     {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
-        // Register the commonSetup method for modloading
-        modEventBus.addListener(this::commonSetup);
+        LOGGER.error("works");
 
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
     }
 
-    private void commonSetup(final FMLCommonSetupEvent event)
-    {
-        YourItemsToNewWorldsFeatures.registerFeatures();
+    @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
+    public static class ModEvents{
+
+        @SubscribeEvent
+        public void commonSetup(FMLCommonSetupEvent event){
+            LOGGER.error("registerFea");
+            YourItemsToNewWorldsFeatures.registerFeatures();
+        }
+
     }
 }
