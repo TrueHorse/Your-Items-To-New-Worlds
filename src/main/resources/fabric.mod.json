@@ -3,7 +3,7 @@
 	"id": "your_items_to_new_worlds",
 	"version": "${version}",
 	"name": "Your Items to New Worlds",
-	"description": "This mod allows you to transfer your items from one world to another",
+	"description": "This mod allows you to copy your items from one world to another",
 	"authors": [
 		"TrueHorse"
 	],
@@ -11,7 +11,7 @@
 		"sources": "https://github.com/TrueHorse/Your-Items-To-New-Worlds",
 		"issues": "https://github.com/TrueHorse/Your-Items-To-New-Worlds/issues"
 	},
-	"license": "GPL-3.0",
+	"license": "LGPL-2.1 license",
 	"icon": "assets/your_items_to_new_worlds/icon.png",
 	"environment": "*",
 	"entrypoints": {
