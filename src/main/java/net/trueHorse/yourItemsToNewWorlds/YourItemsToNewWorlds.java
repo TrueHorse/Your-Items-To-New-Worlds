@@ -29,6 +29,7 @@ public class YourItemsToNewWorlds
         MinecraftForge.EVENT_BUS.register(this);
     }
 
+    /*
     @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
     public static class ModEvents{
 
@@ -39,4 +40,5 @@ public class YourItemsToNewWorlds
         }
 
     }
+     */
 }
