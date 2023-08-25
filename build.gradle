@@ -152,6 +152,7 @@ dependencies {
 
 mixin {
     // MixinGradle Settings
+    add sourceSets.main, 'your_items_to_new_worlds.mixins.refmap.json'
     config 'your_items_to_new_worlds.mixins.json'
 }
 
