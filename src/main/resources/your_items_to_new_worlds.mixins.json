@@ -1,5 +1,6 @@
 {
 	"required": true,
+	"refmap": "your_items_to_new_worlds.mixins.refmap.json",
 	"package": "net.trueHorse.yourItemsToNewWorlds.mixin",
 	"compatibilityLevel": "JAVA_17",
 	"client": [
