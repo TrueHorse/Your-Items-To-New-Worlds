@@ -23,8 +23,6 @@ public class YourItemsToNewWorlds
     {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
-        LOGGER.error("works");
-
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
     }

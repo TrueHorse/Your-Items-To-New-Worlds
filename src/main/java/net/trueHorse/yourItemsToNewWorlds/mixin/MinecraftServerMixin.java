@@ -23,7 +23,6 @@ public class MinecraftServerMixin {
 
     @Inject(method = "setInitialSpawn",at=@At("TAIL"))
     private static void setupImportChests(ServerLevel world, ServerLevelData worldProperties, boolean bonusChest, boolean debugWorld, CallbackInfo ci){
-        YourItemsToNewWorlds.LOGGER.error("injected");
         if(debugWorld) return;
         ArrayList<ItemStack> importItems = ((GeneratorOptionsAccess)((PrimaryLevelData)worldProperties).worldGenOptions()).getImportItems();
         if(!importItems.isEmpty()){
