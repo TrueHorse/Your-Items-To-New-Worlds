@@ -15,6 +15,9 @@
 	"icon": "assets/your_items_to_new_worlds/icon.png",
 	"environment": "*",
 	"entrypoints": {
+		"client": [
+			"net.trueHorse.yourItemsToNewWorlds.YourItemsToNewWorldsClient"
+		],
 		"main": [
 			"net.trueHorse.yourItemsToNewWorlds.YourItemsToNewWorlds"
 		]

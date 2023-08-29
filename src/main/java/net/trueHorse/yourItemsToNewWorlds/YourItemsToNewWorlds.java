@@ -3,6 +3,7 @@ package net.trueHorse.yourItemsToNewWorlds;
 import net.fabricmc.api.ModInitializer;
 
 import net.trueHorse.yourItemsToNewWorlds.feature.YourItemsToNewWorldsFeatures;
+import net.trueHorse.yourItemsToNewWorlds.network.C2SImportItemPacket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,5 +13,6 @@ public class YourItemsToNewWorlds implements ModInitializer {
     @Override
     public void onInitialize() {
         YourItemsToNewWorldsFeatures.registerFeatures();
+        C2SImportItemPacket.registerPacket();
     }
 }
