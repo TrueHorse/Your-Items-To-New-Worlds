@@ -15,6 +15,8 @@ public class ChatScreenMixin {
     private void nullScreenIfNotItemImport(MinecraftClient instance, Screen screen){
         if(!ImportItemsCommand.justExecuted){
             instance.setScreen(screen);
+        }else{
+            ImportItemsCommand.justExecuted = false;
         }
     }
 }
