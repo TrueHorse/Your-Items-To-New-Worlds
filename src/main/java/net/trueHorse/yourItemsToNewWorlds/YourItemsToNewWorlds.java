@@ -1,12 +1,14 @@
 package net.trueHorse.yourItemsToNewWorlds;
 
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.RegisterClientCommandsEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.trueHorse.yourItemsToNewWorlds.feature.YourItemsToNewWorldsFeatures;
+import net.trueHorse.yourItemsToNewWorlds.commands.YourItemsToNewWorldsCommands;
+import net.trueHorse.yourItemsToNewWorlds.network.YourItemsToNewWorldsPacketHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,6 +27,17 @@ public class YourItemsToNewWorlds
 
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
+        YourItemsToNewWorldsPacketHandler.registerPackets();
+    }
+
+    @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.FORGE,value = Dist.CLIENT)
+    public static class ModEvents{
+
+        @SubscribeEvent
+        public static void commonSetup(RegisterClientCommandsEvent event){
+            YourItemsToNewWorldsCommands.registerClientCommands(event.getDispatcher(),event.getBuildContext());
+        }
+
     }
 
     /*
