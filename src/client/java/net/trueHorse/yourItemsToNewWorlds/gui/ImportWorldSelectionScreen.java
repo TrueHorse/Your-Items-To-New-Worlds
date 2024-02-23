@@ -1,6 +1,7 @@
 package net.trueHorse.yourItemsToNewWorlds.gui;
 
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.screen.ButtonTextures;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -16,7 +17,7 @@ import java.util.function.Consumer;
 
 public class ImportWorldSelectionScreen extends Screen {
 
-    public static final Identifier BUTTON_TEXTURE_SHEET = new Identifier("your_items_to_new_worlds","textures/gui/buttons.png");
+    private static final ButtonTextures ADD_BUTTON_TEXTURES = new ButtonTextures(new Identifier("your_items_to_new_worlds","add.png"),new Identifier("your_items_to_new_worlds","add_highlighted.png"));
     private final ImportWorldSelectionScreenHandler handler;
     private TextFieldWidget searchBox;
     private TexturedButtonWidget addInstanceButton;
@@ -46,13 +47,13 @@ public class ImportWorldSelectionScreen extends Screen {
         super.init();
         this.searchBox = new TextFieldWidget(this.textRenderer, this.width / 2 - 100, 12, 200, 20, this.searchBox, handler.getSelectedInstancePath()!=null ? Text.translatable("selectWorld.search"):Text.translatable("narrator.your_items_to_new_worlds.instance_search"));
 
-        this.addInstanceButton = new TexturedButtonWidget(this.width/2+105,12,20,20,0,0, 20, BUTTON_TEXTURE_SHEET,40,40,
-                button -> handler.chooseNewInstance(),Text.translatable("transfer_items.your_items_to_new_worlds.add_instance"));
+        this.addInstanceButton = new TexturedButtonWidget(this.width/2+105,12,20,20, ADD_BUTTON_TEXTURES,
+            button -> handler.chooseNewInstance(),Text.translatable("transfer_items.your_items_to_new_worlds.add_instance"));
         addInstanceButton.visible = handler.getSelectedInstancePath()==null;
         addInstanceButton.setTooltip(Tooltip.of(Text.translatable("transfer_items.your_items_to_new_worlds.add_instance")));
         this.addDrawableChild(addInstanceButton);
 
-        this.worldList = new ImportWorldListWidget(this, handler, this.client, this.width, this.height, 38, this.height - 64, 36, this.searchBox.getText());
+        this.worldList = new ImportWorldListWidget(this, handler, this.client, this.width, this.height, 38, 36, this.searchBox.getText());
         this.instanceList = new InstanceListWidget(this.client,this, this.handler, this.searchBox.getText());
 
         if(handler.getSelectedInstancePath()==null){
@@ -76,7 +77,7 @@ public class ImportWorldSelectionScreen extends Screen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        this.renderBackground(context);
+        this.renderBackground(context,mouseX,mouseY,delta);
         if(handler.getSelectedInstancePath()==null){
             this.instanceList.render(context, mouseX, mouseY, delta);
         }else{

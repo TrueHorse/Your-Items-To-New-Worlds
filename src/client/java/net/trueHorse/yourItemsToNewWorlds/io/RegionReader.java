@@ -2,8 +2,10 @@ package net.trueHorse.yourItemsToNewWorlds.io;
 
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.storage.RegionFile;
+import net.minecraft.world.storage.StorageKey;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.DataInputStream;
@@ -13,15 +15,17 @@ public class RegionReader {
 
     private final Path directory;
     private final boolean desync;
+    private final StorageKey storageKey;
 
-    public RegionReader(Path directory, boolean desync){
-        this.directory = directory;
+    public RegionReader(Path worldDirectory, boolean desync){
+        this.directory = worldDirectory.resolve("region");
+        storageKey = new StorageKey(worldDirectory, RegistryKeys.DIMENSION.)
         this.desync = desync;
     }
 
     private RegionFile getRegionFile(ChunkPos pos) throws IOException{
         Path path = this.directory.resolve("r." + pos.getRegionX() + "." + pos.getRegionZ() + ".mca");
-        return new RegionFile(path, this.directory, this.desync);
+        return new RegionFile(new StorageKey(),path, this.directory, this.desync);
     }
 
     @Nullable

@@ -2,6 +2,7 @@ package net.trueHorse.yourItemsToNewWorlds.gui;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.screen.ButtonTextures;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.*;
@@ -10,7 +11,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.trueHorse.yourItemsToNewWorlds.YourItemsToNewWorlds;
 import net.trueHorse.yourItemsToNewWorlds.gui.handlers.ImportItemScreenHandler;
 import net.trueHorse.yourItemsToNewWorlds.io.ItemImporter;
 
@@ -20,7 +20,11 @@ import java.util.function.BiConsumer;
 
 public class ImportItemsScreen extends Screen {
 
-    private final Identifier textureSheet = new Identifier("your_items_to_new_worlds","textures/gui/import_items_screen.png");
+    private static final ButtonTextures LEFT_ARROW_BUTTON_TEXTURES = new ButtonTextures(new Identifier("your_items_to_new_worlds","prev_page.png"),new Identifier("your_items_to_new_worlds","prev_page_highlighted.png"));
+    private static final ButtonTextures RIGHT_ARROW_BUTTON_TEXTURES = new ButtonTextures(new Identifier("your_items_to_new_worlds","next_page.png"),new Identifier("your_items_to_new_worlds","next_page_highlighted.png"));
+    private static final ButtonTextures SELECTED_ITEM_BUTTON_TEXTURES = new ButtonTextures(new Identifier("your_items_to_new_worlds","selected_slot.png"),new Identifier("your_items_to_new_worlds","selected_slot.png"));
+    private static final ButtonTextures UNSELECTED_ITEM_BUTTON_TEXTURES = new ButtonTextures(new Identifier("your_items_to_new_worlds","unselected_slot.png"),new Identifier("your_items_to_new_worlds","unselected_slot.png"));
+
     private final BiConsumer<ArrayList<ItemStack>,ImportItemsScreen> applier;
     private final String[] searchLocationDeterminationModeIDs = {"transfer_items.your_items_to_new_worlds.spawn_point",
             "transfer_items.your_items_to_new_worlds.most_item_containers",
@@ -64,7 +68,7 @@ public class ImportItemsScreen extends Screen {
         widgets.add(selectWorldButton);
 
         if(handler.getSelectedWorldPath()!=null){
-            playerNameWidget = CyclingButtonWidget.builder(Text::of).values(handler.getPlayerNames()).build(this.width/2-50,selectWorldButton.getY()+selectWorldButton.getHeight()+ margin,100,20,Text.translatable("transfer_items.your_items_to_new_worlds.player_name"),
+            playerNameWidget = CyclingButtonWidget.<String>builder(Text::of).values(handler.getPlayerNames()).build(this.width/2-50,selectWorldButton.getY()+selectWorldButton.getHeight()+ margin,100,20,Text.translatable("transfer_items.your_items_to_new_worlds.player_name"),
                     (button,val)-> {
                         button.setMessage(Text.of(val));
                         handler.setSelectedPlayerName(val);
@@ -125,13 +129,13 @@ public class ImportItemsScreen extends Screen {
 
             final int pixelsBetweenSearchAndBack = this.height-29-(searchButton.getY()+searchButton.getHeight());
             final int pageArrowY = searchButton.getY()+searchButton.getHeight()+(pixelsBetweenSearchAndBack)/2-9;
-            leftArrowButton = new TexturedButtonWidget(minDistanceFromEdge,pageArrowY,12,17,14,2,18,textureSheet,
+            leftArrowButton = new TexturedButtonWidget(minDistanceFromEdge,pageArrowY,12,17,LEFT_ARROW_BUTTON_TEXTURES,
                     button -> {gridPage--;
                     refreshGridArea();});
             leftArrowButton.visible = false;
             widgets.add(leftArrowButton);
 
-            rightArrowButton = new TexturedButtonWidget(this.width- minDistanceFromEdge -12,pageArrowY,12,17,0,2,18,textureSheet,
+            rightArrowButton = new TexturedButtonWidget(this.width- minDistanceFromEdge -12,pageArrowY,12,17,RIGHT_ARROW_BUTTON_TEXTURES,
                     button -> {gridPage++;
                         refreshGridArea();});
             rightArrowButton.visible = false;
@@ -143,7 +147,7 @@ public class ImportItemsScreen extends Screen {
             final int additionalGridXMargin = ((this.width-(minDistanceFromEdge +12)*2)%25)/2;
             for(int i=0;i<itemRows;i++){
                 for(int j=0;j<itemColumns;j++){
-                    TexturedItemButtonWidget selectButton = new TexturedItemButtonWidget(minDistanceFromEdge +12+additionalGridXMargin+j*25,searchButton.getY()+searchButton.getHeight()+ margin +additionalGridYMargin+i*25,25,25,27,0,25,textureSheet,
+                    TexturedItemButtonWidget selectButton = new TexturedItemButtonWidget(minDistanceFromEdge +12+additionalGridXMargin+j*25,searchButton.getY()+searchButton.getHeight()+ margin +additionalGridYMargin+i*25,25,25,UNSELECTED_ITEM_BUTTON_TEXTURES,SELECTED_ITEM_BUTTON_TEXTURES,
                             button -> {((TexturedItemButtonWidget)button).toggle();
                             handler.toggleSelection(itemSelectButtons.indexOf(button)+gridPage*itemSelectButtons.size());},ItemStack.EMPTY);
                     selectButton.visible = false;
@@ -194,10 +198,10 @@ public class ImportItemsScreen extends Screen {
     public void tick(){
         super.tick();
         if(handler.getSelectedWorldPath()!=null){
-            for(TextFieldWidget field:coordFields){
+            /*for(TextFieldWidget field:coordFields){
                 field.tick();
             }
-            radiusWidget.tick();
+            radiusWidget.tick();*/
         }
         handler.tick();
     }
@@ -277,7 +281,7 @@ public class ImportItemsScreen extends Screen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta){
-        renderBackground(context);
+        renderBackground(context, mouseX,mouseY,delta);
         super.render(context,mouseX,mouseY,delta);
     }
 

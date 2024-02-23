@@ -3,7 +3,6 @@ package net.trueHorse.yourItemsToNewWorlds.mixin;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.gen.feature.FeatureConfig;
 import net.minecraft.world.level.LevelProperties;
 import net.minecraft.world.level.ServerWorldProperties;
@@ -26,7 +25,7 @@ public class MinecraftServerMixin {
         ArrayList<ItemStack> importItems = ((GeneratorOptionsAccess)((LevelProperties)worldProperties).getGeneratorOptions()).getImportItems();
         if(!importItems.isEmpty()){
             ImportChestsFeature.importItems = importItems;
-            YourItemsToNewWorldsFeatures.importChestsFeature.generateIfValid(FeatureConfig.DEFAULT,world, world.getChunkManager().getChunkGenerator(), world.random, new BlockPos(worldProperties.getSpawnX(), worldProperties.getSpawnY(), worldProperties.getSpawnZ()));
+            YourItemsToNewWorldsFeatures.importChestsFeature.generateIfValid(FeatureConfig.DEFAULT,world, world.getChunkManager().getChunkGenerator(), world.random, worldProperties.getSpawnPos());
         }
     }
 }

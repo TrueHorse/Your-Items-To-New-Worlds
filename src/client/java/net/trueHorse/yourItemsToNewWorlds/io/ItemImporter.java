@@ -4,6 +4,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtSizeTracker;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.trueHorse.yourItemsToNewWorlds.YourItemsToNewWorlds;
@@ -29,13 +30,13 @@ public class ItemImporter {
     private final NbtCompound playerNbt;
 
     public ItemImporter(Path worldPath, String playerUuid){
-        regionReader = new RegionReader(worldPath.resolve("region"), false);
+        regionReader = new RegionReader(worldPath, false);
 
         NbtCompound tempPlayerNbt;
         File file = worldPath.resolve("playerdata/"+ playerUuid + ".dat").toFile();
         if (file.exists() && file.isFile()) {
             try {
-                tempPlayerNbt = NbtIo.readCompressed(file);
+                tempPlayerNbt = NbtIo.readCompressed(file.toPath(), NbtSizeTracker.ofUnlimitedBytes());
             } catch (IOException e) {
                 YourItemsToNewWorlds.LOGGER.error("Couldn't read player data file.\n"+e.getMessage());
                 tempPlayerNbt = null;
