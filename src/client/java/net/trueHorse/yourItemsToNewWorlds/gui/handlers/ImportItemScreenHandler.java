@@ -101,7 +101,7 @@ public class ImportItemScreenHandler {
     public void initPlayerNames(){
         playerIdNames.clear();
         AtomicBoolean success = new AtomicBoolean(true);
-        File playerDataFolder = new File(selectedWorldPath+"\\playerdata");
+        File playerDataFolder = new File(selectedWorldPath.resolve("playerdata").toString());
         ArrayList<String> uuids;
         try {
             uuids = new ArrayList<>(Arrays.stream(playerDataFolder.list()).map(name -> name.substring(0,name.lastIndexOf("."))).toList());
