@@ -71,10 +71,7 @@ public class ItemImporter {
             }
         }
 
-        ListTag itemsInBlockEntitiesNbts = new ListTag();
-        surroundingChunks.forEach(chunkNbt -> ((CompoundTag) chunkNbt).getList("block_entities", 10).forEach(be -> itemsInBlockEntitiesNbts.addAll(((CompoundTag) be).getList("Items", 10))));
-        surroundingChunks.forEach(chunkNbt -> ((CompoundTag) chunkNbt).getCompound("Level").getList("TileEntities", 10).forEach(be -> itemsInBlockEntitiesNbts.addAll(((CompoundTag) be).getList("Items", 10))));
-
+        ListTag itemsInBlockEntitiesNbts = ChunkExtractor.extractItems(surroundingChunks);
         return new ArrayList<>(itemsInBlockEntitiesNbts.stream().map(nbt -> ItemStack.of((CompoundTag) nbt)).filter(stack -> !stack.isEmpty()).toList());
     }
 
