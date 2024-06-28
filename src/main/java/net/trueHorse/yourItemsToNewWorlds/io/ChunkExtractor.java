@@ -54,12 +54,30 @@ public class ChunkExtractor {
     }
 
     private static void putNewItemIds(NbtList items){
-        Map<Short,String> idMap = new HashMap<>();
-        JsonHelper.deserialize(itemIdMapJson).asMap().forEach((k,v)->idMap.put(Short.parseShort(k),v.getAsJsonPrimitive().getAsString()));
+        Map<String,String> idMap = new HashMap<>();
+        JsonHelper.deserialize(itemIdMapJson).asMap().forEach((k,v)->idMap.put(k,v.getAsJsonPrimitive().getAsString()));
 
         for(NbtElement el : items){
             NbtCompound itemCompound = (NbtCompound) el;
-            itemCompound.putString("id",idMap.get(itemCompound.getShort("id")));
+            String numericId = String.valueOf(itemCompound.getShort("id"));
+            short potentialVariant = itemCompound.getShort("Damage");
+
+            if(potentialVariant>0){
+                String variantString = numericId +":"+potentialVariant;
+                String variantMapping = idMap.get(variantString);
+                if(variantMapping==null){
+                    YourItemsToNewWorlds.LOGGER.warn(variantString+" is no defined variant. Trying base id instead");
+                }else{
+                    numericId = variantString;
+                }
+            }
+
+            String modernId = idMap.get(numericId);
+            if(modernId==null){
+                YourItemsToNewWorlds.LOGGER.error(numericId +" has no modern id mapped to it.");
+            }else{
+                itemCompound.putString("id",modernId);
+            }
         }
     }
 
