@@ -71,6 +71,7 @@ public class ItemImporter {
             }
         }
 
+        YourItemsToNewWorlds.LOGGER.info("Found chunks: "+surroundingChunks.size());
         NbtList itemsInBlockEntitiesNbts = ChunkExtractor.extractItems(surroundingChunks);
         return new ArrayList<>(itemsInBlockEntitiesNbts.stream().map(nbt -> ItemStack.fromNbt((NbtCompound) nbt)).filter(stack -> !stack.isEmpty()).toList());
     }

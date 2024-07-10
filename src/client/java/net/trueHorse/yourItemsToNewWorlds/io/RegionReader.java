@@ -4,6 +4,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.storage.RegionFile;
+import net.trueHorse.yourItemsToNewWorlds.YourItemsToNewWorlds;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.DataInputStream;
@@ -20,7 +21,9 @@ public class RegionReader {
     }
 
     private RegionFile getRegionFile(ChunkPos pos) throws IOException{
-        Path path = this.directory.resolve("r." + pos.getRegionX() + "." + pos.getRegionZ() + ".mca");
+        String fileName = "r." + pos.getRegionX() + "." + pos.getRegionZ() + ".mca";
+        YourItemsToNewWorlds.LOGGER.info("Getting chunk "+pos.x+" "+pos.z+" in "+fileName);
+        Path path = this.directory.resolve(fileName);
         return new RegionFile(path, this.directory, this.desync);
     }
 
