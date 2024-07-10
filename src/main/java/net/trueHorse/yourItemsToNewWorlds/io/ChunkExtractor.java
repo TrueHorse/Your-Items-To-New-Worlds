@@ -15,7 +15,7 @@ public class ChunkExtractor {
         NbtList blockEntityNbts = extractBlockEntities(chunkNbts);
         NbtList containedItemsNbts = getItemsFromEntities(blockEntityNbts);
 
-        if(((NbtCompound)containedItemsNbts.get(0)).contains("id",2)){
+        if(!containedItemsNbts.isEmpty()&&((NbtCompound)containedItemsNbts.get(0)).contains("id",2)){
             putNewItemIds(containedItemsNbts);
         }
 
