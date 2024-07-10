@@ -31,8 +31,10 @@ public class ChunkExtractor {
             if(((NbtCompound)chunkNbts.get(0)).contains("block_entities")||((NbtCompound)chunkNbts.get(0)).contains("Level")){
                 if(((NbtCompound)chunkNbts.get(0)).contains("block_entities")){
                     chunkNbts.forEach(chunkNbt->blockEntityNbts.addAll(((NbtCompound) chunkNbt).getList("block_entities", 10)));
+                    YourItemsToNewWorlds.LOGGER.info("Block Entities in chunks: "+ blockEntityNbts.size());
                 }else{
                     chunkNbts.forEach(chunkNbt->blockEntityNbts.addAll(((NbtCompound) chunkNbt).getCompound("Level").getList("TileEntities", 10)));
+                    YourItemsToNewWorlds.LOGGER.info("Tile Entities in chunks: "+ blockEntityNbts.size());
                 }
             }else{
                 YourItemsToNewWorlds.LOGGER.warn("Unknown chunk format.");
