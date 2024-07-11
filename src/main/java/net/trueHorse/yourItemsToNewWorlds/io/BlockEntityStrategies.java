@@ -23,14 +23,14 @@ public class BlockEntityStrategies {
                         NbtCompound item = tag.getCompound(key);
                         long cnt = item.getLong("Cnt");
 
-                        if(cnt>64){
-                            item.putByte("count", (byte) 64);
+                        if(cnt>=64){
+                            item.putByte("Count", (byte) 64);
                             for(int j = 0;j<Math.floor(cnt/64.0);j++){
                                 itemNbts.add(item.copy());
                             }
                         }
 
-                        item.putByte("count",(byte)(cnt%64));
+                        item.putByte("Count",(byte)(cnt%64));
                         itemNbts.add(item);
                     }
                 }

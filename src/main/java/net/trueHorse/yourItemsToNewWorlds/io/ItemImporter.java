@@ -73,6 +73,15 @@ public class ItemImporter {
 
         YourItemsToNewWorlds.LOGGER.info("Found chunks: "+surroundingChunks.size());
         ListTag itemsInBlockEntitiesNbts = ChunkExtractor.extractItems(surroundingChunks);
+        /*
+        itemsInBlockEntitiesNbts.forEach(nbt -> {
+            ((NbtCompound)nbt).getKeys().forEach(key->{
+                NbtElement el = ((NbtCompound) nbt).get(key);
+                YourItemsToNewWorlds.LOGGER.info(key+" "+el.toString()+": "+el.getNbtType().getCommandFeedbackName());
+            });
+        });
+         */
+
         return new ArrayList<>(itemsInBlockEntitiesNbts.stream().map(nbt -> ItemStack.of((CompoundTag) nbt)).filter(stack -> !stack.isEmpty()).toList());
     }
 
