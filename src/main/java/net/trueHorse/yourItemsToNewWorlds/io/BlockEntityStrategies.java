@@ -1,7 +1,6 @@
 package net.trueHorse.yourItemsToNewWorlds.io;
 
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 
 import java.util.List;
@@ -36,7 +35,7 @@ public class BlockEntityStrategies {
                 }
 
                 return itemNbts;
-            }),
+            })/*,
             Map.entry("refinedstorage:disk_drive",(driveNbt)->{
                 NbtList itemNbts = new NbtList();
                 NbtList storedNbts = new NbtList();
@@ -61,7 +60,7 @@ public class BlockEntityStrategies {
                 }
 
                 return itemNbts;
-            })
+            })*/
     );
 
     private static final Function<NbtCompound,NbtList> DEFAULT_STRATEGY = (blockEntityNbt->blockEntityNbt.getList("Items", 10));
