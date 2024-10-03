@@ -5,7 +5,8 @@
   "client": [
     "ChatScreenMixin",
     "CreateWorldScreenMoreTabMixin",
-    "WorldCreatorMixin"
+    "WorldCreatorMixin",
+    "ItemStackMixin"
   ],
   "injectors": {
     "defaultRequire": 1
