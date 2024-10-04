@@ -1,5 +1,6 @@
 package net.trueHorse.yourItemsToNewWorlds.mixin.client;
 
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.JsonHelper;
@@ -10,20 +11,18 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
 @Mixin(ItemStack.class)
 public class ItemStackMixin {
 
-    private static final Map<String,String> idMap = new HashMap<>();
+    private static final File MAPPINGS_FILE = FabricLoader.getInstance().getConfigDir().resolve("config/Your Items to New Worlds/idMappings.json").toFile();
+    private static final Map<String,String> idMap = loadIdMap();
 
     @Inject(method = "fromNbt",at = @At("HEAD"),locals = LocalCapture.CAPTURE_FAILSOFT)
     private static void convertOldItemId(NbtCompound nbt, CallbackInfoReturnable<ItemStack> cir){
-        if(idMap.isEmpty()){
-            JsonHelper.deserialize(itemIdMapJson).asMap().forEach((k, v)->idMap.put(k,v.getAsJsonPrimitive().getAsString()));
-        }
-
         if(nbt.contains("id",2)){
             String numericId = String.valueOf(nbt.getShort("id"));
             short potentialVariant = nbt.getShort("Damage");
@@ -45,6 +44,28 @@ public class ItemStackMixin {
                 nbt.putString("id",modernId);
             }
         }
+    }
+
+    private static Map<String,String> loadIdMap() {
+        Map<String, String> map = new HashMap<>();
+        try {
+            if(!MAPPINGS_FILE.exists()){
+                try {
+                    MAPPINGS_FILE.getParentFile().mkdirs();
+                    FileWriter writer = new FileWriter(MAPPINGS_FILE);
+                    writer.write(itemIdMapJson);
+                    writer.close();
+                }catch (IOException e){
+                    YourItemsToNewWorlds.LOGGER.error(e.getMessage());
+                }
+            }
+
+            JsonHelper.deserialize(new FileReader(MAPPINGS_FILE)).asMap().forEach((k, v)->map.put(k,v.getAsJsonPrimitive().getAsString()));
+        } catch (FileNotFoundException e) {
+            YourItemsToNewWorlds.LOGGER.error(e.getMessage());
+        }
+
+        return map;
     }
 
     private static final String itemIdMapJson = """
