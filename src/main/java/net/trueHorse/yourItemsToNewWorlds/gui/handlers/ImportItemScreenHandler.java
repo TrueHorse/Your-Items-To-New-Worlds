@@ -34,7 +34,7 @@ public class ImportItemScreenHandler {
     private ArrayList<ItemStack> importableItemStacks = new ArrayList<>();
     private boolean[] itemSelected;
     private final Map<String,String> playerIdNames = new HashMap<>();
-    private final Map<ItemSearchConfig, Pair<ArrayList<ItemStack>, ChunkPos>> itemCache = new HashMap<>();
+    private final Map<ItemSearchConfig, Pair<ChunkPos, ArrayList<ItemStack>>> itemCache = new HashMap<>();
     private boolean nameRequestSucessful;
     private Path selectedWorldPath;
     private String selectedPlayerName;
@@ -51,12 +51,12 @@ public class ImportItemScreenHandler {
     public void searchImportableItemStacks(){
         ItemSearchConfig currentConfig = new ItemSearchConfig(selectedWorldPath,selectedPlayerName,searchLocationDeterminationMode,searchLocationDeterminationMode==ItemImporter.SearchLocationDeterminationMode.COORDINATES ? new ChunkPos(chosenPos) :null,searchRadius);
         if(itemCache.containsKey(currentConfig)){
-            Pair<ArrayList<ItemStack>,ChunkPos> pair =itemCache.get(currentConfig);
-            importableItemStacks = pair.getFirst();
+            Pair<ChunkPos, ArrayList<ItemStack>> pair =itemCache.get(currentConfig);
             if(searchLocationDeterminationMode != ItemImporter.SearchLocationDeterminationMode.COORDINATES) {
-                chosenPos.set(pair.getSecond().getBlockAt(0, 0, 0));
+                chosenPos.set(pair.getFirst().getBlockAt(0, 0, 0));
                 screen.updateCoordinateFields();
             }
+            onItemSearchComplete(pair);
         }else {
             screen.onSearchStatusChanged(true);
             importResult = CompletableFuture.supplyAsync(()->{
@@ -92,7 +92,7 @@ public class ImportItemScreenHandler {
             screen.updateCoordinateFields();
         }
         itemCache.put(new ItemSearchConfig(selectedWorldPath,selectedPlayerName,searchLocationDeterminationMode,searchLocationDeterminationMode==ItemImporter.SearchLocationDeterminationMode.COORDINATES ? new ChunkPos(chosenPos) :null,searchRadius)
-                ,new Pair<>(result.getSecond(),result.getFirst()));
+                ,new Pair<>(result.getFirst(), result.getSecond()));
 
         screen.onSearchStatusChanged(false);
     }
