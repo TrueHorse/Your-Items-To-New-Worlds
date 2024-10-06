@@ -1,7 +1,5 @@
 package net.trueHorse.yourItemsToNewWorlds.io;
 
-import net.trueHorse.yourItemsToNewWorlds.YourItemsToNewWorlds;
-
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +12,6 @@ public class InstanceList {
         Path[] possiblePaths = {launcherInstancePath.resolve("minecraft"),launcherInstancePath.resolve(".minecraft")};
         for(Path posPath:possiblePaths){
             if(posPath.toFile().exists()){
-                YourItemsToNewWorlds.LOGGER.info("path changed");
                 return posPath;
             }
         }
