@@ -42,6 +42,7 @@ public class ItemStackMixin {
                 YourItemsToNewWorlds.LOGGER.error(numericId +" has no modern id mapped to it.");
             }else{
                 nbt.putString("id",modernId);
+                nbt.getCompound("tag").putInt("damage",potentialVariant);
             }
         }
     }
