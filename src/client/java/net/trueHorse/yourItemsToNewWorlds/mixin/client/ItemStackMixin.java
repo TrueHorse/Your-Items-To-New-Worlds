@@ -18,7 +18,7 @@ import java.util.Map;
 @Mixin(ItemStack.class)
 public class ItemStackMixin {
 
-    private static final File MAPPINGS_FILE = FabricLoader.getInstance().getConfigDir().resolve("config/Your Items to New Worlds/idMappings.json").toFile();
+    private static final File MAPPINGS_FILE = FabricLoader.getInstance().getConfigDir().resolve("Your Items to New Worlds/idMappings.json").toFile();
     private static final Map<String,String> idMap = loadIdMap();
 
     @Inject(method = "fromNbt",at = @At("HEAD"),locals = LocalCapture.CAPTURE_FAILSOFT)
