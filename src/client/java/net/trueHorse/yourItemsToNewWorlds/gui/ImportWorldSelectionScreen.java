@@ -44,18 +44,18 @@ public class ImportWorldSelectionScreen extends Screen {
     @Override
     protected void init(){
         super.init();
-        this.searchBox = new TextFieldWidget(this.textRenderer, this.width / 2 - 100, 12, 200, 20, this.searchBox, handler.getSelectedInstancePath()!=null ? Text.translatable("selectWorld.search"):Text.translatable("narrator.your_items_to_new_worlds.instance_search"));
+        this.searchBox = new TextFieldWidget(this.textRenderer, this.width / 2 - 100, 12, 200, 20, this.searchBox, handler.getSelectedInstance()!=null ? Text.translatable("selectWorld.search"):Text.translatable("narrator.your_items_to_new_worlds.instance_search"));
 
         this.addInstanceButton = new TexturedButtonWidget(this.width/2+105,12,20,20,0,0, 20, BUTTON_TEXTURE_SHEET,40,40,
                 button -> handler.chooseNewInstance(),Text.translatable("transfer_items.your_items_to_new_worlds.add_instance"));
-        addInstanceButton.visible = handler.getSelectedInstancePath()==null;
+        addInstanceButton.visible = handler.getSelectedInstance()==null;
         addInstanceButton.setTooltip(Tooltip.of(Text.translatable("transfer_items.your_items_to_new_worlds.add_instance")));
         this.addDrawableChild(addInstanceButton);
 
         this.worldList = new ImportWorldListWidget(this, handler, this.client, this.width, this.height, 38, this.height - 64, 36, this.searchBox.getText());
         this.instanceList = new InstanceListWidget(this.client,this, this.handler, this.searchBox.getText());
 
-        if(handler.getSelectedInstancePath()==null){
+        if(handler.getSelectedInstance()==null){
             this.searchBox.setChangedListener(search -> this.instanceList.search(search));
             this.addSelectableChild(this.instanceList);
         }else{
@@ -68,16 +68,16 @@ public class ImportWorldSelectionScreen extends Screen {
         this.selectButton.active = handler.getSelectedWorld()!=null;
 
         ButtonWidget cancelButton = this.addDrawableChild(ButtonWidget.builder(Text.translatable("gui.cancel"), button -> close()).dimensions(this.width / 2 + 5, this.height-29, 150, 20).build());
-        cancelButton.visible = handler.getSelectedInstancePath()==null;
+        cancelButton.visible = handler.getSelectedInstance()==null;
 
         ButtonWidget backButton = this.addDrawableChild(ButtonWidget.builder(Text.translatable("gui.back"), button -> handler.onInstanceSelected(null)).dimensions(this.width / 2 + 5, this.height-29, 150, 20).build());
-        backButton.visible = handler.getSelectedInstancePath()!=null;
+        backButton.visible = handler.getSelectedInstance()!=null;
     }
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         this.renderBackground(context);
-        if(handler.getSelectedInstancePath()==null){
+        if(handler.getSelectedInstance()==null){
             this.instanceList.render(context, mouseX, mouseY, delta);
         }else{
             this.worldList.render(context, mouseX, mouseY, delta);

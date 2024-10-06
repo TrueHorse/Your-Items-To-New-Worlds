@@ -10,8 +10,8 @@ import net.minecraft.client.gui.widget.ElementListWidget;
 import net.minecraft.client.gui.widget.TexturedButtonWidget;
 import net.minecraft.text.Text;
 import net.trueHorse.yourItemsToNewWorlds.gui.handlers.ImportWorldSelectionScreenHandler;
+import net.trueHorse.yourItemsToNewWorlds.io.LauncherMinecraftInstance;
 
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
 
@@ -28,8 +28,8 @@ public class InstanceListWidget extends ElementListWidget<InstanceListWidget.Ent
         this.parent = parent;
         this.handler = handler;
         this.search = search;
-        for(Path path:handler.getInstances()){
-            this.addEntry(new InstanceEntry(path,handler));
+        for(LauncherMinecraftInstance instance:handler.getInstances().get()){
+            this.addEntry(new InstanceEntry(instance,handler));
         }
     }
 
@@ -43,9 +43,9 @@ public class InstanceListWidget extends ElementListWidget<InstanceListWidget.Ent
     private void showInstances(String search) {
         this.clearEntries();
         search = search.toLowerCase(Locale.ROOT);
-        for (Path instancePath : handler.getInstances()) {
-            if (instancePath.getFileName().toString().toLowerCase().contains(search)){
-                this.addEntry(new InstanceEntry(instancePath,handler));
+        for (LauncherMinecraftInstance instance : handler.getInstances().get()) {
+            if (instance.path().getFileName().toString().toLowerCase().contains(search)){
+                this.addEntry(new InstanceEntry(instance,handler));
             }
         }
         this.parent.narrateScreenIfNarrationEnabled(true);
@@ -57,13 +57,13 @@ public class InstanceListWidget extends ElementListWidget<InstanceListWidget.Ent
         private final ButtonWidget instanceButton;
         private final TexturedButtonWidget deleteButton;
 
-        public InstanceEntry(Path instancePath, ImportWorldSelectionScreenHandler handler){
-            String instanceName = instancePath.getFileName().toString();
-            instanceButton = ButtonWidget.builder(Text.of(instanceName),button -> handler.onInstanceSelected(instancePath)).dimensions(0,0,150,20).build();
+        public InstanceEntry(LauncherMinecraftInstance instance, ImportWorldSelectionScreenHandler handler){
+            String instanceName = instance.path().getFileName().toString();
+            instanceButton = ButtonWidget.builder(Text.of(instanceName),button -> handler.onInstanceSelected(instance)).dimensions(0,0,150,20).build();
             instanceButton.setMessage(Text.of(instanceName));
 
             deleteButton = new TexturedButtonWidget(0,0,20,20,20,0,20, ImportWorldSelectionScreen.BUTTON_TEXTURE_SHEET,40,40,
-                    button -> handler.removeInstance(instancePath),Text.translatable("narrator.your_items_to_new_worlds.remove_instance",instanceName));
+                    button -> handler.removeInstance(instance.path()),Text.translatable("narrator.your_items_to_new_worlds.remove_instance",instanceName));
         }
 
         @Override
