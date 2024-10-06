@@ -10,7 +10,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import net.trueHorse.yourItemsToNewWorlds.YourItemsToNewWorlds;
 import net.trueHorse.yourItemsToNewWorlds.gui.handlers.ImportItemScreenHandler;
 import net.trueHorse.yourItemsToNewWorlds.io.ItemImporter;
 
@@ -257,6 +256,7 @@ public class ImportItemsScreen extends Screen {
     }
 
     public void onSearchStatusChanged(boolean searching){
+        gridPage = 0;
         searchingTextWidget.visible = searching;
         selectWorldButton.active = !searching;
         playerNameWidget.active = !searching;
