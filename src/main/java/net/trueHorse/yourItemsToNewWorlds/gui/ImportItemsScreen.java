@@ -255,6 +255,7 @@ public class ImportItemsScreen extends Screen {
     }
 
     public void onSearchStatusChanged(boolean searching){
+        gridPage = 0;
         searchingTextWidget.visible = searching;
         selectWorldButton.active = !searching;
         playerNameWidget.active = !searching;
