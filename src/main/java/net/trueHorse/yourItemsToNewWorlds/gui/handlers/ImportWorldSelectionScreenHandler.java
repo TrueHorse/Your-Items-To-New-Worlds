@@ -8,6 +8,8 @@ import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.LevelSummary;
 import net.trueHorse.yourItemsToNewWorlds.YourItemsToNewWorlds;
 import net.trueHorse.yourItemsToNewWorlds.gui.ImportWorldSelectionScreen;
+import net.trueHorse.yourItemsToNewWorlds.io.InstanceList;
+import net.trueHorse.yourItemsToNewWorlds.io.LauncherMinecraftInstance;
 import net.trueHorse.yourItemsToNewWorlds.io.InstancesFileIO;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.util.tinyfd.TinyFileDialogs;
@@ -22,15 +24,15 @@ public class ImportWorldSelectionScreenHandler {
 
     private final ImportWorldSelectionScreen screen;
     private List<LevelSummary> worlds = new ArrayList<>();
-    private final List<Path> instancePaths;
-    private Path selectedInstancePath = null;
+    private final InstanceList instances;
+    private LauncherMinecraftInstance selectedInstance = null;
     private LevelSummary selectedWorld;
     private final InstancesFileIO instancesFileIO = new InstancesFileIO();
     private Path lastAddedInstance;
 
     public ImportWorldSelectionScreenHandler(ImportWorldSelectionScreen screen){
         this.screen = screen;
-        instancePaths = instancesFileIO.loadInstances();
+        instances = instancesFileIO.loadInstances();
     }
 
     public void chooseNewInstance(){
@@ -44,10 +46,11 @@ public class ImportWorldSelectionScreenHandler {
 
 
 
-    public void onInstanceSelected(@Nullable Path path){
-        selectedInstancePath = path;
-        if(path!=null){
-            LevelStorageSource levelStorage = new LevelStorageSource(path.resolve("saves"),path.resolve("backups"),LevelStorageSource.parseValidator(path.resolve("allowed_symlinks.txt")),Minecraft.getInstance().getFixerUpper());
+    public void onInstanceSelected(@Nullable LauncherMinecraftInstance instance){
+        selectedInstance = instance;
+        if(instance!=null){
+            Path minecraftPath = instance.minecraftPath();
+            LevelStorageSource levelStorage = new LevelStorageSource(minecraftPath.resolve("saves"),minecraftPath.resolve("backups"),LevelStorageSource.parseValidator(minecraftPath.resolve("allowed_symlinks.txt")),Minecraft.getInstance().getFixerUpper());
             try {
                 worlds = levelStorage.loadLevelSummaries(levelStorage.findLevelCandidates()).get();
             } catch (LevelStorageException | InterruptedException | ExecutionException e) {
@@ -61,31 +64,31 @@ public class ImportWorldSelectionScreenHandler {
     }
 
     public Path getPathOfWorld(int index){
-        return selectedInstancePath.resolve("saves/"+worlds.get(index).getLevelId());
+        return selectedInstance.minecraftPath().resolve("saves/"+worlds.get(index).getLevelId());
     }
 
     public Path getPathOfWorld(LevelSummary summary){
-        return selectedInstancePath.resolve("saves/"+summary.getLevelId());
+        return selectedInstance.minecraftPath().resolve("saves/"+summary.getLevelId());
     }
 
     public void addInstance(Path instance){
-        instancePaths.add(instance);
-        instancesFileIO.saveInstances(instancePaths);
+        instances.add(instance);
+        instancesFileIO.saveInstances(instances);
         screen.onInstancesChanged();
     }
 
     public void removeInstance(Path instance){
-        instancePaths.remove(instance);
-        instancesFileIO.saveInstances(instancePaths);
+        instances.remove(instance);
+        instancesFileIO.saveInstances(instances);
         screen.onInstancesChanged();
     }
 
-    public List<Path> getInstances(){
-        return instancePaths;
+    public InstanceList getInstances(){
+        return instances;
     }
 
-    public Path getSelectedInstancePath(){
-        return selectedInstancePath;
+    public LauncherMinecraftInstance getSelectedInstance(){
+        return selectedInstance;
     }
 
     public List<LevelSummary> getWorlds() {

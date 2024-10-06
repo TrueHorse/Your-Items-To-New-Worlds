@@ -8,7 +8,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -17,7 +16,7 @@ public class InstancesFileIO {
     private static final Path INSTANCES_FILE_PATH = Minecraft.getInstance().gameDirectory.toPath().resolve("config/Your Items to New Worlds/instances.txt");
     private static final Path CURRENT_INSTANCE_PATH = Minecraft.getInstance().gameDirectory.toPath();
 
-    public void saveInstances(List<Path> instancePaths){
+    public void saveInstances(InstanceList instanceList){
         File instancesFile = INSTANCES_FILE_PATH.toFile();
 
         if(!instancesFile.getParentFile().exists()){
@@ -25,6 +24,7 @@ public class InstancesFileIO {
         }
 
         StringBuilder builder = new StringBuilder();
+        List<Path> instancePaths = instanceList.get().stream().map(LauncherMinecraftInstance::path).toList();
         builder.append(instancePaths.isEmpty() ? "":instancePaths.get(0));
         for(int i = 1; i<instancePaths.size();i++){
             builder.append(',').append(instancePaths.get(i));
@@ -40,24 +40,23 @@ public class InstancesFileIO {
         }
     }
 
-    public List<Path> loadInstances(){
-        List<Path> instancePaths = new ArrayList<>();
+    public InstanceList loadInstances(){
+        InstanceList instances = new InstanceList();
         if(!INSTANCES_FILE_PATH.toFile().exists()){
-            instancePaths.add(CURRENT_INSTANCE_PATH);
+            instances.add(CURRENT_INSTANCE_PATH);
         }else {
             String pathsString;
             try {
                 pathsString = Files.readAllLines(INSTANCES_FILE_PATH).get(0);
             } catch (IOException e) {
                 YourItemsToNewWorlds.LOGGER.error("Failed to load instances.");
-                e.printStackTrace();
-                instancePaths.add(CURRENT_INSTANCE_PATH);
-                return instancePaths;
+                instances.add(CURRENT_INSTANCE_PATH);
+                return instances;
             }
 
             String[] paths = pathsString.split(",");
-            Arrays.stream(paths).map(path -> new File(path).toPath()).forEach(instancePaths::add);
+            Arrays.stream(paths).map(path -> new File(path).toPath()).forEach(instances::add);
         }
-        return instancePaths;
+        return instances;
     }
 }

@@ -10,8 +10,8 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.network.chat.Component;
 import net.trueHorse.yourItemsToNewWorlds.gui.handlers.ImportWorldSelectionScreenHandler;
+import net.trueHorse.yourItemsToNewWorlds.io.LauncherMinecraftInstance;
 
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
 
@@ -28,8 +28,8 @@ public class InstanceListWidget extends ContainerObjectSelectionList<InstanceLis
         this.parent = parent;
         this.handler = handler;
         this.search = search;
-        for(Path path:handler.getInstances()){
-            this.addEntry(new InstanceEntry(path,handler));
+        for(LauncherMinecraftInstance instance:handler.getInstances().get()){
+            this.addEntry(new InstanceEntry(instance,handler));
         }
     }
 
@@ -43,9 +43,9 @@ public class InstanceListWidget extends ContainerObjectSelectionList<InstanceLis
     private void showInstances(String search) {
         this.clearEntries();
         search = search.toLowerCase(Locale.ROOT);
-        for (Path instancePath : handler.getInstances()) {
-            if (instancePath.getFileName().toString().toLowerCase().contains(search)){
-                this.addEntry(new InstanceEntry(instancePath,handler));
+        for (LauncherMinecraftInstance instance : handler.getInstances().get()) {
+            if (instance.path().getFileName().toString().toLowerCase().contains(search)){
+                this.addEntry(new InstanceEntry(instance,handler));
             }
         }
         this.parent.triggerImmediateNarration(true);
@@ -57,13 +57,13 @@ public class InstanceListWidget extends ContainerObjectSelectionList<InstanceLis
         private final Button instanceButton;
         private final ImageButton deleteButton;
 
-        public InstanceEntry(Path instancePath, ImportWorldSelectionScreenHandler handler){
-            String instanceName = instancePath.getFileName().toString();
-            instanceButton = Button.builder(Component.literal(instanceName), button -> handler.onInstanceSelected(instancePath)).bounds(0,0,150,20).build();
+        public InstanceEntry(LauncherMinecraftInstance instance, ImportWorldSelectionScreenHandler handler){
+            String instanceName = instance.path().getFileName().toString();
+            instanceButton = Button.builder(Component.literal(instanceName), button -> handler.onInstanceSelected(instance)).bounds(0,0,150,20).build();
             instanceButton.setMessage(Component.literal(instanceName));
 
             deleteButton = new ImageButton(0,0,20,20,20,0,20, ImportWorldSelectionScreen.BUTTON_TEXTURE_SHEET,40,40,
-                    button -> handler.removeInstance(instancePath),Component.translatable("narrator.your_items_to_new_worlds.remove_instance",instanceName));
+                    button -> handler.removeInstance(instance.path()),Component.translatable("narrator.your_items_to_new_worlds.remove_instance",instanceName));
         }
 
         @Override
