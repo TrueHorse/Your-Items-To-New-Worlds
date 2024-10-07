@@ -10,6 +10,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.storage.LevelSummary;
 import net.trueHorse.yourItemsToNewWorlds.gui.handlers.ImportWorldSelectionScreenHandler;
+import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
 import java.util.function.Consumer;
@@ -44,18 +45,18 @@ public class ImportWorldSelectionScreen extends Screen {
     @Override
     protected void init(){
         super.init();
-        this.searchBox = new EditBox(this.font, this.width / 2 - 100, 12, 200, 20, this.searchBox, handler.getSelectedInstancePath()!=null ? Component.translatable("selectWorld.search"):Component.translatable("narrator.your_items_to_new_worlds.instance_search"));
+        this.searchBox = new EditBox(this.font, this.width / 2 - 100, 12, 200, 20, this.searchBox, handler.getSelectedInstance()!=null ? Component.translatable("selectWorld.search"):Component.translatable("narrator.your_items_to_new_worlds.instance_search"));
 
         this.addInstanceButton = new ImageButton(this.width/2+105,12,20,20,0,0, 20, BUTTON_TEXTURE_SHEET,40,40,
                 button -> handler.chooseNewInstance(),Component.translatable("transfer_items.your_items_to_new_worlds.add_instance"));
-        addInstanceButton.visible = handler.getSelectedInstancePath()==null;
+        addInstanceButton.visible = handler.getSelectedInstance()==null;
         addInstanceButton.setTooltip(Tooltip.create(Component.translatable("transfer_items.your_items_to_new_worlds.add_instance")));
         this.addRenderableWidget(addInstanceButton);
 
         this.worldList = new ImportWorldListWidget(this, handler, this.minecraft, this.width, this.height, 38, this.height - 64, 36, this.searchBox.getValue());
         this.instanceList = new InstanceListWidget(this.minecraft,this, this.handler, this.searchBox.getValue());
 
-        if(handler.getSelectedInstancePath()==null){
+        if(handler.getSelectedInstance()==null){
             this.searchBox.setResponder(search -> this.instanceList.search(search));
             this.addWidget(this.instanceList);
         }else{
@@ -68,16 +69,16 @@ public class ImportWorldSelectionScreen extends Screen {
         this.selectButton.active = handler.getSelectedWorld()!=null;
 
         Button cancelButton = this.addRenderableWidget(Button.builder(Component.translatable("gui.cancel"), button -> onClose()).bounds(this.width / 2 + 5, this.height-29, 150, 20).build());
-        cancelButton.visible = handler.getSelectedInstancePath()==null;
+        cancelButton.visible = handler.getSelectedInstance()==null;
 
         Button backButton = this.addRenderableWidget(Button.builder(Component.translatable("gui.back"), button -> handler.onInstanceSelected(null)).bounds(this.width / 2 + 5, this.height-29, 150, 20).build());
-        backButton.visible = handler.getSelectedInstancePath()!=null;
+        backButton.visible = handler.getSelectedInstance()!=null;
     }
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void render(@NotNull GuiGraphics context, int mouseX, int mouseY, float delta) {
         this.renderBackground(context);
-        if(handler.getSelectedInstancePath()==null){
+        if(handler.getSelectedInstance()==null){
             this.instanceList.render(context, mouseX, mouseY, delta);
         }else{
             this.worldList.render(context, mouseX, mouseY, delta);

@@ -6,6 +6,9 @@ import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.trueHorse.yourItemsToNewWorlds.YourItemsToNewWorlds;
+import org.jetbrains.annotations.NotNull;
 
 public class TexturedItemButtonWidget extends ImageButton {
 
@@ -33,13 +36,20 @@ public class TexturedItemButtonWidget extends ImageButton {
     }
 
     @Override
-    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void renderWidget(@NotNull GuiGraphics context, int mouseX, int mouseY, float delta) {
         if(toggled){
             this.renderTexture(context, this.resourceLocation, this.getX(), this.getY(), this.xTexStart, this.yTexStart, this.yDiffTex, this.width, this.height, this.textureWidth, this.textureHeight);
         }else{
             this.renderTexture(context, this.resourceLocation, this.getX(), this.getY(), this.xTexStart+this.width, this.yTexStart, this.yDiffTex, this.width, this.height, this.textureWidth, this.textureHeight);
         }
-        context.renderItem(itemStack,this.getX()+5,this.getY()+4);
+
+        //Geckolib crash workaround, because I don't know Geckolib
+        try{
+            context.renderItem(itemStack,this.getX()+5,this.getY()+4);
+        }catch (Exception e){
+            YourItemsToNewWorlds.LOGGER.error(itemStack.getItem().getDescription().getString()+" : "+ e.getMessage());
+            context.renderItem(ForgeRegistries.ITEMS.getValue(new ResourceLocation("minecraft","barrier")).getDefaultInstance(),this.getX()+5,this.getY()+4);
+        }
         context.renderItemDecorations(Minecraft.getInstance().font,itemStack,this.getX()+5,this.getY()+4);
     }
 

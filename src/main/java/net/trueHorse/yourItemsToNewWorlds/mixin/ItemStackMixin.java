@@ -1,9 +1,9 @@
-package net.trueHorse.yourItemsToNewWorlds.mixin.client;
+package net.trueHorse.yourItemsToNewWorlds.mixin;
 
-import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.util.JsonHelper;
+import net.minecraft.client.Minecraft;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.util.GsonHelper;
 import net.trueHorse.yourItemsToNewWorlds.YourItemsToNewWorlds;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -18,11 +18,16 @@ import java.util.Map;
 @Mixin(ItemStack.class)
 public class ItemStackMixin {
 
-    private static final File MAPPINGS_FILE = FabricLoader.getInstance().getConfigDir().resolve("Your Items to New Worlds/idMappings.json").toFile();
-    private static final Map<String,String> idMap = loadIdMap();
+    private static File MAPPINGS_FILE;
+    private static Map<String,String> idMap;
 
-    @Inject(method = "fromNbt",at = @At("HEAD"),locals = LocalCapture.CAPTURE_FAILSOFT)
-    private static void convertOldItemId(NbtCompound nbt, CallbackInfoReturnable<ItemStack> cir){
+    @Inject(method = "of",at = @At("HEAD"),locals = LocalCapture.CAPTURE_FAILSOFT)
+    private static void convertOldItemId(CompoundTag nbt, CallbackInfoReturnable<ItemStack> cir){
+        if(MAPPINGS_FILE == null){
+            MAPPINGS_FILE = Minecraft.getInstance().gameDirectory.toPath().resolve("config").resolve("Your Items to New Worlds/idMappings.json").toFile();
+            idMap = loadIdMap();
+        }
+
         if(nbt.contains("id",2)){
             String numericId = String.valueOf(nbt.getShort("id"));
             short potentialVariant = nbt.getShort("Damage");
@@ -61,7 +66,7 @@ public class ItemStackMixin {
                 }
             }
 
-            JsonHelper.deserialize(new FileReader(MAPPINGS_FILE)).asMap().forEach((k, v)->map.put(k,v.getAsJsonPrimitive().getAsString()));
+            GsonHelper.parse(new FileReader(MAPPINGS_FILE)).asMap().forEach((k, v)->map.put(k,v.getAsJsonPrimitive().getAsString()));
         } catch (FileNotFoundException e) {
             YourItemsToNewWorlds.LOGGER.error(e.getMessage());
         }

@@ -1,30 +1,30 @@
 package net.trueHorse.yourItemsToNewWorlds.io;
 
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.trueHorse.yourItemsToNewWorlds.YourItemsToNewWorlds;
 
 public class ChunkExtractor {
 
-    public static NbtList extractItems(NbtList chunkNbts){
-        NbtList blockEntityNbts = extractBlockEntities(chunkNbts);
+    public static ListTag extractItems(ListTag chunkNbts){
+        ListTag blockEntityNbts = extractBlockEntities(chunkNbts);
 
         return getItemsFromEntities(blockEntityNbts);
     }
 
-    public static NbtList extractBlockEntities(NbtList chunkNbts){
+    public static ListTag extractBlockEntities(ListTag chunkNbts){
         if(chunkNbts.isEmpty()){
-            return new NbtList();
+            return new ListTag();
         }else{
-            NbtList blockEntityNbts = new NbtList();
+            ListTag blockEntityNbts = new ListTag();
 
-            if(((NbtCompound)chunkNbts.get(0)).contains("block_entities")||((NbtCompound)chunkNbts.get(0)).contains("Level")){
-                if(((NbtCompound)chunkNbts.get(0)).contains("block_entities")){
-                    chunkNbts.forEach(chunkNbt->blockEntityNbts.addAll(((NbtCompound) chunkNbt).getList("block_entities", 10)));
+            if(((CompoundTag)chunkNbts.get(0)).contains("block_entities")||((CompoundTag)chunkNbts.get(0)).contains("Level")){
+                if(((CompoundTag)chunkNbts.get(0)).contains("block_entities")){
+                    chunkNbts.forEach(chunkNbt->blockEntityNbts.addAll(((CompoundTag) chunkNbt).getList("block_entities", 10)));
                     YourItemsToNewWorlds.LOGGER.info("Block Entities in chunks: "+ blockEntityNbts.size());
                 }else{
-                    chunkNbts.forEach(chunkNbt->blockEntityNbts.addAll(((NbtCompound) chunkNbt).getCompound("Level").getList("TileEntities", 10)));
+                    chunkNbts.forEach(chunkNbt->blockEntityNbts.addAll(((CompoundTag) chunkNbt).getCompound("Level").getList("TileEntities", 10)));
                     YourItemsToNewWorlds.LOGGER.info("Tile Entities in chunks: "+ blockEntityNbts.size());
                 }
             }else{
@@ -35,11 +35,11 @@ public class ChunkExtractor {
         }
     }
 
-    private static NbtList getItemsFromEntities(NbtList blockEntitieNbts){
-        NbtList itemNbts = new NbtList();
+    private static ListTag getItemsFromEntities(ListTag blockEntitieNbts){
+        ListTag itemNbts = new ListTag();
 
-        for(NbtElement blockEntity : blockEntitieNbts){
-            NbtCompound blockEntityC = ((NbtCompound)blockEntity);
+        for(Tag blockEntity : blockEntitieNbts){
+            CompoundTag blockEntityC = ((CompoundTag)blockEntity);
             itemNbts.addAll(BlockEntityStrategies.getStrategy(blockEntityC).apply(blockEntityC));
         }
 

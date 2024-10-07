@@ -1,7 +1,7 @@
 package net.trueHorse.yourItemsToNewWorlds.io;
 
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 
 import java.util.List;
 import java.util.Map;
@@ -9,17 +9,17 @@ import java.util.function.Function;
 
 public class BlockEntityStrategies {
 
-    private static final Map<String, Function<NbtCompound,NbtList>> STRATEGIES = Map.ofEntries(
+    private static final Map<String, Function<CompoundTag,ListTag>> STRATEGIES = Map.ofEntries(
             Map.entry("BlockDrive",(driveNbt)->{
-                NbtList itemNbts = new NbtList();
-                NbtCompound inv = driveNbt.getCompound("inv");
+                ListTag itemNbts = new ListTag();
+                CompoundTag inv = driveNbt.getCompound("inv");
 
                 for(int i = 0;i<10;i++){
-                    NbtCompound tag = inv.getCompound("item"+i).getCompound("tag");
-                    List<String> itemKeys = tag.getKeys().stream().filter(key->key.charAt(0)== '#').toList();
+                    CompoundTag tag = inv.getCompound("item"+i).getCompound("tag");
+                    List<String> itemKeys = tag.getAllKeys().stream().filter(key->key.charAt(0)== '#').toList();
 
                     for(String key : itemKeys){
-                        NbtCompound item = tag.getCompound(key);
+                        CompoundTag item = tag.getCompound(key);
                         long cnt = item.getLong("Cnt");
 
                         if(cnt>=64){
@@ -37,16 +37,16 @@ public class BlockEntityStrategies {
                 return itemNbts;
             })/*,
             Map.entry("refinedstorage:disk_drive",(driveNbt)->{
-                NbtList itemNbts = new NbtList();
-                NbtList storedNbts = new NbtList();
+                ListTag itemNbts = new ListTag();
+                ListTag storedNbts = new ListTag();
                 List<String> inventoryKeys = driveNbt.getKeys().stream().filter(key->key.startsWith("Inventory_")).toList();
 
                 for(String key:inventoryKeys){
-                    driveNbt.getList(key,10).forEach(inv->storedNbts.addAll(((NbtCompound)inv).getCompound("tag").getList("Items",10)));
+                    driveNbt.getList(key,10).forEach(inv->storedNbts.addAll(((CompoundTag)inv).getCompound("tag").getList("Items",10)));
                 }
 
                 for(NbtElement el : storedNbts){
-                    NbtCompound itemNbt = (NbtCompound) el;
+                    CompoundTag itemNbt = (CompoundTag) el;
                     itemNbt.put("id",itemNbt.get("Type"));
 
                     int quantity = itemNbt.getInt("Quantity");
@@ -63,9 +63,9 @@ public class BlockEntityStrategies {
             })*/
     );
 
-    private static final Function<NbtCompound,NbtList> DEFAULT_STRATEGY = (blockEntityNbt->blockEntityNbt.getList("Items", 10));
+    private static final Function<CompoundTag,ListTag> DEFAULT_STRATEGY = (blockEntityNbt->blockEntityNbt.getList("Items", 10));
 
-    public static Function<NbtCompound,NbtList> getStrategy(NbtCompound blockEntityNbt){
+    public static Function<CompoundTag,ListTag> getStrategy(CompoundTag blockEntityNbt){
         String id = blockEntityNbt.getString("id");
         return STRATEGIES.getOrDefault(id, DEFAULT_STRATEGY);
     }
