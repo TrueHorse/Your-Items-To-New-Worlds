@@ -43,6 +43,7 @@ public class ImportItemScreenHandler {
     private int searchRadius;
     private final ImportItemsScreen screen;
     private CompletableFuture<Pair<ChunkPos,ArrayList<ItemStack>>> importResult;
+    private Boolean deleteItems = false;
 
     public ImportItemScreenHandler(ImportItemsScreen screen){
         this.screen = screen;
@@ -226,5 +227,9 @@ public class ImportItemScreenHandler {
 
     public boolean wasNameRequestSucessful() {
         return nameRequestSucessful;
+    }
+
+    public void setDeleteItems(Boolean deleteItems) {
+        this.deleteItems = deleteItems;
     }
 }

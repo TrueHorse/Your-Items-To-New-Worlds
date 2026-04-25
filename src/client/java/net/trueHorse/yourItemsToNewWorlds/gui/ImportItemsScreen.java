@@ -32,6 +32,7 @@ public class ImportItemsScreen extends Screen {
     private TextFieldWidget radiusWidget;
     private ButtonWidget searchButton;
     private CyclingButtonWidget<Boolean> selectAllButton;
+    private CyclingButtonWidget<Boolean> extractionModeWidget;
 
     private TexturedButtonWidget leftArrowButton;
     private TexturedButtonWidget rightArrowButton;
@@ -149,6 +150,7 @@ public class ImportItemsScreen extends Screen {
                     itemSelectButtons.add(selectButton);
                 }
             }
+            widgets.addAll(itemSelectButtons);
 
             selectAllButton = CyclingButtonWidget.onOffBuilder(false).build(this.width-minDistanceFromEdge-30-rightArrowButton.getWidth()-additionalGridXMargin,searchButton.getY()+searchButton.getHeight()+margin+additionalGridYMargin-12,30,12,Text.translatable("transfer_items.your_items_to_new_worlds.select_all"),
                     (button,selectAll)->{
@@ -162,9 +164,21 @@ public class ImportItemsScreen extends Screen {
                     });
             selectAllButton.setMessage(Text.translatable("gui.all"));
             selectAllButton.visible = false;
-
             widgets.add(selectAllButton);
-            widgets.addAll(itemSelectButtons);
+
+            extractionModeWidget = CyclingButtonWidget.onOffBuilder(false).build(selectAllButton.getX()-2-80,selectAllButton.getY(),80,12,Text.translatable("transfer_items.your_items_to_new_worlds.extraction_mode"),
+                    (button, extract)->{
+                        if(extract){
+                            button.setMessage(Text.translatable("transfer_items.your_items_to_new_worlds.extract_items"));
+                        }else {
+                            button.setMessage(Text.translatable("transfer_items.your_items_to_new_worlds.copy_items"));
+                        }
+                        handler.setDeleteItems(extract);
+                        refreshGridArea();
+                    });
+            extractionModeWidget.setMessage(Text.translatable("transfer_items.your_items_to_new_worlds.copy_items"));
+            extractionModeWidget.visible = false;
+            widgets.add(extractionModeWidget);
 
             noItemsTextWidget = new TextWidget(this.width/2-100,pageArrowY,200,20,Text.translatable("transfer_items.your_items_to_new_worlds.no_items_found"), MinecraftClient.getInstance().textRenderer);
             noItemsTextWidget.visible = false;
@@ -252,6 +266,7 @@ public class ImportItemsScreen extends Screen {
 
         boolean noItems = pageItemCount == 0;
         selectAllButton.visible = !noItems;
+        extractionModeWidget.visible = !noItems;
         noItemsTextWidget.visible = noItems;
     }
 
