@@ -11,10 +11,7 @@ import net.trueHorse.yourItemsToNewWorlds.YourItemsToNewWorlds;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.function.Function;
 
 public class ItemImporter {
@@ -27,21 +24,23 @@ public class ItemImporter {
     }
     private final RegionReader regionReader;
     private final NbtCompound playerNbt;
+    private Map<ChunkPos,NbtCompound> searchedChunksWithoutItems = Map.of();
+    private final File playerFile;
 
     public ItemImporter(Path worldPath, String playerUuid){
         regionReader = new RegionReader(worldPath.resolve("region"), false);
 
         NbtCompound tempPlayerNbt;
-        File file = worldPath.resolve("playerdata/"+ playerUuid + ".dat").toFile();
-        if (file.exists() && file.isFile()) {
+        playerFile = worldPath.resolve("playerdata/"+ playerUuid + ".dat").toFile();
+        if (playerFile.exists() && playerFile.isFile()) {
             try {
-                tempPlayerNbt = NbtIo.readCompressed(file);
+                tempPlayerNbt = NbtIo.readCompressed(playerFile);
             } catch (IOException e) {
                 YourItemsToNewWorlds.LOGGER.error("Couldn't read player data file.\n"+e.getMessage());
                 tempPlayerNbt = null;
             }
         }else{
-            YourItemsToNewWorlds.LOGGER.error(file.getName()+" doesn't exist.");
+            YourItemsToNewWorlds.LOGGER.error(playerFile.getName()+" doesn't exist.");
             tempPlayerNbt = null;
         }
         playerNbt = tempPlayerNbt;
@@ -59,20 +58,22 @@ public class ItemImporter {
     }
 
     public ArrayList<ItemStack> getItemsInArea(ChunkPos centerChunkPos, int searchRadius) {
-        NbtList surroundingChunks = new NbtList();
+        Map<ChunkPos,NbtCompound> searchedChunks = new HashMap<>();
 
         for (int i = searchRadius*-1; i <= searchRadius; i++) {
             for (int j = searchRadius*-1; j <= searchRadius; j++) {
                 try {
-                    surroundingChunks.add(regionReader.getNbtAt(new ChunkPos(centerChunkPos.x + i, centerChunkPos.z + j)));
+                    ChunkPos chunkPos = new ChunkPos(centerChunkPos.x + i, centerChunkPos.z + j);
+                    searchedChunks.put(chunkPos,regionReader.getNbtAt(chunkPos));
                 } catch (IOException | NullPointerException e) {
                     YourItemsToNewWorlds.LOGGER.error("Couldn't get chunk at " + (i+centerChunkPos.x) + " " + (j+ centerChunkPos.z));
                 }
             }
         }
 
-        YourItemsToNewWorlds.LOGGER.info("Found chunks: "+surroundingChunks.size());
-        NbtList itemsInBlockEntitiesNbts = ChunkExtractor.extractItems(surroundingChunks);
+        YourItemsToNewWorlds.LOGGER.info("Found chunks: "+ searchedChunks.size());
+        NbtList itemsInBlockEntitiesNbts = ChunkExtractor.extractItems(searchedChunks.values().stream().toList());
+        searchedChunksWithoutItems = searchedChunks;
         /*
         itemsInBlockEntitiesNbts.forEach(nbt -> {
             ((NbtCompound)nbt).getKeys().forEach(key->{
@@ -176,6 +177,23 @@ public class ItemImporter {
                 return 0;
             }catch (ArithmeticException e){
                 return Integer.MAX_VALUE;
+            }
+        });
+    }
+
+    public void deleteItemsFromChunks(){
+        playerNbt.put("Inventory",new NbtList());
+        playerNbt.put("EnderItems", new NbtList());
+        try {
+            NbtIo.writeCompressed(playerNbt,playerFile);
+        } catch (IOException e) {
+            YourItemsToNewWorlds.LOGGER.error("Could not delete items from player file.");
+        }
+        searchedChunksWithoutItems.forEach((chunkPos,nbt)->{
+            try {
+                regionReader.write(chunkPos,nbt);
+            } catch (IOException e) {
+                YourItemsToNewWorlds.LOGGER.error("Couldn't write region file "+(Math.floor(chunkPos.x/32.0))+"."+(Math.floor(chunkPos.z/32.0)));
             }
         });
     }

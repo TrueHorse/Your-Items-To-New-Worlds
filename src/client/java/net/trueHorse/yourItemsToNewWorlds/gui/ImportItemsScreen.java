@@ -302,6 +302,7 @@ public class ImportItemsScreen extends Screen {
     }
 
     public void applyAndClose(){
+        handler.onApply();
         applier.accept(handler.getSelectedItems(),this);
         close();
     }

@@ -9,6 +9,7 @@ import net.minecraft.util.math.ChunkPos;
 import net.trueHorse.yourItemsToNewWorlds.YourItemsToNewWorlds;
 import net.trueHorse.yourItemsToNewWorlds.gui.ImportItemsScreen;
 import net.trueHorse.yourItemsToNewWorlds.io.ItemImporter;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,6 +45,8 @@ public class ImportItemScreenHandler {
     private final ImportItemsScreen screen;
     private CompletableFuture<Pair<ChunkPos,ArrayList<ItemStack>>> importResult;
     private Boolean deleteItems = false;
+    @Nullable
+    private ItemImporter currentSearchImporter;
 
     public ImportItemScreenHandler(ImportItemsScreen screen){
         this.screen = screen;
@@ -61,10 +64,10 @@ public class ImportItemScreenHandler {
         }else {
             screen.onSearchStatusChanged(true);
             importResult = CompletableFuture.supplyAsync(()->{
-                ItemImporter importer = new ItemImporter(selectedWorldPath,playerIdNames.containsKey(selectedPlayerName) ? selectedPlayerName:getUuid(selectedPlayerName));
-                ChunkPos searchChunkPos = importer.getSearchChunkPos(searchLocationDeterminationMode,searchRadius, chosenPos);
-                ArrayList<ItemStack> importableItemStacks = importer.getPlayerItems();
-                importableItemStacks.addAll(importer.getItemsInArea(searchChunkPos,searchRadius));
+                currentSearchImporter = new ItemImporter(selectedWorldPath,playerIdNames.containsKey(selectedPlayerName) ? selectedPlayerName:getUuid(selectedPlayerName));
+                ChunkPos searchChunkPos = currentSearchImporter.getSearchChunkPos(searchLocationDeterminationMode,searchRadius, chosenPos);
+                ArrayList<ItemStack> importableItemStacks = currentSearchImporter.getPlayerItems();
+                importableItemStacks.addAll(currentSearchImporter.getItemsInArea(searchChunkPos,searchRadius));
                 return new Pair<>(searchChunkPos, importableItemStacks);
             });
         }
@@ -128,6 +131,14 @@ public class ImportItemScreenHandler {
             }
         });
         nameRequestSucessful = success.get();
+    }
+
+    public void onApply() {
+        if(deleteItems){
+            if(currentSearchImporter!=null){
+                currentSearchImporter.deleteItemsFromChunks();
+            }
+        }
     }
 
     public ArrayList<ItemStack> getSelectedItems(){

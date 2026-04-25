@@ -5,15 +5,17 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.trueHorse.yourItemsToNewWorlds.YourItemsToNewWorlds;
 
+import java.util.List;
+
 public class ChunkExtractor {
 
-    public static NbtList extractItems(NbtList chunkNbts){
+    public static NbtList extractItems(List<NbtCompound> chunkNbts){
         NbtList blockEntityNbts = extractBlockEntities(chunkNbts);
 
         return getItemsFromEntities(blockEntityNbts);
     }
 
-    public static NbtList extractBlockEntities(NbtList chunkNbts){
+    public static NbtList extractBlockEntities(List<NbtCompound> chunkNbts){
         if(chunkNbts.isEmpty()){
             return new NbtList();
         }else{
