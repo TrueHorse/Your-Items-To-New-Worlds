@@ -25,5 +25,6 @@
 
   "narrator.your_items_to_new_worlds.select_import_world": "select import world",
   "narrator.your_items_to_new_worlds.instance_search": "instance search",
-  "narrator.your_items_to_new_worlds.remove_instance": "Remove Instance %s"
+  "narrator.your_items_to_new_worlds.remove_instance": "Remove Instance %s",
+  "transfer_items.your_items_to_new_worlds.item_deletion_failed": "The deletion of the items in your selected world failed."
 }

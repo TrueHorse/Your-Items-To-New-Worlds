@@ -26,8 +26,10 @@ public class ItemImporter {
     private final NbtCompound playerNbt;
     private Map<ChunkPos,NbtCompound> searchedChunksWithoutItems = Map.of();
     private final File playerFile;
+    private final Path worldPath;
 
     public ItemImporter(Path worldPath, String playerUuid){
+        this.worldPath = worldPath;
         regionReader = new RegionReader(worldPath.resolve("region"), false);
 
         NbtCompound tempPlayerNbt;
@@ -181,19 +183,24 @@ public class ItemImporter {
         });
     }
 
-    public void deleteItemsFromChunks(){
+    public void deleteItemsInWorld() throws IOException{
         playerNbt.put("Inventory",new NbtList());
         playerNbt.put("EnderItems", new NbtList());
-        try {
-            NbtIo.writeCompressed(playerNbt,playerFile);
-        } catch (IOException e) {
-            YourItemsToNewWorlds.LOGGER.error("Could not delete items from player file.");
-        }
+        NbtIo.writeCompressed(playerNbt,playerFile);
+        YourItemsToNewWorlds.LOGGER.error("Could not delete items from player file.");
+
+        File worldFile = worldPath.resolve("level.dat").toFile();
+        NbtCompound worldNbt = NbtIo.readCompressed(worldFile);
+        NbtCompound playerNbt2 = worldNbt.getCompound("Data").getCompound("Player");
+        playerNbt2.put("Inventory",new NbtList());
+        playerNbt2.put("EnderItems", new NbtList());
+        NbtIo.writeCompressed(worldNbt,worldFile);
+
         searchedChunksWithoutItems.forEach((chunkPos,nbt)->{
             try {
                 regionReader.write(chunkPos,nbt);
             } catch (IOException e) {
-                YourItemsToNewWorlds.LOGGER.error("Couldn't write region file "+(Math.floor(chunkPos.x/32.0))+"."+(Math.floor(chunkPos.z/32.0)));
+                YourItemsToNewWorlds.LOGGER.error("Couldn't delete items in region file "+(Math.floor(chunkPos.x/32.0))+"."+(Math.floor(chunkPos.z/32.0)));
             }
         });
     }

@@ -2,6 +2,7 @@ package net.trueHorse.yourItemsToNewWorlds.gui.handlers;
 
 import com.google.gson.JsonParseException;
 import net.minecraft.item.ItemStack;
+import net.minecraft.text.Text;
 import net.minecraft.util.JsonHelper;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.BlockPos;
@@ -136,7 +137,13 @@ public class ImportItemScreenHandler {
     public void onApply() {
         if(deleteItems){
             if(currentSearchImporter!=null){
-                currentSearchImporter.deleteItemsFromChunks();
+                try {
+                    currentSearchImporter.deleteItemsInWorld();
+                } catch (IOException e) {
+                    YourItemsToNewWorlds.LOGGER.error("Failed to delete items.");
+                    YourItemsToNewWorlds.LOGGER.error(e.getMessage());
+                    screen.showErrorPopUp(Text.translatable("transfer_items.your_items_to_new_worlds.item_deletion_failed"));
+                }
             }
         }
     }

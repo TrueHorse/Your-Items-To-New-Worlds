@@ -2,6 +2,7 @@ package net.trueHorse.yourItemsToNewWorlds.gui;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.screen.MessageScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.*;
@@ -305,5 +306,9 @@ public class ImportItemsScreen extends Screen {
         handler.onApply();
         applier.accept(handler.getSelectedItems(),this);
         close();
+    }
+
+    public void showErrorPopUp(Text message) {
+        client.setScreen(new MessageScreen(message));
     }
 }
