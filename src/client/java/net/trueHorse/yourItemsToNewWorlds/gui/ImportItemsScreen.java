@@ -2,6 +2,7 @@ package net.trueHorse.yourItemsToNewWorlds.gui;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.screen.ConfirmScreen;
 import net.minecraft.client.gui.screen.MessageScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.Tooltip;
@@ -21,7 +22,6 @@ import java.util.function.BiConsumer;
 public class ImportItemsScreen extends Screen {
 
     private final Identifier textureSheet = new Identifier("your_items_to_new_worlds","textures/gui/import_items_screen.png");
-    private final BiConsumer<ArrayList<ItemStack>,ImportItemsScreen> applier;
     private final String[] searchLocationDeterminationModeIDs = {"transfer_items.your_items_to_new_worlds.spawn_point",
             "transfer_items.your_items_to_new_worlds.most_item_containers",
             "transfer_items.your_items_to_new_worlds.longest_inhabitation",
@@ -41,12 +41,12 @@ public class ImportItemsScreen extends Screen {
     private TextWidget noItemsTextWidget;
     private TextWidget searchingTextWidget;
     private final Screen parent;
-    private final ImportItemScreenHandler handler = new ImportItemScreenHandler(this);
+    private final ImportItemScreenHandler handler;
     private int gridPage = 0;
 
     public ImportItemsScreen(Screen parent, BiConsumer<ArrayList<ItemStack>,ImportItemsScreen> applier){
         super(Text.translatable("transfer_items.your_items_to_new_worlds.select_transfer_items"));
-        this.applier = applier;
+        handler = new ImportItemScreenHandler(this, applier);
         this.parent = parent;
     }
 
@@ -191,7 +191,7 @@ public class ImportItemsScreen extends Screen {
         }
 
         widgets.add(addDrawableChild(ButtonWidget.builder(Text.translatable("gui.cancel"), button -> close()).dimensions(this.width / 2 + 5, this.height-29, 150, 20).build()));
-        widgets.add(ButtonWidget.builder(ScreenTexts.DONE, button -> applyAndClose()).dimensions(this.width / 2 - 155, this.height-29, 150, 20).build());
+        widgets.add(ButtonWidget.builder(ScreenTexts.DONE, button -> handler.onApply()).dimensions(this.width / 2 - 155, this.height-29, 150, 20).build());
 
         widgets.forEach(this::addDrawableChild);
     }
@@ -302,13 +302,21 @@ public class ImportItemsScreen extends Screen {
         client.setScreen(parent);
     }
 
-    public void applyAndClose(){
-        handler.onApply();
-        applier.accept(handler.getSelectedItems(),this);
-        close();
-    }
-
     public void showErrorPopUp(Text message) {
         client.setScreen(new MessageScreen(message));
+    }
+
+    public void showWarningPopUp(Text message, Runnable action) {
+        client.setScreen(new ConfirmScreen((confirmed)->{
+            if(confirmed){
+                action.run();
+            }else{
+                client.setScreen(this);
+            }
+        },
+                Text.translatable("createWorld.customize.custom.confirmTitle"),
+                message,
+                Text.translatable("gui.continue"),
+                Text.translatable("gui.cancel")));
     }
 }

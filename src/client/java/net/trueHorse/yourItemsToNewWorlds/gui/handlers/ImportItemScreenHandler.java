@@ -30,9 +30,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BiConsumer;
 
 public class ImportItemScreenHandler {
 
+    private final BiConsumer<ArrayList<ItemStack>,ImportItemsScreen> applier;
     private ArrayList<ItemStack> importableItemStacks = new ArrayList<>();
     private boolean[] itemSelected;
     private final Map<String,String> playerIdNames = new HashMap<>();
@@ -49,12 +51,13 @@ public class ImportItemScreenHandler {
     @Nullable
     private ItemImporter currentSearchImporter;
 
-    public ImportItemScreenHandler(ImportItemsScreen screen){
+    public ImportItemScreenHandler(ImportItemsScreen screen, BiConsumer<ArrayList<ItemStack>,ImportItemsScreen> applier){
         this.screen = screen;
+        this.applier = applier;
     }
 
     public void searchImportableItemStacks(){
-        ItemSearchConfig currentConfig = new ItemSearchConfig(selectedWorldPath,selectedPlayerName,searchLocationDeterminationMode,searchLocationDeterminationMode==ItemImporter.SearchLocationDeterminationMode.COORDINATES ? new ChunkPos(chosenPos) :null,searchRadius);
+        ItemSearchConfig currentConfig = getCurrentSearchConfig();
         if(itemCache.containsKey(currentConfig)){
             Pair<ChunkPos, ArrayList<ItemStack>> pair =itemCache.get(currentConfig);
             if(searchLocationDeterminationMode != ItemImporter.SearchLocationDeterminationMode.COORDINATES) {
@@ -96,7 +99,7 @@ public class ImportItemScreenHandler {
             chosenPos.set(searchChunkPos.getBlockPos(0,0,0));
             screen.updateCoordinateFields();
         }
-        itemCache.put(new ItemSearchConfig(selectedWorldPath,selectedPlayerName,searchLocationDeterminationMode,searchLocationDeterminationMode==ItemImporter.SearchLocationDeterminationMode.COORDINATES ? new ChunkPos(chosenPos) :null,searchRadius)
+        itemCache.put(getCurrentSearchConfig()
                 ,new Pair<>(result.getLeft(),result.getRight()));
 
         screen.onSearchStatusChanged(false);
@@ -137,14 +140,23 @@ public class ImportItemScreenHandler {
     public void onApply() {
         if(deleteItems){
             if(currentSearchImporter!=null){
-                try {
-                    currentSearchImporter.deleteItemsInWorld();
-                } catch (IOException e) {
-                    YourItemsToNewWorlds.LOGGER.error("Failed to delete items.");
-                    YourItemsToNewWorlds.LOGGER.error(e.getMessage());
-                    screen.showErrorPopUp(Text.translatable("transfer_items.your_items_to_new_worlds.item_deletion_failed"));
-                }
+                screen.showWarningPopUp(Text.translatable("transfer_items.your_items_to_new_worlds.item_deletion_warning"),()->
+                {
+                    try {
+                        currentSearchImporter.deleteItemsInWorld();
+                    } catch (IOException e) {
+                        YourItemsToNewWorlds.LOGGER.error("Failed to delete items.");
+                        YourItemsToNewWorlds.LOGGER.error(e.getMessage());
+                        screen.showErrorPopUp(Text.translatable("transfer_items.your_items_to_new_worlds.item_deletion_failed"));
+                    }
+                    itemCache.remove(getCurrentSearchConfig());
+                    applier.accept(getSelectedItems(), screen);
+                    screen.close();
+                });
             }
+        }else{
+            applier.accept(getSelectedItems(), screen);
+            screen.close();
         }
     }
 
@@ -249,5 +261,9 @@ public class ImportItemScreenHandler {
 
     public void setDeleteItems(Boolean deleteItems) {
         this.deleteItems = deleteItems;
+    }
+
+    public ItemSearchConfig getCurrentSearchConfig(){
+        return new ItemSearchConfig(selectedWorldPath,selectedPlayerName,searchLocationDeterminationMode,searchLocationDeterminationMode==ItemImporter.SearchLocationDeterminationMode.COORDINATES ? new ChunkPos(chosenPos) :null,searchRadius);
     }
 }
