@@ -2,6 +2,7 @@ package net.trueHorse.yourItemsToNewWorlds.io;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.util.math.BlockPos;
@@ -24,7 +25,7 @@ public class ItemImporter {
     }
     private final RegionReader regionReader;
     private final NbtCompound playerNbt;
-    private Map<ChunkPos,NbtCompound> searchedChunksWithoutItems = Map.of();
+    private Map<ChunkPos,NbtCompound> searchedChunks = Map.of();
     private final File playerFile;
     private final Path worldPath;
 
@@ -60,7 +61,7 @@ public class ItemImporter {
     }
 
     public ArrayList<ItemStack> getItemsInArea(ChunkPos centerChunkPos, int searchRadius) {
-        Map<ChunkPos,NbtCompound> searchedChunks = new HashMap<>();
+        searchedChunks = new HashMap<>();
 
         for (int i = searchRadius*-1; i <= searchRadius; i++) {
             for (int j = searchRadius*-1; j <= searchRadius; j++) {
@@ -75,7 +76,6 @@ public class ItemImporter {
 
         YourItemsToNewWorlds.LOGGER.info("Found chunks: "+ searchedChunks.size());
         NbtList itemsInBlockEntitiesNbts = ChunkExtractor.extractItems(searchedChunks.values().stream().toList());
-        searchedChunksWithoutItems = searchedChunks;
         /*
         itemsInBlockEntitiesNbts.forEach(nbt -> {
             ((NbtCompound)nbt).getKeys().forEach(key->{
@@ -183,26 +183,53 @@ public class ItemImporter {
         });
     }
 
-    public void deleteItemsInWorld() throws IOException{
-        playerNbt.put("Inventory",new NbtList());
-        playerNbt.put("EnderItems", new NbtList());
-        NbtIo.writeCompressed(playerNbt,playerFile);
-        YourItemsToNewWorlds.LOGGER.error("Could not delete items from player file.");
+    public void deleteItemsInWorld(List<ItemStack> selectedItemStacks) throws IOException{
+        NbtList selectedItemStackNbts = new NbtList();
+        selectedItemStackNbts.addAll(selectedItemStacks.stream().map((stack)->{
+            NbtCompound nbt = new NbtCompound();
+            return stack.writeNbt(nbt);
+        }).toList());
 
         File worldFile = worldPath.resolve("level.dat").toFile();
         NbtCompound worldNbt = NbtIo.readCompressed(worldFile);
         NbtCompound playerNbt2 = worldNbt.getCompound("Data").getCompound("Player");
-        playerNbt2.put("Inventory",new NbtList());
-        playerNbt2.put("EnderItems", new NbtList());
-        NbtIo.writeCompressed(worldNbt,worldFile);
 
-        searchedChunksWithoutItems.forEach((chunkPos,nbt)->{
+        //TODO refactor to not miss any storage location (Inventory, Ender Chest...)
+        //TODO map of Stacks and original nbt
+        selectedItemStackNbts.forEach((stackNbt)->{
+            if(playerNbt.getList("Inventory",10).contains(stackNbt)){
+                playerNbt.getList("Inventory",10).remove(stackNbt);
+                playerNbt2.getList("Inventory",10).remove(stackNbt);
+            } else if (playerNbt.getList("EnderItems",10).contains(stackNbt)) {
+                playerNbt.getList("EnderItems",10).remove(stackNbt);
+                playerNbt2.getList("EnderItems",10).remove(stackNbt);
+            }else {
+                NbtList blockEntities = ChunkExtractor.extractBlockEntities(searchedChunks.values().stream().toList());
+                for(NbtElement entityNbt : blockEntities){
+                    //TODO use strategies for other entities
+                    NbtCompound tmpEntity = (NbtCompound) (entityNbt.copy());
+                    NbtList tmpInventory = tmpEntity.getList("Items",10);
+                    tmpInventory.forEach((itemNbt)->((NbtCompound)itemNbt).remove("Slot"));
+
+                    if(tmpInventory.contains(stackNbt)){
+                        ((NbtCompound) entityNbt).getList("Items", 10).remove(tmpInventory.indexOf(stackNbt));
+                        return;
+                    }
+                }
+
+                YourItemsToNewWorlds.LOGGER.error("{} could not be removed from the selected World.", ((NbtCompound) stackNbt).getString("id"));
+            }
+        });
+
+        searchedChunks.forEach((chunkPos,nbt)->{
             try {
                 regionReader.write(chunkPos,nbt);
             } catch (IOException e) {
                 YourItemsToNewWorlds.LOGGER.error("Couldn't delete items in region file "+(Math.floor(chunkPos.x/32.0))+"."+(Math.floor(chunkPos.z/32.0)));
             }
         });
+        NbtIo.writeCompressed(playerNbt,playerFile);
+        NbtIo.writeCompressed(worldNbt,worldFile);
     }
 
 }

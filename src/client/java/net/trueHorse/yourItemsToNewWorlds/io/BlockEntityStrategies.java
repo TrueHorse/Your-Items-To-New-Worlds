@@ -32,8 +32,6 @@ public class BlockEntityStrategies {
                         item.putByte("Count",(byte)(cnt%64));
                         itemNbts.add(item);
                     }
-
-                    inv.getCompound("item"+i).put("tag",new NbtCompound());
                 }
 
                 return itemNbts;
@@ -65,11 +63,8 @@ public class BlockEntityStrategies {
             })*/
     );
 
-    private static final Function<NbtCompound,NbtList> DEFAULT_STRATEGY = (blockEntityNbt->{
-        NbtList items = blockEntityNbt.getList("Items", 10);
-        blockEntityNbt.put("Items",new NbtList());
-        return items;
-    });
+    private static final Function<NbtCompound,NbtList> DEFAULT_STRATEGY = (blockEntityNbt-> blockEntityNbt.getList("Items", 10)
+    );
 
     public static Function<NbtCompound,NbtList> getStrategy(NbtCompound blockEntityNbt){
         String id = blockEntityNbt.getString("id");

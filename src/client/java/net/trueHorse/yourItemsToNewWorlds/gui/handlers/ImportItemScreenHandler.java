@@ -143,7 +143,7 @@ public class ImportItemScreenHandler {
                 screen.showWarningPopUp(Text.translatable("transfer_items.your_items_to_new_worlds.item_deletion_warning"),()->
                 {
                     try {
-                        currentSearchImporter.deleteItemsInWorld();
+                        currentSearchImporter.deleteItemsInWorld(getSelectedItems());
                     } catch (IOException e) {
                         YourItemsToNewWorlds.LOGGER.error("Failed to delete items.");
                         YourItemsToNewWorlds.LOGGER.error(e.getMessage());
