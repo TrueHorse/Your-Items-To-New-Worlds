@@ -49,15 +49,17 @@ public class ItemImporter {
         playerNbt = tempPlayerNbt;
     }
 
-    public ArrayList<ItemStack> getPlayerItems(){
+    //TODO Rewrite lol
+
+    public List<ItemStack> getPlayerItems(){
         if (playerNbt == null) {
             return new ArrayList<>();
         }
 
-        ArrayList<ItemStack> items = new ArrayList<>();
-        items.addAll(playerNbt.getList("Inventory", 10).stream().map(nbt -> ItemStack.fromNbt((NbtCompound)nbt)).filter(stack -> !stack.isEmpty()).toList());
-        items.addAll(playerNbt.getList("EnderItems", 10).stream().map(nbt -> ItemStack.fromNbt((NbtCompound)nbt)).filter(stack -> !stack.isEmpty()).toList());
-        return items;
+        ArrayList<NbtElement> itemNbts = new ArrayList<>();
+        itemNbts.addAll(playerNbt.getList("Inventory", 10));
+        itemNbts.addAll(playerNbt.getList("EnderItems", 10));
+        return itemNbts.stream().map(nbt -> ItemStack.fromNbt((NbtCompound)nbt)).filter(stack -> !stack.isEmpty()).toList();
     }
 
     public ArrayList<ItemStack> getItemsInArea(ChunkPos centerChunkPos, int searchRadius) {

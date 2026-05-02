@@ -21,10 +21,7 @@ import java.net.http.HttpResponse;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -35,10 +32,10 @@ import java.util.function.BiConsumer;
 public class ImportItemScreenHandler {
 
     private final BiConsumer<ArrayList<ItemStack>,ImportItemsScreen> applier;
-    private ArrayList<ItemStack> importableItemStacks = new ArrayList<>();
+    private List<ItemStack> importableItemStacks = new ArrayList<>();
     private boolean[] itemSelected;
     private final Map<String,String> playerIdNames = new HashMap<>();
-    private final Map<ItemSearchConfig,Pair<ChunkPos,ArrayList<ItemStack>>> itemCache = new HashMap<>();
+    private final Map<ItemSearchConfig,Pair<ChunkPos,List<ItemStack>>> itemCache = new HashMap<>();
     private boolean nameRequestSucessful;
     private Path selectedWorldPath;
     private String selectedPlayerName;
@@ -46,7 +43,7 @@ public class ImportItemScreenHandler {
     private final BlockPos.Mutable chosenPos = new BlockPos.Mutable();
     private int searchRadius;
     private final ImportItemsScreen screen;
-    private CompletableFuture<Pair<ChunkPos,ArrayList<ItemStack>>> importResult;
+    private CompletableFuture<Pair<ChunkPos,List<ItemStack>>> importResult;
     private Boolean deleteItems = false;
     @Nullable
     private ItemImporter currentSearchImporter;
@@ -59,7 +56,7 @@ public class ImportItemScreenHandler {
     public void searchImportableItemStacks(){
         ItemSearchConfig currentConfig = getCurrentSearchConfig();
         if(itemCache.containsKey(currentConfig)){
-            Pair<ChunkPos, ArrayList<ItemStack>> pair =itemCache.get(currentConfig);
+            Pair<ChunkPos, List<ItemStack>> pair =itemCache.get(currentConfig);
             if(searchLocationDeterminationMode != ItemImporter.SearchLocationDeterminationMode.COORDINATES) {
                 chosenPos.set(pair.getLeft().getBlockPos(0, 0, 0));
                 screen.updateCoordinateFields();
@@ -70,7 +67,7 @@ public class ImportItemScreenHandler {
             importResult = CompletableFuture.supplyAsync(()->{
                 currentSearchImporter = new ItemImporter(selectedWorldPath,playerIdNames.containsKey(selectedPlayerName) ? selectedPlayerName:getUuid(selectedPlayerName));
                 ChunkPos searchChunkPos = currentSearchImporter.getSearchChunkPos(searchLocationDeterminationMode,searchRadius, chosenPos);
-                ArrayList<ItemStack> importableItemStacks = currentSearchImporter.getPlayerItems();
+                List<ItemStack> importableItemStacks = currentSearchImporter.getPlayerItems();
                 importableItemStacks.addAll(currentSearchImporter.getItemsInArea(searchChunkPos,searchRadius));
                 return new Pair<>(searchChunkPos, importableItemStacks);
             });
@@ -88,7 +85,7 @@ public class ImportItemScreenHandler {
         }
     }
 
-    private void onItemSearchComplete(Pair<ChunkPos, ArrayList<ItemStack>> result){
+    private void onItemSearchComplete(Pair<ChunkPos, List<ItemStack>> result){
         importResult = null;
 
         ChunkPos searchChunkPos = result.getLeft();
@@ -209,7 +206,7 @@ public class ImportItemScreenHandler {
         };
     }
 
-    public ArrayList<ItemStack> getImportableItems() {
+    public List<ItemStack> getImportableItems() {
         return importableItemStacks;
     }
 
