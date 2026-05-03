@@ -35,7 +35,7 @@ public class ImportItemScreenHandler {
     private List<ItemStack> importableItemStacks = new ArrayList<>();
     private boolean[] itemSelected;
     private final Map<String,String> playerIdNames = new HashMap<>();
-    private final Map<ItemSearchConfig,Pair<ChunkPos,List<ItemStack>>> itemCache = new HashMap<>();
+    private final Map<ItemSearchConfig,Pair<ItemImporter,List<ItemStack>>> itemCache = new HashMap<>();
     private boolean nameRequestSucessful;
     private Path selectedWorldPath;
     private String selectedPlayerName;
@@ -43,7 +43,7 @@ public class ImportItemScreenHandler {
     private final BlockPos.Mutable chosenPos = new BlockPos.Mutable();
     private int searchRadius;
     private final ImportItemsScreen screen;
-    private CompletableFuture<Pair<ChunkPos,List<ItemStack>>> importResult;
+    private CompletableFuture<Pair<ItemImporter,List<ItemStack>>> importResult;
     private Boolean deleteItems = false;
     @Nullable
     private ItemImporter currentSearchImporter;
@@ -56,9 +56,9 @@ public class ImportItemScreenHandler {
     public void searchImportableItemStacks(){
         ItemSearchConfig currentConfig = getCurrentSearchConfig();
         if(itemCache.containsKey(currentConfig)){
-            Pair<ChunkPos, List<ItemStack>> pair =itemCache.get(currentConfig);
+            Pair<ItemImporter, List<ItemStack>> pair =itemCache.get(currentConfig);
             if(searchLocationDeterminationMode != ItemImporter.SearchLocationDeterminationMode.COORDINATES) {
-                chosenPos.set(pair.getLeft().getBlockPos(0, 0, 0));
+                chosenPos.set(pair.getLeft().getSearchedChunkPos().getBlockPos(0, 0, 0));
                 screen.updateCoordinateFields();
             }
             onItemSearchComplete(pair);
@@ -69,7 +69,7 @@ public class ImportItemScreenHandler {
                 ChunkPos searchChunkPos = currentSearchImporter.getSearchChunkPos(searchLocationDeterminationMode,searchRadius, chosenPos);
                 List<ItemStack> importableItemStacks = currentSearchImporter.getPlayerItems();
                 importableItemStacks.addAll(currentSearchImporter.getItemsInArea(searchChunkPos,searchRadius));
-                return new Pair<>(searchChunkPos, importableItemStacks);
+                return new Pair<>(currentSearchImporter, importableItemStacks);
             });
         }
     }
@@ -81,14 +81,14 @@ public class ImportItemScreenHandler {
             }
         }catch (InterruptedException|CompletionException| ExecutionException| CancellationException e){
             YourItemsToNewWorlds.LOGGER.error("An error occurred during item search.\n"+e.getMessage());
-            onItemSearchComplete(new Pair<>(new ChunkPos(0,0),new ArrayList<>()));
+            onItemSearchComplete(new Pair<>(currentSearchImporter,new ArrayList<>()));
         }
     }
 
-    private void onItemSearchComplete(Pair<ChunkPos, List<ItemStack>> result){
+    private void onItemSearchComplete(Pair<ItemImporter, List<ItemStack>> result){
         importResult = null;
 
-        ChunkPos searchChunkPos = result.getLeft();
+        ChunkPos searchChunkPos = result.getLeft().getSearchedChunkPos();
         importableItemStacks = result.getRight();
         itemSelected = new boolean[importableItemStacks.size()];
         Arrays.fill(itemSelected, false);

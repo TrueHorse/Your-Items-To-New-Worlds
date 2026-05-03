@@ -25,6 +25,7 @@ public class ItemImporter {
     }
     private final RegionReader regionReader;
     private final NbtCompound playerNbt;
+    private ChunkPos searchedChunkPos;
     private Map<ChunkPos,NbtCompound> searchedChunks = Map.of();
     private final Map<String, List<NbtCompound>> originalStackNbts = new HashMap<>();
     private final File playerFile;
@@ -79,6 +80,7 @@ public class ItemImporter {
     }
 
     public ArrayList<ItemStack> getItemsInArea(ChunkPos centerChunkPos, int searchRadius) {
+        searchedChunkPos = centerChunkPos;
         searchedChunks = new HashMap<>();
 
         for (int i = searchRadius*-1; i <= searchRadius; i++) {
@@ -262,4 +264,7 @@ public class ItemImporter {
         NbtIo.writeCompressed(worldNbt,worldFile);
     }
 
+    public ChunkPos getSearchedChunkPos() {
+        return searchedChunkPos;
+    }
 }
