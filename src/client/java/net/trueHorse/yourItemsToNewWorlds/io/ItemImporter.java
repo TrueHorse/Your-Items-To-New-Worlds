@@ -26,6 +26,7 @@ public class ItemImporter {
     private final RegionReader regionReader;
     private final NbtCompound playerNbt;
     private Map<ChunkPos,NbtCompound> searchedChunks = Map.of();
+    private final Map<ItemStack, List<NbtCompound>> originalStackNbts = new HashMap<>();
     private final File playerFile;
     private final Path worldPath;
 
@@ -51,7 +52,7 @@ public class ItemImporter {
 
     //TODO Rewrite lol
 
-    public List<ItemStack> getPlayerItems(){
+    public ArrayList<ItemStack> getPlayerItems(){
         if (playerNbt == null) {
             return new ArrayList<>();
         }
@@ -59,7 +60,16 @@ public class ItemImporter {
         ArrayList<NbtElement> itemNbts = new ArrayList<>();
         itemNbts.addAll(playerNbt.getList("Inventory", 10));
         itemNbts.addAll(playerNbt.getList("EnderItems", 10));
-        return itemNbts.stream().map(nbt -> ItemStack.fromNbt((NbtCompound)nbt)).filter(stack -> !stack.isEmpty()).toList();
+
+        itemNbts.forEach((stackNbt)->originalStackNbts.compute(ItemStack.fromNbt((NbtCompound) stackNbt),(keyStack,valueList)-> {
+            if(valueList==null){
+                valueList = new ArrayList<>();
+            }
+            valueList.add((NbtCompound) stackNbt);
+            return valueList;
+        }));
+
+        return new ArrayList<>(itemNbts.stream().map(nbt -> ItemStack.fromNbt((NbtCompound)nbt)).filter(stack -> !stack.isEmpty()).toList());
     }
 
     public ArrayList<ItemStack> getItemsInArea(ChunkPos centerChunkPos, int searchRadius) {
@@ -87,6 +97,13 @@ public class ItemImporter {
         });
          */
 
+        itemsInBlockEntitiesNbts.forEach((stackNbt)->originalStackNbts.compute(ItemStack.fromNbt((NbtCompound) stackNbt),(keyStack,valueList)-> {
+            if(valueList==null){
+                valueList = new ArrayList<>();
+            }
+            valueList.add((NbtCompound) stackNbt);
+            return valueList;
+        }));
         return new ArrayList<>(itemsInBlockEntitiesNbts.stream().map(nbt -> ItemStack.fromNbt((NbtCompound) nbt)).filter(stack -> !stack.isEmpty()).toList());
     }
 
@@ -186,41 +203,39 @@ public class ItemImporter {
     }
 
     public void deleteItemsInWorld(List<ItemStack> selectedItemStacks) throws IOException{
-        NbtList selectedItemStackNbts = new NbtList();
-        selectedItemStackNbts.addAll(selectedItemStacks.stream().map((stack)->{
-            NbtCompound nbt = new NbtCompound();
-            return stack.writeNbt(nbt);
-        }).toList());
-
         File worldFile = worldPath.resolve("level.dat").toFile();
         NbtCompound worldNbt = NbtIo.readCompressed(worldFile);
         NbtCompound playerNbt2 = worldNbt.getCompound("Data").getCompound("Player");
 
         //TODO refactor to not miss any storage location (Inventory, Ender Chest...)
-        //TODO map of Stacks and original nbt
-        selectedItemStackNbts.forEach((stackNbt)->{
-            if(playerNbt.getList("Inventory",10).contains(stackNbt)){
-                playerNbt.getList("Inventory",10).remove(stackNbt);
-                playerNbt2.getList("Inventory",10).remove(stackNbt);
-            } else if (playerNbt.getList("EnderItems",10).contains(stackNbt)) {
-                playerNbt.getList("EnderItems",10).remove(stackNbt);
-                playerNbt2.getList("EnderItems",10).remove(stackNbt);
-            }else {
-                NbtList blockEntities = ChunkExtractor.extractBlockEntities(searchedChunks.values().stream().toList());
-                for(NbtElement entityNbt : blockEntities){
-                    //TODO use strategies for other entities
-                    NbtCompound tmpEntity = (NbtCompound) (entityNbt.copy());
-                    NbtList tmpInventory = tmpEntity.getList("Items",10);
-                    tmpInventory.forEach((itemNbt)->((NbtCompound)itemNbt).remove("Slot"));
+        selectedItemStacks.forEach((itemStack)->{
+            YourItemsToNewWorlds.LOGGER.debug(itemStack.toString());
+            YourItemsToNewWorlds.LOGGER.debug(originalStackNbts.keySet().toString());
+            List<NbtCompound> possibleOriginalNbts = originalStackNbts.get(itemStack);
 
-                    if(tmpInventory.contains(stackNbt)){
-                        ((NbtCompound) entityNbt).getList("Items", 10).remove(tmpInventory.indexOf(stackNbt));
-                        return;
+            for(NbtCompound possibleNbt : possibleOriginalNbts){
+                if (playerNbt.getList("Inventory", 10).contains(possibleNbt)) {
+                    playerNbt.getList("Inventory", 10).remove(possibleNbt);
+                    playerNbt2.getList("Inventory", 10).remove(possibleNbt);
+                    return;
+                } else if (playerNbt.getList("EnderItems", 10).contains(possibleNbt)) {
+                    playerNbt.getList("EnderItems", 10).remove(possibleNbt);
+                    playerNbt2.getList("EnderItems", 10).remove(possibleNbt);
+                    return;
+                } else {
+                    NbtList blockEntities = ChunkExtractor.extractBlockEntities(searchedChunks.values().stream().toList());
+                    for (NbtElement entityNbt : blockEntities) {
+                        //TODO use strategies for other entities
+
+                        if (((NbtCompound) entityNbt).getList("Items", 10).remove(possibleNbt)) {
+                            return;
+                        }
                     }
-                }
 
-                YourItemsToNewWorlds.LOGGER.error("{} could not be removed from the selected World.", ((NbtCompound) stackNbt).getString("id"));
+
+                }
             }
+            YourItemsToNewWorlds.LOGGER.error("{} could not be removed from the selected World.", itemStack.getName().getString());
         });
 
         searchedChunks.forEach((chunkPos,nbt)->{
