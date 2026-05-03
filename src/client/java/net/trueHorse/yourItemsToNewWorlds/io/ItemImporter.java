@@ -26,7 +26,7 @@ public class ItemImporter {
     private final RegionReader regionReader;
     private final NbtCompound playerNbt;
     private Map<ChunkPos,NbtCompound> searchedChunks = Map.of();
-    private final Map<ItemStack, List<NbtCompound>> originalStackNbts = new HashMap<>();
+    private final Map<String, List<NbtCompound>> originalStackNbts = new HashMap<>();
     private final File playerFile;
     private final Path worldPath;
 
@@ -61,13 +61,19 @@ public class ItemImporter {
         itemNbts.addAll(playerNbt.getList("Inventory", 10));
         itemNbts.addAll(playerNbt.getList("EnderItems", 10));
 
-        itemNbts.forEach((stackNbt)->originalStackNbts.compute(ItemStack.fromNbt((NbtCompound) stackNbt),(keyStack,valueList)-> {
-            if(valueList==null){
-                valueList = new ArrayList<>();
-            }
-            valueList.add((NbtCompound) stackNbt);
-            return valueList;
-        }));
+        itemNbts.forEach((entityStackNbt)->{
+            NbtCompound stackNbt = new NbtCompound();
+            ItemStack.fromNbt((NbtCompound) entityStackNbt).writeNbt(stackNbt);
+
+            originalStackNbts.compute(stackNbt.toString(),
+                    (keyStack,valueList)-> {
+                        if(valueList==null){
+                            valueList = new ArrayList<>();
+                        }
+                        valueList.add((NbtCompound) entityStackNbt);
+                        return valueList;
+                    });
+        });
 
         return new ArrayList<>(itemNbts.stream().map(nbt -> ItemStack.fromNbt((NbtCompound)nbt)).filter(stack -> !stack.isEmpty()).toList());
     }
@@ -97,13 +103,19 @@ public class ItemImporter {
         });
          */
 
-        itemsInBlockEntitiesNbts.forEach((stackNbt)->originalStackNbts.compute(ItemStack.fromNbt((NbtCompound) stackNbt),(keyStack,valueList)-> {
-            if(valueList==null){
-                valueList = new ArrayList<>();
-            }
-            valueList.add((NbtCompound) stackNbt);
-            return valueList;
-        }));
+        itemsInBlockEntitiesNbts.forEach((entityStackNbt)->{
+            NbtCompound stackNbt = new NbtCompound();
+            ItemStack.fromNbt((NbtCompound) entityStackNbt).writeNbt(stackNbt);
+
+            originalStackNbts.compute(stackNbt.toString(),
+                    (keyStack,valueList)-> {
+                        if(valueList==null){
+                            valueList = new ArrayList<>();
+                        }
+                        valueList.add((NbtCompound) entityStackNbt);
+                        return valueList;
+                    });
+        });
         return new ArrayList<>(itemsInBlockEntitiesNbts.stream().map(nbt -> ItemStack.fromNbt((NbtCompound) nbt)).filter(stack -> !stack.isEmpty()).toList());
     }
 
@@ -209,9 +221,10 @@ public class ItemImporter {
 
         //TODO refactor to not miss any storage location (Inventory, Ender Chest...)
         selectedItemStacks.forEach((itemStack)->{
-            YourItemsToNewWorlds.LOGGER.debug(itemStack.toString());
-            YourItemsToNewWorlds.LOGGER.debug(originalStackNbts.keySet().toString());
-            List<NbtCompound> possibleOriginalNbts = originalStackNbts.get(itemStack);
+            NbtCompound stackNbt = new NbtCompound();
+            itemStack.writeNbt(stackNbt);
+
+            List<NbtCompound> possibleOriginalNbts = originalStackNbts.get(stackNbt.toString());
 
             for(NbtCompound possibleNbt : possibleOriginalNbts){
                 if (playerNbt.getList("Inventory", 10).contains(possibleNbt)) {
