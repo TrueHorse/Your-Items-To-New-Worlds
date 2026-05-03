@@ -3,12 +3,14 @@ package net.trueHorse.yourItemsToNewWorlds.gui.handlers;
 import com.google.gson.JsonParseException;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.trueHorse.yourItemsToNewWorlds.YourItemsToNewWorlds;
 import net.trueHorse.yourItemsToNewWorlds.gui.ImportItemsScreen;
 import net.trueHorse.yourItemsToNewWorlds.io.ItemImporter;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,22 +21,21 @@ import java.net.http.HttpResponse;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BiConsumer;
 
 public class ImportItemScreenHandler {
 
-    private ArrayList<ItemStack> importableItemStacks = new ArrayList<>();
+    private final BiConsumer<ArrayList<ItemStack>,ImportItemsScreen> applier;
+    private List<ItemStack> importableItemStacks = new ArrayList<>();
     private boolean[] itemSelected;
     private final Map<String,String> playerIdNames = new HashMap<>();
-    private final Map<ItemSearchConfig, Pair<ChunkPos, ArrayList<ItemStack>>> itemCache = new HashMap<>();
+    private final Map<ItemSearchConfig, Pair<ItemImporter,List<ItemStack>>> itemCache = new HashMap<>();
     private boolean nameRequestSucessful;
     private Path selectedWorldPath;
     private String selectedPlayerName;
@@ -42,29 +43,33 @@ public class ImportItemScreenHandler {
     private final BlockPos.MutableBlockPos chosenPos = new BlockPos.MutableBlockPos();
     private int searchRadius;
     private final ImportItemsScreen screen;
-    private CompletableFuture<Pair<ChunkPos,ArrayList<ItemStack>>> importResult;
+    private CompletableFuture<Pair<ItemImporter,List<ItemStack>>> importResult;
+    private Boolean deleteItems = false;
+    @Nullable
+    private ItemImporter currentSearchImporter;
 
-    public ImportItemScreenHandler(ImportItemsScreen screen){
+    public ImportItemScreenHandler(ImportItemsScreen screen, BiConsumer<ArrayList<ItemStack>,ImportItemsScreen> applier){
         this.screen = screen;
+        this.applier = applier;
     }
 
     public void searchImportableItemStacks(){
-        ItemSearchConfig currentConfig = new ItemSearchConfig(selectedWorldPath,selectedPlayerName,searchLocationDeterminationMode,searchLocationDeterminationMode==ItemImporter.SearchLocationDeterminationMode.COORDINATES ? new ChunkPos(chosenPos) :null,searchRadius);
+        ItemSearchConfig currentConfig = getCurrentSearchConfig();
         if(itemCache.containsKey(currentConfig)){
-            Pair<ChunkPos, ArrayList<ItemStack>> pair =itemCache.get(currentConfig);
+            Pair<ItemImporter, List<ItemStack>> pair =itemCache.get(currentConfig);
             if(searchLocationDeterminationMode != ItemImporter.SearchLocationDeterminationMode.COORDINATES) {
-                chosenPos.set(pair.getFirst().getBlockAt(0, 0, 0));
+                chosenPos.set(pair.getFirst().getSearchedChunkPos().getBlockAt(0, 0, 0));
                 screen.updateCoordinateFields();
             }
             onItemSearchComplete(pair);
         }else {
             screen.onSearchStatusChanged(true);
             importResult = CompletableFuture.supplyAsync(()->{
-                ItemImporter importer = new ItemImporter(selectedWorldPath,playerIdNames.containsKey(selectedPlayerName) ? selectedPlayerName:getUuid(selectedPlayerName));
-                ChunkPos searchChunkPos = importer.getSearchChunkPos(searchLocationDeterminationMode,searchRadius, chosenPos);
-                ArrayList<ItemStack> importableItemStacks = importer.getPlayerItems();
-                importableItemStacks.addAll(importer.getItemsInArea(searchChunkPos,searchRadius));
-                return new Pair<>(searchChunkPos, importableItemStacks);
+                currentSearchImporter = new ItemImporter(selectedWorldPath,playerIdNames.containsKey(selectedPlayerName) ? selectedPlayerName:getUuid(selectedPlayerName));
+                ChunkPos searchChunkPos = currentSearchImporter.getSearchChunkPos(searchLocationDeterminationMode,searchRadius, chosenPos);
+                List<ItemStack> importableItemStacks = currentSearchImporter.getPlayerItems();
+                importableItemStacks.addAll(currentSearchImporter.getItemsInArea(searchChunkPos,searchRadius));
+                return new Pair<>(currentSearchImporter, importableItemStacks);
             });
         }
     }
@@ -76,14 +81,14 @@ public class ImportItemScreenHandler {
             }
         }catch (InterruptedException|CompletionException| ExecutionException| CancellationException e){
             YourItemsToNewWorlds.LOGGER.error("An error occurred during item search.\n"+e.getMessage());
-            onItemSearchComplete(new Pair<>(new ChunkPos(0,0),new ArrayList<>()));
+            onItemSearchComplete(new Pair<>(currentSearchImporter,new ArrayList<>()));
         }
     }
 
-    private void onItemSearchComplete(Pair<ChunkPos, ArrayList<ItemStack>> result){
+    private void onItemSearchComplete(Pair<ItemImporter, List<ItemStack>> result){
         importResult = null;
 
-        ChunkPos searchChunkPos = result.getFirst();
+        ChunkPos searchChunkPos = result.getFirst().getSearchedChunkPos();
         importableItemStacks = result.getSecond();
         itemSelected = new boolean[importableItemStacks.size()];
         Arrays.fill(itemSelected, false);
@@ -91,7 +96,7 @@ public class ImportItemScreenHandler {
             chosenPos.set(searchChunkPos.getBlockAt(0,0,0));
             screen.updateCoordinateFields();
         }
-        itemCache.put(new ItemSearchConfig(selectedWorldPath,selectedPlayerName,searchLocationDeterminationMode,searchLocationDeterminationMode==ItemImporter.SearchLocationDeterminationMode.COORDINATES ? new ChunkPos(chosenPos) :null,searchRadius)
+        itemCache.put(getCurrentSearchConfig()
                 ,new Pair<>(result.getFirst(), result.getSecond()));
 
         screen.onSearchStatusChanged(false);
@@ -127,6 +132,29 @@ public class ImportItemScreenHandler {
             }
         });
         nameRequestSucessful = success.get();
+    }
+
+    public void onApply() {
+        if(deleteItems){
+            if(currentSearchImporter!=null){
+                screen.showWarningPopUp(Component.translatable("transfer_items.your_items_to_new_worlds.item_deletion_warning"),()->
+                {
+                    try {
+                        currentSearchImporter.deleteItemsInWorld(getSelectedItems());
+                    } catch (IOException e) {
+                        YourItemsToNewWorlds.LOGGER.error("Failed to delete items.");
+                        YourItemsToNewWorlds.LOGGER.error(e.getMessage());
+                        screen.showErrorPopUp(Component.translatable("transfer_items.your_items_to_new_worlds.item_deletion_failed"));
+                    }
+                    itemCache.remove(getCurrentSearchConfig());
+                    applier.accept(getSelectedItems(), screen);
+                    screen.onClose();
+                });
+            }
+        }else{
+            applier.accept(getSelectedItems(), screen);
+            screen.onClose();
+        }
     }
 
     public ArrayList<ItemStack> getSelectedItems(){
@@ -178,7 +206,7 @@ public class ImportItemScreenHandler {
         };
     }
 
-    public ArrayList<ItemStack> getImportableItems() {
+    public List<ItemStack> getImportableItems() {
         return importableItemStacks;
     }
 
@@ -226,5 +254,13 @@ public class ImportItemScreenHandler {
 
     public boolean wasNameRequestSucessful() {
         return nameRequestSucessful;
+    }
+
+    public void setDeleteItems(Boolean deleteItems) {
+        this.deleteItems = deleteItems;
+    }
+
+    public ItemSearchConfig getCurrentSearchConfig(){
+        return new ItemSearchConfig(selectedWorldPath,selectedPlayerName,searchLocationDeterminationMode,searchLocationDeterminationMode==ItemImporter.SearchLocationDeterminationMode.COORDINATES ? new ChunkPos(chosenPos) :null,searchRadius);
     }
 }

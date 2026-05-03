@@ -3,6 +3,8 @@ package net.trueHorse.yourItemsToNewWorlds.gui;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.*;
+import net.minecraft.client.gui.screens.ConfirmScreen;
+import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -19,7 +21,6 @@ import java.util.function.BiConsumer;
 public class ImportItemsScreen extends Screen {
 
     private final ResourceLocation textureSheet = new ResourceLocation("your_items_to_new_worlds","textures/gui/import_items_screen.png");
-    private final BiConsumer<ArrayList<ItemStack>,ImportItemsScreen> applier;
     private final String[] searchLocationDeterminationModeIDs = {"transfer_items.your_items_to_new_worlds.spawn_point",
             "transfer_items.your_items_to_new_worlds.most_item_containers",
             "transfer_items.your_items_to_new_worlds.longest_inhabitation",
@@ -31,6 +32,7 @@ public class ImportItemsScreen extends Screen {
     private EditBox radiusWidget;
     private Button searchButton;
     private CycleButton<Boolean> selectAllButton;
+    private CycleButton<Boolean> extractionModeWidget;
 
     private ImageButton leftArrowButton;
     private ImageButton rightArrowButton;
@@ -38,12 +40,12 @@ public class ImportItemsScreen extends Screen {
     private StringWidget noItemsTextWidget;
     private StringWidget searchingTextWidget;
     private final Screen parent;
-    private final ImportItemScreenHandler handler = new ImportItemScreenHandler(this);
+    private final ImportItemScreenHandler handler;
     private int gridPage = 0;
 
     public ImportItemsScreen(Screen parent, BiConsumer<ArrayList<ItemStack>,ImportItemsScreen> applier){
         super(Component.translatable("transfer_items.your_items_to_new_worlds.select_transfer_items"));
-        this.applier = applier;
+        handler = new ImportItemScreenHandler(this, applier);
         this.parent = parent;
     }
 
@@ -148,6 +150,7 @@ public class ImportItemsScreen extends Screen {
                     itemSelectButtons.add(selectButton);
                 }
             }
+            widgets.addAll(itemSelectButtons);
 
             selectAllButton = CycleButton.onOffBuilder(false).create(this.width-minDistanceFromEdge-30-rightArrowButton.getWidth()-additionalGridXMargin,searchButton.getY()+searchButton.getHeight()+margin+additionalGridYMargin-12,30,12,Component.translatable("transfer_items.your_items_to_new_worlds.select_all"),
                     (button,selectAll)->{
@@ -161,9 +164,21 @@ public class ImportItemsScreen extends Screen {
                     });
             selectAllButton.setMessage(Component.translatable("gui.all"));
             selectAllButton.visible = false;
-
             widgets.add(selectAllButton);
-            widgets.addAll(itemSelectButtons);
+
+            extractionModeWidget = CycleButton.onOffBuilder(false).create(selectAllButton.getX()-2-80,selectAllButton.getY(),80,12,Component.translatable("transfer_items.your_items_to_new_worlds.extraction_mode"),
+                    (button, extract)->{
+                        if(extract){
+                            button.setMessage(Component.translatable("transfer_items.your_items_to_new_worlds.extract_items"));
+                        }else {
+                            button.setMessage(Component.translatable("transfer_items.your_items_to_new_worlds.copy_items"));
+                        }
+                        handler.setDeleteItems(extract);
+                        refreshGridArea();
+                    });
+            extractionModeWidget.setMessage(Component.translatable("transfer_items.your_items_to_new_worlds.copy_items"));
+            extractionModeWidget.visible = false;
+            widgets.add(extractionModeWidget);
 
             noItemsTextWidget = new StringWidget(this.width/2-100,pageArrowY,200,20,Component.translatable("transfer_items.your_items_to_new_worlds.no_items_found"), Minecraft.getInstance().font);
             noItemsTextWidget.visible = false;
@@ -175,7 +190,7 @@ public class ImportItemsScreen extends Screen {
         }
 
         widgets.add(addRenderableWidget(Button.builder(Component.translatable("gui.cancel"), button -> onClose()).bounds(this.width / 2 + 5, this.height-29, 150, 20).build()));
-        widgets.add(Button.builder(CommonComponents.GUI_DONE, button -> applyAndClose()).bounds(this.width / 2 - 155, this.height-29, 150, 20).build());
+        widgets.add(Button.builder(CommonComponents.GUI_DONE, button -> handler.onApply()).bounds(this.width / 2 - 155, this.height-29, 150, 20).build());
 
         widgets.forEach(this::addRenderableWidget);
     }
@@ -252,6 +267,7 @@ public class ImportItemsScreen extends Screen {
         boolean noItems = pageItemCount == 0;
         selectAllButton.visible = !noItems;
         noItemsTextWidget.visible = noItems;
+        extractionModeWidget.visible = !noItems;
     }
 
     public void onSearchStatusChanged(boolean searching){
@@ -285,8 +301,21 @@ public class ImportItemsScreen extends Screen {
         minecraft.setScreen(parent);
     }
 
-    public void applyAndClose(){
-        applier.accept(handler.getSelectedItems(),this);
-        onClose();
+    public void showErrorPopUp(Component message) {
+        minecraft.setScreen(new GenericDirtMessageScreen(message));
+    }
+
+    public void showWarningPopUp(Component message, Runnable action) {
+        minecraft.setScreen(new ConfirmScreen((confirmed)->{
+            if(confirmed){
+                action.run();
+            }else{
+                minecraft.setScreen(this);
+            }
+        },
+                Component.translatable("createWorld.customize.custom.confirmTitle"),
+                message,
+                Component.translatable("gui.continue"),
+                Component.translatable("gui.cancel")));
     }
 }

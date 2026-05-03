@@ -8,6 +8,8 @@ import net.trueHorse.yourItemsToNewWorlds.YourItemsToNewWorlds;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.DataInputStream;
+import java.io.DataOutput;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 public class RegionReader {
@@ -51,6 +53,17 @@ public class RegionReader {
         dataInputStream.close();
 
         return nbt;
+    }
+
+    protected void write(ChunkPos pos, @Nullable CompoundTag nbt) throws IOException {
+        RegionFile regionFile = this.getRegionFile(pos);
+        if (nbt == null) {
+            regionFile.clear(pos);
+        } else {
+            try (DataOutputStream dataOutputStream = regionFile.getChunkDataOutputStream(pos)){
+                NbtIo.write(nbt, (DataOutput)dataOutputStream);
+            }
+        }
     }
 
     public String[] getAllRegionFileNames(){
